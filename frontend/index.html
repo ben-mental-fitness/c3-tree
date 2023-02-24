@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>C3Tree</title>
+    <meta charset="utf-8" />
+
+    <style type="text/css">
+      html, body {
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    
+    <div id="loader" style="position: absolute; left: 50%; top: 50%; width: 400px; height: 300px; margin: -150px 0 0 -200px;text-align: center">
+      <span>Welcome!<br/>Now loading data from Google Sheet API...</span>
+      <img src="/loading_bars.svg" alt="loading-bars"/>
+    </div>
+
+    <svg id="d3-canvas" opacity="0.0"/>
+
+    <script src="/d3/dist/d3.min.js"></script>
+
+    <script type="text/javascript">
+
+      const createCollapsableRadialTree = (data) => {
+
+        console.log(data);
+
+        const treeFunction = d3.cluster;
+        const separation = (a, b) => a.parent == b.parent ? 1 : 2;
+
+        const margin = {
+          top: 60,
+          right: 60,
+          bottom: 60,
+          left: 60,
+        }
+        const width  = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+        const height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+        const radius = d3.min([width - margin.left - margin.right, height - margin.top - margin.bottom]) / 2 - 50;
+        
+        const root = d3.hierarchy(data);
+        
+        treeFunction().size([2 * Math.PI, radius]).separation(separation)(root);
+
+        d3.select("#loader").style("display", "none");
+        d3.select("#d3-canvas").selectAll("*").remove();
+        const svg = d3.select("#d3-canvas")
+          .attr("opacity", 1.0)
+          .attr("viewBox", [0, 0, width, height])
+          .attr("width", width)
+          .attr("height", height)
+          .attr("font-family", "sans-serif")
+          .attr("font-size", 10)
+          .append("g")
+          .attr("transform", `translate(${width / 2.0},${height / 2.0}) rotate(-70)`);
+
+        const brainAspectRatio = 0.822;
+        const brainSize = 0.65;
+        d3.select("#d3-canvas")
+          .append("image")
+          .attr("opacity", 0.0)
+          .attr("href", "/brain.png")
+          .attr("width", radius * brainSize)
+          .attr("height", radius * brainSize * brainAspectRatio)
+          .attr("transform", `translate(
+            ${width / 2.0 - radius * brainSize / 2.0},
+            ${height / 2.0 - radius * brainSize / 2.0 * brainAspectRatio})`);
+
+        d3.select("#d3-canvas").append("g")
+          .selectAll("text")
+          .data(data.children)
+          .join("text")
+          .attr("class", "category-labels")
+          .attr("transform", (d, i) => `translate(
+            ${[0,3].includes(i) ? width / 2.0 - radius : width / 2.0 + radius},
+            ${[0,1].includes(i) ? margin.top : height - margin.bottom})`)
+          .attr("text-anchor", (d, i) => [0,3].includes(i) ? "middle" : "middle")
+          .attr("dominant-baseline", "middle")
+          .attr("font-size", "20px")
+          .attr("font-weight", "bold")
+          .attr("fill", (d) => d.color)
+          .text((d) => d.text)
+
+        svg.append("g")
+          .attr("fill", "none")
+          .selectAll("path")
+          .data(root.links())
+          .join("path")
+            .attr("d", d3.linkRadial().angle((d) => d.x).radius((d) => d.y))
+            .attr("stroke", (d) => d.target.data.color)
+            .attr("stroke-width", 1.5)
+            .attr("opacity", (d) => d.source.data.depth > 0 ? 1.0 : 0.0);
+
+        const node = svg.append("g")
+          .selectAll("g")
+          .data(root.descendants())
+          .join("g")
+            .attr("transform", (d) => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`);
+
+        node.append("circle")
+          .attr("fill", (d) => d.data.color)
+          .attr("opacity", (d) => d.children ? 0.0 : 1.0)
+          .attr("r", 3);
+
+        const titleFunction = (d, n) => `${n.ancestors().reverse().map((d) => d.data.text).join(".")}`;
+        node.append("title").text((d) => titleFunction(d.data, d));
+
+        node.append("text")
+          .attr("transform", (d) => `rotate(${d.x >= Math.PI ? 180 : 0})`)
+          .attr("dy", "0.32em")
+          .attr("x", (d) => d.x < Math.PI === !d.children ? 6 : -6)
+          .attr("text-anchor", (d) => d.x < Math.PI === !d.children ? "start" : "end")
+          .attr("paint-order", "stroke")
+          .attr("stroke", "white")
+          .attr("stroke-width", 3)
+          .attr("opacity", (d) => d.data.depth > 2 ? 1.0 : 0.0)
+          .attr("fill", (d) => d.data.color)
+          .attr("font-weight", "bold")
+          .attr("font-size", "10px")
+          .style("pointer-events", "none")
+          .text((d) => d.data.text);
+
+        return svg.node();
+      }
+
+    </script>
+
+    <script type="text/javascript">
+
+      const parseSheetData = ((data) => {
+
+        const categories = [...new Set(data.slice(1).map((d) => d[2]))];
+        const colors = ["#8C88BA", "#BF84AE", "#DB95AC", "#FBB9A6", "#F6A294"];
+
+        const hierarchyData = {
+          "text": "ROOT",
+          "color": "#202020",
+          "depth": 0,
+          "children": [],
+        };
+
+        categories.forEach((category, i) => {
+          const color = i < colors.length ? colors[i] : "#808080";
+          const rootChild = {
+            "text": category,
+            "color": color,
+            "depth": 1,
+            "children": [],
+          };
+
+          new Set(data.filter((d) => d[2] === category).map((d) => d[3])).forEach((subcategory) => {
+            const categoryChild = { 
+              "text": subcategory,
+              "color": color,
+              "depth": 2,
+              "children": data.filter((d) => d[3] === subcategory).map((d) => ({ 
+                "text": d[0], 
+                "color": color,
+                "depth": 3, 
+                "children": null 
+              }))
+            };
+
+            rootChild.children.push(categoryChild);
+          });
+          hierarchyData.children.push(rootChild);
+
+        });
+
+        return hierarchyData;
+      });
+
+      window.addEventListener("load", (event) => {
+        
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("POST", "/fetch_c3tree_data_from_google_sheet", false);
+        xmlHttp.send(null);
+        const response = JSON.parse(xmlHttp.responseText);
+
+        const hierarchyData = parseSheetData(response.data.slice(1));
+
+        chart = createCollapsableRadialTree(hierarchyData);
+      });
+
+    </script>
+
+
+  </body>
+</html>
