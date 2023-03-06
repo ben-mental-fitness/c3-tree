@@ -21,11 +21,29 @@
       <img src="/loading_bars.svg" alt="loading-bars"/>
     </div>
 
+    <br/><br/>
+    <center>
+      <select id="viz-select">
+        <option value="0">Radial Tree</option>
+        <option value="1">Connected Edges</option>
+      </select>
+    </center>
+
     <svg id="d3-canvas" opacity="0.0"/>
 
     <script src="/d3/dist/d3.min.js"></script>
 
     <script type="text/javascript">
+
+      d3.select("#viz-select").on("change", (event) => {
+        if(event.target.value === "0") {
+          d3.selectAll(".curves-wrapper-center").attr("opacity", 1.0);
+          d3.selectAll(".curves-wrapper-leaves").attr("opacity", 0.0);
+        } else {
+          d3.selectAll(".curves-wrapper-center").attr("opacity", 0.0);
+          d3.selectAll(".curves-wrapper-leaves").attr("opacity", 1.0);
+        }
+      });
 
       const createCollapsableRadialTree = (data) => {
 
@@ -41,10 +59,13 @@
           left: 60,
         }
         const width  = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-        const height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+        const height = (window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight) - 60;
         const radius = d3.min([width - margin.left - margin.right, height - margin.top - margin.bottom]) / 2 - 50;
         
         const root = d3.hierarchy(data);
+
+        console.log(root);
+        console.log(root.leaves());
         
         treeFunction().size([2 * Math.PI, radius]).separation(separation)(root);
 
@@ -60,6 +81,7 @@
           .append("g")
           .attr("transform", `translate(${width / 2.0},${height / 2.0}) rotate(-70)`);
 
+        // center image
         const brainAspectRatio = 0.822;
         const brainSize = 0.65;
         d3.select("#d3-canvas")
@@ -72,6 +94,8 @@
             ${width / 2.0 - radius * brainSize / 2.0},
             ${height / 2.0 - radius * brainSize / 2.0 * brainAspectRatio})`);
 
+
+        // research questions text in the corners (currently only works with 4)
         d3.select("#d3-canvas").append("g")
           .selectAll("text")
           .data(data.children)
@@ -87,8 +111,11 @@
           .attr("fill", (d) => d.color)
           .text((d) => d.text)
 
+        // curves from center to leaves
         svg.append("g")
+          .attr("class", "curves-wrapper-center")
           .attr("fill", "none")
+          .attr("opacity", 0.0)
           .selectAll("path")
           .data(root.links())
           .join("path")
@@ -97,21 +124,36 @@
             .attr("stroke-width", 1.5)
             .attr("opacity", (d) => d.source.data.depth > 0 ? 1.0 : 0.0);
 
+        // curves from leaf to leaf (connected edges)
+        const radialLine = d3.lineRadial().curve(d3.curveBundle.beta(0.9)).radius((d) => d.y).angle((d) => d.x);
+        const leaves = root.leaves();
+        svg.append("g")
+          .attr("class", "curves-wrapper-leaves")
+          .attr("fill", "none")
+          .attr("opacity", 0.0)
+          .selectAll("path")
+          .data(leaves.flatMap((leaf) => {
+            return leaves.filter(
+              (d) => d.data.props.data_source === leaf.data.props.data_source && d !== leaf).map(
+              (d) => [leaf, d]);
+          }))
+          .join("path")
+            .attr("data-connection-data-source", (d) => `${d[0].data.props.data_source}`)
+            .attr("fill", "tansparent")
+            .attr("stroke", "#d0d0d0")
+            .attr("stroke-width", 1.0)
+            .attr("opacity", 0.5)
+            .attr("d", ([i, o]) => radialLine(i.path(o)));
+
+        // texts (leaves etc.)
         const node = svg.append("g")
           .selectAll("g")
           .data(root.descendants())
           .join("g")
             .attr("transform", (d) => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`);
 
-        node.append("circle")
-          .attr("fill", (d) => d.data.color)
-          .attr("opacity", (d) => d.children ? 0.0 : 1.0)
-          .attr("r", 3);
-
-        const titleFunction = (d, n) => `${n.ancestors().reverse().map((d) => d.data.text).join(".")}`;
-        node.append("title").text((d) => titleFunction(d.data, d));
-
         node.append("text")
+          .attr("id", (d) => `${d.data.id}-text`)
           .attr("transform", (d) => `rotate(${d.x >= Math.PI ? 180 : 0})`)
           .attr("dy", "0.32em")
           .attr("x", (d) => d.x < Math.PI === !d.children ? 6 : -6)
@@ -121,12 +163,47 @@
           .attr("stroke-width", 3)
           .attr("opacity", (d) => d.data.depth > 2 ? 1.0 : 0.0)
           .attr("fill", (d) => d.data.color)
-          .attr("font-weight", "bold")
           .attr("font-size", "10px")
           .style("pointer-events", "none")
           .text((d) => d.data.text);
+        node.append("rect")
+          .attr("class", "text-leaf-interact-area")
+          .attr("fill", "transparent")
+          .attr("opacity", 0.5)
+          .attr("y", -10)
+          .attr("width", 100)
+          .attr("height", 20)
+          .style("pointer-events", "all")
+          .style("cursor", "pointer")
+          .on("mouseover", (event, d) => {
+            d3.select(`#${d.data.id}-text`).style("font-weight", "bold");
+            d3.selectAll(`path[data-connection-data-source="${d.data.props.data_source}"]`)
+              .attr("stroke", "#86A2F4")
+              .raise();
+          })
+          .on("mouseleave", (event, d) => {
+            d3.select(`#${d.data.id}-text`).style("font-weight", null);
+            d3.selectAll(`path[data-connection-data-source="${d.data.props.data_source}"]`)
+              .attr("stroke", "#d0d0d0");
+          });
+        // leaf nodes
+        node.append("circle")
+          .attr("fill", (d) => d.data.color)
+          .attr("opacity", (d) => d.children ? 0.0 : 1.0)
+          .attr("r", 3);
 
-        return svg.node();
+        // TODO: Replace with proper tooltip
+
+        const titleFunction = (d, n) => `${n.ancestors().reverse().map((d) => d.data.text).join(".")}`;
+        node.append("title").text((d) => titleFunction(d.data, d));
+
+        if(d3.select("#viz-select").node().value === "0") {
+          d3.selectAll(".curves-wrapper-center").attr("opacity", 1.0);
+          d3.selectAll(".curves-wrapper-leaves").attr("opacity", 0.0);
+        } else {
+          d3.selectAll(".curves-wrapper-center").attr("opacity", 0.0);
+          d3.selectAll(".curves-wrapper-leaves").attr("opacity", 1.0);
+        }
       }
 
     </script>
@@ -139,11 +216,16 @@
         data.filter((d) => d.parent === parentLevel.text).forEach((d) => {
 
           const level = {
+            "id": `${parentLevel.id}${parentLevel.children.length}`,
             "text": d.text,
             "color": depth === 1
               ? (parentLevel.children.length < colors.length ? colors[parentLevel.children.length] : "#808080")
               : parentLevel.color,
             "depth": depth,
+            "props": {
+              "link": d.link,
+              "data_source": d.data_source,
+            },
             "children": [],
           };
 
@@ -155,9 +237,11 @@
       const parseSheetData = ((data) => {
         
         const hierarchyRootLevel = {
+          "id": "r",
           "text": "ROOT",
           "color": "#202020",
           "depth": 0,
+          "props": {},
           "children": [],
         };
 
@@ -173,13 +257,11 @@
         var xmlHttp = new XMLHttpRequest();
         xmlHttp.open("POST", "/fetch_c3tree_data_from_google_sheet", false);
         xmlHttp.send(null);
-        console.log(xmlHttp.responseText);
         const response = JSON.parse(xmlHttp.responseText);
-        console.log(response);
 
         const hierarchyRootLevel = parseSheetData(response.data);
 
-        chart = createCollapsableRadialTree(hierarchyRootLevel);
+        createCollapsableRadialTree(hierarchyRootLevel);
       });
 
     </script>

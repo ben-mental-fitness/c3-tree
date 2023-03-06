@@ -25,7 +25,7 @@ const TOKEN_PATH = path.join(process.cwd(), 'token.json');
 async function loadSavedCredentialsIfExist() {
   try {
     console.log(process.env.GOOGLE_API_TOKEN_JSON);
-    const content = await fs.promises.readFile(TOKEN_PATH);
+    const content = await fs.promises.readFile(process.env.GOOGLE_API_TOKEN_JSON);
     const credentials = JSON.parse(content);
     return google.auth.fromJSON(credentials);
   } catch (err) {
