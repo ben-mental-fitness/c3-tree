@@ -105,3 +105,6 @@ dist
 
 # Google API credentials
 gAPI*.json
+
+data/
+frontend/static/demos/

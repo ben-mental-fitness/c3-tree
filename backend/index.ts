@@ -12,6 +12,9 @@ const { google } = require("googleapis");
 const dotenv = require("dotenv");
 dotenv.config({path: "../.env"});
 
+const TOKEN_PATH = path.join(process.cwd(), 'token.json');
+
+
 // define necessary Google Sheet API callbacks
 
 /**
@@ -22,7 +25,7 @@ dotenv.config({path: "../.env"});
 async function loadSavedCredentialsIfExist() {
   try {
     console.log(process.env.GOOGLE_API_TOKEN_JSON);
-    const content = await fs.promises.readFile(process.env.GOOGLE_API_TOKEN_JSON);
+    const content = await fs.promises.readFile(TOKEN_PATH);
     const credentials = JSON.parse(content);
     return google.auth.fromJSON(credentials);
   } catch (err) {
@@ -84,37 +87,46 @@ app.use(express.static("../frontend/static"));
 app.use(express.static("./node_modules"));
 
 app.post("/fetch_c3tree_data_from_google_sheet", (req, res) => {
-  authorize()
-    .then((auth) => {
-      const sheets = google.sheets({version: "v4", auth});
 
-      const sheetRes = sheets.spreadsheets.values.get({
-        //spreadsheetId: "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms",
-        spreadsheetId: "11tCraeH710zGQ0-OhJ-8wwcrZRbRRvSWrHO-llYueuM",
-        range: "collapsableRadialTreeData!A:D",
-      });
+  if(process.env.OFFLINE_MODE === "TRUE") {
+    const data = JSON.parse(fs.readFileSync("../data/c3Tree-demoData - collapsableRadialTreeData.json", "utf8"));
+    res.json({ 
+      message: `Success! # rows: ${data.length}`, 
+      data: data,
+    })
+  } else {
+    authorize()
+      .then((auth) => {
+        const sheets = google.sheets({version: "v4", auth});
 
-      sheetRes.then((sheetRes) => {
-        const rows = sheetRes.data.values;
-        if (!rows || rows.length === 0) {
-          res.json({ 
-            message: "Failure! No data / no rows returned :-(", 
-            data: null,
-          })
-        }
-
-        res.json({ 
-          message: `Success! # rows: ${rows.length}`, 
-          data: rows,
-        })
-      }).catch((err) => {
-        console.warn(err);
-        res.json({ 
-          message: "Failure! Something went wrong with the Google sheet API request.", 
-          data: null,
+        const sheetRes = sheets.spreadsheets.values.get({
+          //spreadsheetId: "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms",
+          spreadsheetId: "11tCraeH710zGQ0-OhJ-8wwcrZRbRRvSWrHO-llYueuM",
+          range: "collapsableRadialTreeData!A:D",
         });
-      });      
-    }).catch((err) => console.warn(err));
+
+        sheetRes.then((sheetRes) => {
+          const rows = sheetRes.data.values;
+          if (!rows || rows.length === 0) {
+            res.json({ 
+              message: "Failure! No data / no rows returned :-(", 
+              data: null,
+            })
+          }
+
+          res.json({ 
+            message: `Success! # rows: ${rows.length}`, 
+            data: rows,
+          })
+        }).catch((err) => {
+          console.warn(err);
+          res.json({ 
+            message: "Failure! Something went wrong with the Google sheet API request.", 
+            data: null,
+          });
+        });      
+      }).catch((err) => console.warn(err));
+  }
 });
 
 app.get("/", (req, res) => {

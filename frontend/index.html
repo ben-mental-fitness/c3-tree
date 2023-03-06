@@ -133,47 +133,39 @@
 
     <script type="text/javascript">
 
+      const colors = ["#8C88BA", "#BF84AE", "#DB95AC", "#FBB9A6", "#F6A294"];
+
+      const buildHierarchy = ((parentLevel, data, depth) => {
+        data.filter((d) => d.parent === parentLevel.text).forEach((d) => {
+
+          const level = {
+            "text": d.text,
+            "color": depth === 1
+              ? (parentLevel.children.length < colors.length ? colors[parentLevel.children.length] : "#808080")
+              : parentLevel.color,
+            "depth": depth,
+            "children": [],
+          };
+
+          parentLevel.children.push(level);
+          buildHierarchy(level, data, depth + 1);
+        });
+      });
+
       const parseSheetData = ((data) => {
-
-        const categories = [...new Set(data.slice(1).map((d) => d[2]))];
-        const colors = ["#8C88BA", "#BF84AE", "#DB95AC", "#FBB9A6", "#F6A294"];
-
-        const hierarchyData = {
+        
+        const hierarchyRootLevel = {
           "text": "ROOT",
           "color": "#202020",
           "depth": 0,
           "children": [],
         };
 
-        categories.forEach((category, i) => {
-          const color = i < colors.length ? colors[i] : "#808080";
-          const rootChild = {
-            "text": category,
-            "color": color,
-            "depth": 1,
-            "children": [],
-          };
+        buildHierarchy(hierarchyRootLevel, data, 1);
 
-          new Set(data.filter((d) => d[2] === category).map((d) => d[3])).forEach((subcategory) => {
-            const categoryChild = { 
-              "text": subcategory,
-              "color": color,
-              "depth": 2,
-              "children": data.filter((d) => d[3] === subcategory).map((d) => ({ 
-                "text": d[0], 
-                "color": color,
-                "depth": 3, 
-                "children": null 
-              }))
-            };
+        console.log(hierarchyRootLevel);
 
-            rootChild.children.push(categoryChild);
-          });
-          hierarchyData.children.push(rootChild);
-
-        });
-
-        return hierarchyData;
+        return hierarchyRootLevel;
       });
 
       window.addEventListener("load", (event) => {
@@ -181,11 +173,13 @@
         var xmlHttp = new XMLHttpRequest();
         xmlHttp.open("POST", "/fetch_c3tree_data_from_google_sheet", false);
         xmlHttp.send(null);
+        console.log(xmlHttp.responseText);
         const response = JSON.parse(xmlHttp.responseText);
+        console.log(response);
 
-        const hierarchyData = parseSheetData(response.data.slice(1));
+        const hierarchyRootLevel = parseSheetData(response.data);
 
-        chart = createCollapsableRadialTree(hierarchyData);
+        chart = createCollapsableRadialTree(hierarchyRootLevel);
       });
 
     </script>
