@@ -12,7 +12,7 @@ const { google } = require("googleapis");
 const dotenv = require("dotenv");
 dotenv.config({path: "../.env"});
 
-const TOKEN_PATH = path.join(process.cwd(), 'token.json');
+const TOKEN_PATH = path.join(process.cwd(), process.env.GOOGLE_API_TOKEN_JSON);
 
 
 // define necessary Google Sheet API callbacks
@@ -24,7 +24,6 @@ const TOKEN_PATH = path.join(process.cwd(), 'token.json');
  */
 async function loadSavedCredentialsIfExist() {
   try {
-    console.log(process.env.GOOGLE_API_TOKEN_JSON);
     const content = await fs.promises.readFile(process.env.GOOGLE_API_TOKEN_JSON);
     const credentials = JSON.parse(content);
     return google.auth.fromJSON(credentials);
@@ -50,7 +49,7 @@ async function saveCredentials(client) {
     client_secret: key.client_secret,
     refresh_token: client.credentials.refresh_token,
   });
-  await fs.writeFile(TOKEN_PATH, payload);
+  await fs.writeFile(TOKEN_PATH, payload, () => {});
 }
 
 /**
@@ -64,7 +63,7 @@ async function authorize() {
   }
   client = await authenticate({
     scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
-    keyfilePath: CREDENTIALS_PATH,
+    keyfilePath: `${process.cwd()}/${process.env.GOOGLE_API_CREDENTIALS_JSON}`,
   });
   if (client.credentials) {
     await saveCredentials(client);

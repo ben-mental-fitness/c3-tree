@@ -112,11 +112,13 @@
 
       d3.select("#viz-select").on("change", (event) => {
         if(event.target.value === "0") {
-          d3.selectAll(".curves-wrapper-center").attr("opacity", 1.0);
-          d3.selectAll(".curves-wrapper-leaves").attr("opacity", 0.0);
+          d3.selectAll("#curves-wrapper-center").attr("opacity", 1.0);
+          d3.selectAll("#curves-wrapper-leaves").attr("opacity", 0.0);
+          d3.selectAll(".node-circle").attr("opacity", (d) => d.data.visible || d.parent?.data.visible || d.parent?.data.id === "r" ? 1.0 : 0.0);
         } else {
-          d3.selectAll(".curves-wrapper-center").attr("opacity", 0.0);
-          d3.selectAll(".curves-wrapper-leaves").attr("opacity", 1.0);
+          d3.selectAll("#curves-wrapper-center").attr("opacity", 0.0);
+          d3.selectAll("#curves-wrapper-leaves").attr("opacity", 1.0);
+          d3.selectAll(".node-circle").attr("opacity", (d) => !d.children && d.data.visible ? 1.0 : 0.0)
         }
       });
 
@@ -158,18 +160,36 @@
         .angle((d) => d.x)
         .radius((d) => d.y);
       const connectedEdgesLine = d3.lineRadial().curve(d3.curveBundle.beta(0.9)).radius((d) => d.y).angle((d) => d.x);
-      const separation = (a, b) => a.parent == b.parent ? 1 : 2;
+      const separation = (a, b) => {
+        if(!a.data.visible && !b.data.visible)
+          return a.parent?.parent === b.parent?.parent ? 0.1 : 2;
+        else if(!a.data.visible || !b.data.visible)
+          return a.parent?.parent === b.parent?.parent ? 0.5 : 1;
+        else
+          return a.parent == b.parent ? 1 : 2;
+      };
 
 
+      const calcTreeDepths = (d) => d.children?.length > 0 ? d.children.map(calcTreeDepths).flat() : d.depth;
+
+      const setTreeVisibility = (d, visible) => {
+        d.visible = visible;
+        if(d.children?.length > 0) 
+          d.children.map((child) => setTreeVisibility(child, visible));
+      }
+
+      const nodeOnClick = (data, root, d) => {
+        setTreeVisibility(d.data, !d.data.visible);
+        rerenderTree(data, root);
+      }
 
 
-
-      const rerenderTree = (data) => {
-
-        const root = d3.hierarchy(data);
+      const rerenderTree = (data, root) => {
 
         const treeFunction = d3.cluster().size([2 * Math.PI, radius]);
         treeFunction.separation(separation)(root);
+
+        const animation = d3.transition().duration(750).ease(d3.easeQuadOut);
 
         /*d3.selectAll(".category-labels")
           .data(data.children)
@@ -184,38 +204,52 @@
           .text((d) => d.text);*/
 
         // curves from center to leaves
-        console.log(d3.selectAll(".center-to-leaf-path"));
-        d3.selectAll(".center-to-leaf-path")
+        //d3.selectAll(".center-to-leaf-path").remove();
+
+        const curvesCenterUpdate = d3.select("#curves-wrapper-center")
+          .selectAll(".center-to-leaf-path")
           .data(root.links())
-          .attr("d", radialTreeLine)
-          .attr("stroke", (d) => d.target.data.color)
-          .attr("stroke-width", 1.5)
-          .attr("opacity", (d) => d.source.data.depth > 0 ? 1.0 : 0.0);
+          .call((update) => {
+            update.transition(animation)
+              .attr("d", radialTreeLine)
+              .attr("stroke", (d) => d.target.data.color)
+              .attr("stroke-width", 1.5)
+              .attr("opacity", (d) => d.source.data.visible ? 1.0 : 0.0)
+          });
 
-        console.log(d3.selectAll(".node-group"));
-        console.log(root.descendants().map((d) => d.data.id));
-        d3.selectAll(".node-group")
+        d3.select("#curves-wrapper-leaves")
+          .selectAll(".leaf-to-leaf-path")
+          .data(root.leaves().flatMap((leaf) => {
+            return root.leaves().filter(
+              (d) => d.data.props.data_source === leaf.data.props.data_source && d !== leaf).map(
+              (d) => [leaf, d]);
+          }))
+          .call((update) => {
+            update.attr("d", ([i, o]) => connectedEdgesLine(i.path(o)))
+              .attr("opacity", (d) => d[0].data.visible && d[1].data.visible ? 1.0 : 0.0);
+          });
+            
+
+        const nodeGroupUpdate = d3.selectAll(".node-group")
           .data(root.descendants())
-          .attr("transform", (d) => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y + (d.parent && d.children ? (d.parent.y - d.y) * 0.7 : 0)},0)`);
+          .call((update) => {
+            update.transition(animation)
+              .attr("transform", (d) => `rotate(${d.x * 180 / Math.PI - 90}) 
+                translate(${d.y + (d.parent && d.children ? (d.parent.y - d.y) * 0.7 : 0)},0)`)
 
-        d3.selectAll(".node-text")
-          .attr("transform", (d) => `rotate(${d.x >= Math.PI ? 180 : 0})`)
-          .attr("x", (d) => d.x < Math.PI === !d.children ? 6 : -6)
-          .attr("text-anchor", (d) => d.x < Math.PI === !d.children ? "start" : "end")
-          .attr("opacity", (d) => d.data.depth > 2 ? 1.0 : 0.0);
+            update.selectAll(".node-text")
+              .attr("x", (d) => d.x < Math.PI === !d.children ? 6 : -6)
+              .attr("text-anchor", (d) => d.x < Math.PI === !d.children ? "start" : "end")
+              .attr("transform", (d) => `rotate(${d.x >= Math.PI ? 180 : 0})`)
+            update.selectAll(".node-text").transition(animation)
+              .attr("opacity", (d) => d.data.depth > 2 && (d.data.visible || d.parent?.data.visible) ? 1.0 : 0.0)
 
-        d3.selectAll(".node-circle")
-          .attr("fill", (d) => d.data.color)
-          //.attr("opacity", (d) => d.children ? 0.0 : 1.0)
-          .attr("opacity", (d) => d.depth === 0 ? 0.0 : 1.0)
-          .attr("r", (d) => d.children ? 4 : 2);
+            update.selectAll(".text-leaf-interact-area")
+              .style("pointer-events", (d) => d.data.visible ? "all" : "none");
 
-        d3.selectAll(".node-interact-area")
-          .on("click", (event, d) => {
-            const children = d.data.children;
-            d.data.children = null;
-            d.data.previouschildren = children;
-            rerenderTree(data);
+            update.selectAll(".node-circle")
+              .attr("opacity", (d) => d.data.visible || d.parent?.data.visible || d.parent?.data.id === "r" ? 1.0 : 0.0);
+
           });
       }
 
@@ -223,10 +257,7 @@
 
 
 
-
       const createCollapsableRadialTree = (data) => {
-
-        console.log(data);
 
         const root = d3.hierarchy(data);
         
@@ -246,7 +277,7 @@
           .attr("transform", `translate(${canvasWidth / 2.0},${canvasHeight / 2.0}) rotate(-70)`);
 
         // center image
-        const brainAspectRatio = 0.822;
+        /*const brainAspectRatio = 0.822;
         const brainSize = 0.65;
         d3.select("#d3-canvas")
           .append("image")
@@ -256,7 +287,7 @@
           .attr("height", radius * brainSize * brainAspectRatio)
           .attr("transform", `translate(
             ${width / 2.0 - radius * brainSize / 2.0},
-            ${height / 2.0 - radius * brainSize / 2.0 * brainAspectRatio})`);
+            ${height / 2.0 - radius * brainSize / 2.0 * brainAspectRatio})`);*/
 
 
         // research questions text in the corners (currently only works with 4)
@@ -277,7 +308,7 @@
 
         // curves from center to leaves
         svg.append("g")
-          .attr("class", "curves-wrapper-center")
+          .attr("id", "curves-wrapper-center")
           .attr("fill", "none")
           .attr("opacity", 0.0)
           .selectAll(".center-to-leaf-path")
@@ -292,7 +323,7 @@
         // curves from leaf to leaf (connected edges)
         const leaves = root.leaves();
         svg.append("g")
-          .attr("class", "curves-wrapper-leaves")
+          .attr("id", "curves-wrapper-leaves")
           .attr("fill", "none")
           .attr("opacity", 0.0)
           .selectAll("path")
@@ -302,6 +333,7 @@
               (d) => [leaf, d]);
           }))
           .join("path")
+            .attr("class", "leaf-to-leaf-path")
             .attr("data-connection-data-source", (d) => `${d[0].data.props.data_source}`)
             .attr("fill", "tansparent")
             .attr("stroke", "#d0d0d0")
@@ -311,6 +343,7 @@
 
         // texts (leaves etc.)
         const node = svg.append("g")
+          .attr("id", "node-group-wrapper")
           .selectAll(".node-group")
           .data(root.descendants())
           .join("g")
@@ -355,6 +388,7 @@
             }
           })
           .on("mouseover", (event, d) => {
+            console.log(d);
             const pointerPos = [event.pageX, event.pageY];
             d3.select("#hover-tooltip .tooltip-title")
               .text(d.data.text)
@@ -442,21 +476,14 @@
           .attr("r", 8)
           .style("pointer-events", "all")
           .style("cursor", "pointer")
-          .on("click", (event, d) => {
-            return;
-            const children = d.data.children;
-            d.data.children = null;
-            d.data.previouschildren = children;
-            console.log(root.descendants().map((d) => d.data.id));
-            rerenderTree(data);
-          });
+          .on("click", (event, d) => nodeOnClick(data, root, d));
 
         if(d3.select("#viz-select").node().value === "0") {
-          d3.selectAll(".curves-wrapper-center").attr("opacity", 1.0);
-          d3.selectAll(".curves-wrapper-leaves").attr("opacity", 0.0);
+          d3.selectAll("#curves-wrapper-center").attr("opacity", 1.0);
+          d3.selectAll("#curves-wrapper-leaves").attr("opacity", 0.0);
         } else {
-          d3.selectAll(".curves-wrapper-center").attr("opacity", 0.0);
-          d3.selectAll(".curves-wrapper-leaves").attr("opacity", 1.0);
+          d3.selectAll("#curves-wrapper-center").attr("opacity", 0.0);
+          d3.selectAll("#curves-wrapper-leaves").attr("opacity", 1.0);
         }
       }
 
@@ -476,14 +503,13 @@
               ? (parentLevel.children.length < colors.length ? colors[parentLevel.children.length] : "#808080")
               : parentLevel.color,
             "depth": depth,
+            "visible": depth !== 0,
             "props": {
               "link": d.link,
               "data_source": d.data_source,
             },
             "children": [],
           };
-
-          console.log(level.id);
 
           parentLevel.children.push(level);
           buildHierarchy(level, data, depth + 1);
