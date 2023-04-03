@@ -86,11 +86,13 @@
       </div>
     </div>
 
-    <div id="controls-wrapper" style="display:none">
+    <div id="controls-wrapper" style="display:none;">
       <center>
-        <select id="viz-select">
+        <select id="viz-select" style="width:200px">
           <option value="0">Radial Tree</option>
           <option value="1">Connected Edges</option>
+        </select>
+        <select id="preset-select" style="margin-top:20px;display:none;width:200px">
         </select>
       </center>
     </div>
@@ -102,6 +104,46 @@
     <script src="/d3/dist/d3.min.js"></script>
 
     <script type="text/javascript">
+
+      const addLineBreaks = (text, maxWidth, dy, lineHeight) => {
+        const y = text.attr("y");
+        const words = text.text().split(/\s+/).reverse();
+
+        let word;
+        let line = [];
+        let tspan = text
+          .text(null)
+          .append("tspan")
+          .attr("x", 0)
+          .attr("y", y)
+          .attr("dy", `${dy}em`)
+          .attr("data-initial-dy", dy);
+        let lineCount = 1;
+
+        while ((word = words.pop())) {
+          line.push(word);
+          tspan.text(line.join(" "));
+          if (line.length > 1 && tspan.node() && tspan.node().getComputedTextLength() > maxWidth) {
+            line.pop();
+            tspan.text(line.join(" "));
+            line = [word];
+            tspan = text
+              .append("tspan")
+              .attr("x", 0)
+              .attr("y", y)
+              .attr("dy", `${lineHeight}em`)
+              .attr("data-initial-dy", lineHeight)
+              .text(word);
+            lineCount += 1;
+          }
+        }
+
+        return lineCount;
+      };
+
+      let data;
+      let root;
+      let twist = 0;
 
       const getParentWidthDepth = (d, depth) => {
         let parent = d.parent;
@@ -122,11 +164,32 @@
         }
       });
 
+      const initializePresetsDropdown = (presets) => {
+        d3.select("#preset-select")
+          .style("display", "block")
+          .selectAll("option")
+          .data(["No preset (all visible)", ...presets])
+          .join("option")
+          .attr("value", (d) => d)
+          .text((d) => d);
+
+        d3.select("#preset-select")
+          .on("change", (event) => {
+            const chosenPreset = event.target.value;
+            root.descendants().forEach((d) => {
+              d.data.visible = !d.data.presets.includes(chosenPreset) && d.depth > 0;
+            })
+            rerenderTree();
+          });
+      }
+
+      
+
       const margin = {
-        top: 60,
-        right: 60,
-        bottom: 60,
-        left: 60,
+        top: 90,
+        right: 90,
+        bottom: 90,
+        left: 90,
       }
       const width  = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
       const height = (window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight);
@@ -135,10 +198,8 @@
       if(width < height) {
         d3.select("#controls-wrapper").style("left", "50%").style("top", `${(height - width) / 2.0 - 20}px`).style("margin-left", "-100px");
         d3.selectAll(".canvas-wrapper").style("margin-top", `${(height - width) / 2.0}px`)
-        canvasHeight = width;
       } else {
         d3.select("#controls-wrapper").style("left", `${(width - height) / 2.0 - 220}px`).style("top", `35%`)
-        canvasWidth = height;
       }
       d3.select("#controls-wrapper").style("display", "block");
       d3.selectAll(".canvas-wrapper").style("width", `${canvasWidth}px`).style("height", `${canvasHeight}px`)
@@ -161,8 +222,10 @@
         .radius((d) => d.y);
       const connectedEdgesLine = d3.lineRadial().curve(d3.curveBundle.beta(0.9)).radius((d) => d.y).angle((d) => d.x);
       const separation = (a, b) => {
-        if(!a.data.visible && !b.data.visible)
-          return a.parent?.parent === b.parent?.parent ? 0.1 : 2;
+        if((a.parent && !a.parent.data.visible) && (b.parent && !b.parent.data.visible))
+          return 0.05;
+        else if(!a.data.visible && !b.data.visible) 
+          return a.parent?.parent === b.parent?.parent ? 0.2 : 2;
         else if(!a.data.visible || !b.data.visible)
           return a.parent?.parent === b.parent?.parent ? 0.5 : 1;
         else
@@ -178,33 +241,28 @@
           d.children.map((child) => setTreeVisibility(child, visible));
       }
 
-      const nodeOnClick = (data, root, d) => {
+      const nodeOnClick = (d) => {
         setTreeVisibility(d.data, !d.data.visible);
-        rerenderTree(data, root);
+        rerenderTree();
       }
 
 
-      const rerenderTree = (data, root) => {
+      const rerenderTree = (animated = true) => {
+
+        twist = twist > Math.PI * 2.0 ? twist - Math.PI * 2.0 : twist;
+        twist = twist < 0 ? twist + Math.PI * 2.0 : twist;
 
         const treeFunction = d3.cluster().size([2 * Math.PI, radius]);
         treeFunction.separation(separation)(root);
 
-        const animation = d3.transition().duration(750).ease(d3.easeQuadOut);
-
-        /*d3.selectAll(".category-labels")
-          .data(data.children)
-          .attr("transform", (d, i) => `translate(
-            ${[0,3].includes(i) ? canvasWidth / 2.0 - radius : canvasWidth / 2.0 + radius},
-            ${[0,1].includes(i) ? margin.top : canvasHeight - margin.bottom})`)
-          .attr("text-anchor", (d, i) => [0,3].includes(i) ? "middle" : "middle")
-          .attr("dominant-baseline", "middle")
-          .attr("font-size", "20px")
-          .attr("font-weight", "bold")
-          .attr("fill", (d) => d.color)
-          .text((d) => d.text);*/
+        const animation = d3.transition().duration(animated ? 750 : 0).ease(d3.easeQuadOut);
 
         // curves from center to leaves
         //d3.selectAll(".center-to-leaf-path").remove();
+
+        d3.select("#main-transform")
+            .attr("transform", `translate(${canvasWidth / 2.0},${canvasHeight / 2.0})
+              rotate(${(twist) * 180 / Math.PI})`);
 
         const curvesCenterUpdate = d3.select("#curves-wrapper-center")
           .selectAll(".center-to-leaf-path")
@@ -238,9 +296,21 @@
                 translate(${d.y + (d.parent && d.children ? (d.parent.y - d.y) * 0.7 : 0)},0)`)
 
             update.selectAll(".node-text")
-              .attr("x", (d) => d.x < Math.PI === !d.children ? 6 : -6)
-              .attr("text-anchor", (d) => d.x < Math.PI === !d.children ? "start" : "end")
-              .attr("transform", (d) => `rotate(${d.x >= Math.PI ? 180 : 0})`)
+              .attr("x", (d) => {
+                let angle = d.x + twist;
+                angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
+                return angle < Math.PI ? 6 : -6;
+              })
+              .attr("text-anchor", (d) => {
+                let angle = d.x + twist;
+                angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
+                return angle < Math.PI ? "start" : "end";
+              })
+              .attr("transform", (d) => {
+                let angle = d.x + twist;
+                angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
+                return `rotate(${angle >= Math.PI ? 180 : 0})`;
+              })
             update.selectAll(".node-text").transition(animation)
               .attr("opacity", (d) => d.data.depth > 2 && (d.data.visible || d.parent?.data.visible) ? 1.0 : 0.0)
 
@@ -251,18 +321,40 @@
               .attr("opacity", (d) => d.data.visible || d.parent?.data.visible || d.parent?.data.id === "r" ? 1.0 : 0.0);
 
           });
+
+        d3.select("#category-labels-wrapper")
+          .selectAll(".category-labels")
+          .transition(animation)
+          .attr("transform", (d) => `rotate(${d.x * 180 / Math.PI - 90}) 
+            translate(${radius + 120},0)
+            rotate(${(-d.x - twist) * 180 / Math.PI + 90}) `)
+          .attr("text-anchor", (d) => {
+            let angle = d.x + twist;
+            angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
+            return angle < Math.PI ? "start" : "end"
+          })
+          .attr("dominant-baseline", "middle")
+          .attr("font-size", "20px")
+          .attr("font-weight", "bold")
+          .attr("opacity", (d) => d.data.visible ? 1.0 : 0.0)
+          .attr("fill", (d) => d.data.color)
       }
 
 
 
 
 
-      const createCollapsableRadialTree = (data) => {
+      const createCollapsableRadialTree = () => {
 
-        const root = d3.hierarchy(data);
+        root = d3.hierarchy(data);
         
         const treeFunction = d3.cluster().size([2 * Math.PI, radius]);
         treeFunction.separation(separation)(root);
+
+        d3.select("body")
+          .on("click", (event) => {
+            if(!d3.select("#sticky-tooltip").empty()) d3.select("#sticky-tooltip").remove();
+          })
 
         d3.select("#loader").style("display", "none");
         d3.select("#d3-canvas").selectAll("*").remove();
@@ -274,7 +366,9 @@
           .attr("font-family", "sans-serif")
           .attr("font-size", 10)
           .append("g")
-          .attr("transform", `translate(${canvasWidth / 2.0},${canvasHeight / 2.0}) rotate(-70)`);
+          .attr("id", "main-transform")
+          //.attr("transform", `translate(${canvasWidth / 2.0},${canvasHeight / 2.0}) rotate(-70)`);
+          .attr("transform", `translate(${canvasWidth / 2.0},${canvasHeight / 2.0})`);
 
         // center image
         /*const brainAspectRatio = 0.822;
@@ -291,20 +385,28 @@
 
 
         // research questions text in the corners (currently only works with 4)
-        d3.select("#d3-canvas").append("g")
+        svg.append("g")
+          .attr("id", "category-labels-wrapper")
           .selectAll(".category-labels")
-          .data(data.children)
+          .data(root.descendants().filter((d) => d.depth === 1))
           .join("text")
-          .attr("class", "category-labels")
-          .attr("transform", (d, i) => `translate(
+          .attr("class", (d) => "category-labels")
+          .attr("transform", (d) => `rotate(${d.x * 180 / Math.PI - 90}) 
+            translate(${radius + 100},0)
+            rotate(${-d.x * 180 / Math.PI + 90}) `)
+          /*.attr("transform", (d, i) => `translate(
             ${[0,3].includes(i) ? canvasWidth / 2.0 - radius : canvasWidth / 2.0 + radius},
-            ${[0,1].includes(i) ? margin.top : canvasHeight - margin.bottom})`)
-          .attr("text-anchor", (d, i) => [0,3].includes(i) ? "middle" : "middle")
+            ${[0,1].includes(i) ? margin.top : canvasHeight - margin.bottom})`)*/
+          .attr("text-anchor", (d) => d.x < Math.PI ? "start" : "end")
           .attr("dominant-baseline", "middle")
           .attr("font-size", "20px")
           .attr("font-weight", "bold")
-          .attr("fill", (d) => d.color)
-          .text((d) => d.text)
+          .attr("opacity", 1.0)
+          .attr("fill", (d) => d.data.color)
+          .text((d) => d.data.text)
+          .each(function(d) {
+            addLineBreaks(d3.select(this), canvasWidth / 2 - radius - 80, 0, 1.0)
+          });
 
         // curves from center to leaves
         svg.append("g")
@@ -353,10 +455,7 @@
         node.append("text")
           .attr("class", "node-text")
           .attr("id", (d) => `${d.data.id}-text`)
-          .attr("transform", (d) => `rotate(${d.x >= Math.PI ? 180 : 0})`)
           .attr("dy", "0.32em")
-          .attr("x", (d) => d.x < Math.PI === !d.children ? 6 : -6)
-          .attr("text-anchor", (d) => d.x < Math.PI === !d.children ? "start" : "end")
           .attr("paint-order", "stroke")
           .attr("stroke", "white")
           .attr("stroke-width", 3)
@@ -364,31 +463,48 @@
           .attr("fill", (d) => d.data.color)
           .attr("font-size", "10px")
           .style("pointer-events", "none")
-          .text((d) => d.data.text);
+          .text((d) => d.data.text)
+          .each(function(d) {
+            let textLength = d3.select(this).node().getComputedTextLength();
+            let text = d.data.text;
+            while(textLength > 70) {
+              text = `${text.slice(0,-5)}...`;
+              d3.select(this).text(text);
+              textLength = d3.select(this).node().getComputedTextLength();
+            }
+          });
         node.filter((d) => !d.children).append("rect")
           .attr("class", "text-leaf-interact-area")
           .attr("fill", "transparent")
           .attr("opacity", 0.5)
           .attr("y", -10)
-          .attr("width", 100)
+          .attr("width", 70)
           .attr("height", 30)
           .style("pointer-events", "all")
           .style("cursor", "pointer")
           .on("click", (event, d) => {
-            if(d3.select(`#sticky-tooltip-${d.data.id}`).empty()) {
-              const stickyTooltip = d3.select("#hover-tooltip.tooltip").clone(true).attr("id", `sticky-tooltip-${d.data.id}`);
-              d3.select("#hover-tooltip.tooltip").style("display", "none")
-              stickyTooltip.style("pointer-events", "all");
-              stickyTooltip.select(".tooltip-close-button")
-                .style("display", "block")
-                .on("click", () => d3.select(`#sticky-tooltip-${d.data.id}`).remove());
-            } else {
-              d3.select(`#sticky-tooltip-${d.data.id}`).remove();
-              d3.select("#hover-tooltip.tooltip").style("display", "block")
-            }
+            event.stopPropagation();
+            if(!d3.select("#sticky-tooltip").empty())
+              d3.select("#sticky-tooltip").remove();
+
+            const boundingRect = d3.select("#hover-tooltip.tooltip").node().getBoundingClientRect();
+            const pointerPos = [event.pageX, event.pageY];
+            const left = event.pageX + tooltipWidth >= width - 20 ? event.pageX - tooltipWidth - 10 : event.pageX + 10;
+            const top = event.pageY + boundingRect.height >= height - 20 ? event.pageY - boundingRect.height - 10 : event.pageY + 10;
+              
+            const stickyTooltip = d3.select("#hover-tooltip.tooltip").clone(true)
+              .attr("id", "sticky-tooltip")
+              .style("display", "block")
+              .style("left", `${left}px`)
+              .style("top", `${top}px`);
+            d3.select("#hover-tooltip.tooltip").style("display", "none")
+            stickyTooltip.style("pointer-events", "all");
+            stickyTooltip.select(".tooltip-close-button")
+              .style("display", "block")
+              .on("click", () => d3.select("#sticky-tooltip").remove());
+          
           })
           .on("mouseover", (event, d) => {
-            console.log(d);
             const pointerPos = [event.pageX, event.pageY];
             d3.select("#hover-tooltip .tooltip-title")
               .text(d.data.text)
@@ -430,7 +546,7 @@
                 .text(d.data.props.link.split("/").length > 3 ? d.data.props.link.split("/")[2].replace("www.","") : "Click me");
             }
 
-            if(d3.select(`#sticky-tooltip-${d.data.id}`).empty()) {
+            if(d3.select("#sticky-tooltip").empty()) {
               d3.select("#hover-tooltip.tooltip")
                 .style("left", `${pointerPos[0] + 10}px`)
                 .style("top", `${pointerPos[1] + 10}px`)
@@ -444,7 +560,7 @@
               .raise();
           })
           .on("mousemove", (event, d) => {
-            if(d3.select(`#sticky-tooltip-${d.data.id}`).empty()) {
+            if(d3.select("#sticky-tooltip").empty()) {
               const boundingRect = d3.select("#hover-tooltip.tooltip").node().getBoundingClientRect();
               const pointerPos = [event.pageX, event.pageY];
               const left = event.pageX + tooltipWidth >= width - 20 ? event.pageX - tooltipWidth - 10 : event.pageX + 10;
@@ -476,7 +592,7 @@
           .attr("r", 8)
           .style("pointer-events", "all")
           .style("cursor", "pointer")
-          .on("click", (event, d) => nodeOnClick(data, root, d));
+          .on("click", (event, d) => nodeOnClick(d));
 
         if(d3.select("#viz-select").node().value === "0") {
           d3.selectAll("#curves-wrapper-center").attr("opacity", 1.0);
@@ -485,6 +601,47 @@
           d3.selectAll("#curves-wrapper-center").attr("opacity", 0.0);
           d3.selectAll("#curves-wrapper-leaves").attr("opacity", 1.0);
         }
+
+        svg.append("circle")
+          .attr("id", "twist-circle")
+          .attr("r", radius + 90)
+          .attr("fill", "none")
+          .attr("stroke", "#e0e0e0")
+          .attr("stroke-width", 10)
+          .style("pointer-events", "visibleStroke")
+          .style("cursor", "grab")
+          .on("mousedown.twistCircle", (event) => {
+            const startX = canvasWidth / 2.0 - event.clientX;
+            const startY = canvasHeight / 2.0 - event.clientY;
+            let lastAngle = Math.atan2(startX, startY);
+
+            d3.select("body")
+              .on("mousemove.twistCircle", (event) => {
+                const x = canvasWidth / 2.0 - event.clientX;
+                const y = canvasHeight / 2.0 - event.clientY;
+                const angle = Math.atan2(x, y);
+
+                const deltaAngle = lastAngle - angle;
+                twist += deltaAngle;
+                lastAngle = angle;
+
+                rerenderTree(false);
+              })
+              .on("mouseleave.twistCircle,mouseup.twistCircle", (event) => {
+                d3.select("body")
+                  .on("mousemove.twistCircle", null)
+                  .on("mouseleave.twistCircle", null)
+                  .on("mouseup.twistCircle", null);
+              })
+              .on("mouseup", (event) => {
+                d3.select("body")
+                  .on("mousemove.twistCircle", null)
+                  .on("mouseleave.twistCircle", null)
+                  .on("mouseup.twistCircle", null);
+              });
+          });
+
+        rerenderTree(false);
       }
 
     </script>
@@ -493,7 +650,7 @@
 
       const colors = ["#8C88BA", "#BF84AE", "#DB95AC", "#FBB9A6", "#F6A294"];
 
-      const buildHierarchy = ((parentLevel, data, depth) => {
+      const buildHierarchy = ((parentLevel, data, presetsAvailable, presetsParent, depth) => {
         data.filter((d) => d.parent === parentLevel.text).forEach((d) => {
 
           const level = {
@@ -503,31 +660,34 @@
               ? (parentLevel.children.length < colors.length ? colors[parentLevel.children.length] : "#808080")
               : parentLevel.color,
             "depth": depth,
-            "visible": depth !== 0,
+            "visible": true,
             "props": {
               "link": d.link,
               "data_source": d.data_source,
             },
+            "presets": [...presetsParent, ...presetsAvailable.filter((preset) => !presetsParent.includes(preset) && d[`[PRESET]${preset}`] === "x")],
             "children": [],
           };
 
           parentLevel.children.push(level);
-          buildHierarchy(level, data, depth + 1);
+          buildHierarchy(level, data, presetsAvailable, level.presets, depth + 1);
         });
       });
 
-      const parseSheetData = ((data) => {
+      const parseSheetData = ((data, presets) => {
         
         const hierarchyRootLevel = {
           "id": "r",
           "text": "ROOT",
           "color": "#202020",
           "depth": 0,
+          "visible": false,
           "props": {},
+          "presets": [],
           "children": [],
         };
 
-        buildHierarchy(hierarchyRootLevel, data, 1);
+        buildHierarchy(hierarchyRootLevel, data, presets, [], 1);
 
         return hierarchyRootLevel;
       });
@@ -542,15 +702,18 @@
           if(xhr.readyState === 4) {
             if(xhr.status === 200) {
               const response = JSON.parse(xhr.responseText);
-              const hierarchyRootLevel = parseSheetData(response.data[0][0] === "text" 
-                ? response.data.map((d) => ({
-                    text: d[0],
-                    parent: d[1],
-                    link: d[2],
-                    data_source: d[3]
-                  }))
-                : response.data);
-              createCollapsableRadialTree(hierarchyRootLevel);  
+              const header = response.data[0];
+              const presets = header.filter((column) => column.includes("[PRESET]")).map((column) => column.replace("[PRESET]", ""));
+              const rawData = response.data.map((row) => {
+                const d = {};
+                header.forEach((column, i) => {
+                  d[column] = row[i]
+                });
+                return d;
+              });
+              data = parseSheetData(rawData, presets);
+              createCollapsableRadialTree();
+              initializePresetsDropdown(presets);
             } else {
 
             }
