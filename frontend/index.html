@@ -106,6 +106,13 @@
         </select>
         <select id="preset-select" style="margin-top:20px;display:none;width:200px">
         </select>
+        <br/><br/>
+        <input style="float:left;display:block" type="checkbox" id="checkbox-image" checked>
+        <span style="float:left;display:block">Show center image</span>
+        <div style="clear: both;"></div>
+        <input style="float:left;display:block" type="checkbox" id="checkbox-leaf-titles" checked>
+        <span style="float:left;display:block">Show leaf titles</span>
+        <div style="clear: both;"></div>
       </center>
     </div>
 
@@ -116,6 +123,16 @@
     <script src="/d3/dist/d3.min.js"></script>
 
     <script type="text/javascript">
+
+      d3.select("#checkbox-image").on("change", (event) => {
+        const checked = d3.select("#checkbox-image").property("checked");
+        d3.select("#center-image").attr("opacity", checked ? 1.0 : 0.0)
+      });
+      d3.select("#checkbox-leaf-titles").on("change", (event) => {
+        const checked = d3.select("#checkbox-leaf-titles").property("checked");
+        d3.selectAll(".node-text")
+          .attr("opacity", (d) => d.data.depth > 2 && checked ? 1.0 : 0.0)
+      });
 
       const addLineBreaks = (text, maxWidth, dy, lineHeight) => {
         const y = text.attr("y");
@@ -236,7 +253,10 @@
         }))
         .angle((d) => d.x)
         .radius((d) => d.y);
-      const connectedEdgesLine = d3.lineRadial().curve(d3.curveBundle.beta(0.9)).radius((d) => d.y).angle((d) => d.x);
+      const connectedEdgesLine = d3.lineRadial()
+        .curve(d3.curveBundle.beta(0.9))
+        .radius((d) => d.y)
+        .angle((d) => d.x);
       const separation = (a, b) => {
         if((a.parent && !a.parent.data.visible) && (b.parent && !b.parent.data.visible))
           return 0.05;
@@ -299,9 +319,16 @@
               (d) => [leaf, d]);
           }))
           .call((update) => {
-            update.attr("d", ([i, o]) => connectedEdgesLine(i.path(o)))
-              .attr("opacity", (d) => d[0].data.visible && d[1].data.visible ? 0.075 : 0.0);
+            update.transition(animation).attr("d", ([i, o]) => connectedEdgesLine(i.path(o)))
+              .attr("opacity", (d) => d[0].data.visible && d[1].data.visible ? 0.1 : 0.0);
           });
+
+        d3.select("#outer-node-group-wrapper")
+          .selectAll(".outer-node-group")
+          .transition(animation)
+          .attr("class", "outer-node-group")
+          .attr("transform", (d) => `rotate(${d.x * 180 / Math.PI - 90}) translate(${radius + 130},0)`)
+          .attr("opacity", (d) => d.data.visible ? 1 : 0)
             
 
         const nodeGroupUpdate = d3.selectAll(".node-group")
@@ -388,17 +415,19 @@
           .attr("transform", `translate(${canvasWidth / 2.0},${canvasHeight / 2.0})`);
 
         // center image
-        /*const brainAspectRatio = 0.822;
+        const brainAspectRatio = 0.822;
         const brainSize = 0.65;
         d3.select("#d3-canvas")
           .append("image")
-          .attr("opacity", 0.0)
-          .attr("href", "/brain.png")
+          .attr("id", "center-image")
+          .attr("opacity", 1.0)
+          .attr("href", "/center_logo.png")
           .attr("width", radius * brainSize)
           .attr("height", radius * brainSize * brainAspectRatio)
+          .style("pointer-events", "none")
           .attr("transform", `translate(
             ${width / 2.0 - radius * brainSize / 2.0},
-            ${height / 2.0 - radius * brainSize / 2.0 * brainAspectRatio})`);*/
+            ${height / 2.0 - radius * brainSize / 2.0 * brainAspectRatio})`);
 
 
         // research questions text in the corners (currently only works with 4)
@@ -513,6 +542,9 @@
           .attr("height", 30)
           .style("pointer-events", "all")
           .style("cursor", "pointer")
+
+
+        d3.selectAll(".text-leaf-interact-area,.outer-node-group")
           .on("click", (event, d) => {
             event.stopPropagation();
             if(!d3.select("#sticky-tooltip").empty())
@@ -566,6 +598,8 @@
           })
           .on("mouseover", (event, d) => {
 
+            console.log("!!");
+
             const pointerPos = [event.pageX, event.pageY];
             const topic = getParentWidthDepth(d, 1);
             d3.select("#hover-tooltip .tooltip-title")
@@ -574,11 +608,14 @@
 
             d3.select("#hover-tooltip .table-main .tooltip-tbody").selectAll("*").remove();
             const topicRow = d3.select("#hover-tooltip .table-main .tooltip-tbody").append("tr");
-            topicRow.append("td").style("width", `${tooltipWidth * 0.2}px`)
+            /*topicRow.append("td").style("width", `${tooltipWidth * 0.2}px`)
               .append("p")
               .style("font-weight", "bold")
-              .text("Leaf title")
-            topicRow.append("td").append("p").text(d.data.text);
+              .text("")*/
+            topicRow.append("td").attr("colspan", 2).style("text-align", "center")
+              .append("p")
+              .style("font-weight", "bold")
+              .text(d.data.text);
 
             /*const researchQuestion = getParentWidthDepth(d, 2);
             const researchQuestionRow = d3.select("#hover-tooltip .tooltip-tbody").append("tr");
