@@ -103,7 +103,8 @@ app.post("/fetch_c3tree_data_from_google_sheet", (req, res) => {
         const sheetRes = sheets.spreadsheets.values.get({
           //spreadsheetId: "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms",
           spreadsheetId: "11tCraeH710zGQ0-OhJ-8wwcrZRbRRvSWrHO-llYueuM",
-          range: "collapsableRadialTreeData",
+          //range: "collapsableRadialTreeData",
+          range: "NCS & LHW Projects",
         });
 
         sheetRes.then((sheetRes) => {

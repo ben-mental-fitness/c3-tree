@@ -598,8 +598,6 @@
           })
           .on("mouseover", (event, d) => {
 
-            console.log("!!");
-
             const pointerPos = [event.pageX, event.pageY];
             const topic = getParentWidthDepth(d, 1);
             d3.select("#hover-tooltip .tooltip-title")
@@ -803,7 +801,7 @@
           });
           Object.keys(d).filter((key) => key.indexOf("[INFO_COLLAPSED]") !== -1).forEach((key) => {
             level.props.info_collapsed[key.replace("[INFO_COLLAPSED]", "")] = d[key];
-          });;
+          });
 
           parentLevel.children.push(level);
           buildHierarchy(level, data, presetsAvailable, level.presets, depth + 1);
@@ -828,25 +826,73 @@
         return hierarchyRootLevel;
       });
 
+      const parseNCSAndLHWData = (responseData, header) => {
+        rawData = [];
+        const themesAdded = [];
+        let theme = "";
+        let subThemesAdded = [];
+        responseData.forEach((row) => {
+          
+          // new theme
+          if(row[0] !== undefined && row[0] !== "" && !themesAdded.includes(row[0])) {
+            theme = row[0];
+            rawData.push({
+              "text": theme,
+              "parent": "ROOT",
+            });
+            themesAdded.push(theme);
+            subThemesAdded = [];
+          }
+
+          // new subtheme
+          if(row[1] !== undefined && row[1] !== "" && !subThemesAdded.includes(row[1])) {
+            let subTheme = row[1];
+            rawData.push({
+              "text": subTheme,
+              "parent": theme,
+            });
+            subThemesAdded.push(subTheme);
+          }
+
+          const d = {
+            "text": row[2],
+            "parent": row[1],
+          };
+          header.slice(2).forEach((column, i) => {
+            d[column] = row[i + 2]
+          });
+          rawData.push(d);
+        });
+
+        return rawData;
+      };
+
+      const parseDefaultData = (responseData, header) => {
+        const rawData = responseData.map((row) => {
+          const d = {};
+          header.forEach((column, i) => {
+            d[column] = row[i]
+          });
+          return d;
+        });
+
+        return rawData;
+      };
+
       window.addEventListener("load", (event) => {
         
         var xhr = new XMLHttpRequest();
         xhr.open("POST", "/fetch_c3tree_data_from_google_sheet", true);
         xhr.send(null);
         xhr.onload = () => {
-          
+
           if(xhr.readyState === 4) {
             if(xhr.status === 200) {
               const response = JSON.parse(xhr.responseText);
               const header = response.data[0];
               const presets = header.filter((column) => column.includes("[PRESET]")).map((column) => column.replace("[PRESET]", ""));
-              const rawData = response.data.map((row) => {
-                const d = {};
-                header.forEach((column, i) => {
-                  d[column] = row[i]
-                });
-                return d;
-              });
+              let researchTheme = "";
+              const rawData = parseNCSAndLHWData(response.data.slice(1), header);
               data = parseSheetData(rawData, presets);
               createCollapsableRadialTree();
               initializePresetsDropdown(presets);
