@@ -1,0 +1,151 @@
+html, body {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  font-family: sans-serif;
+}
+.canvas-wrapper {
+  margin: 0 auto;
+}
+.tooltip, #welcome-dialog {
+  position: absolute;
+  pointer-events: none;
+  background: #ffffff;
+  border: 1px solid #f0f0f0;
+  box-shadow: 3px 3px 7px 1px rgba(0,0,0,0.15);
+  -webkit-box-shadow: 3px 3px 7px 1px rgba(0,0,0,0.15);
+  -moz-box-shadow: 3px 3px 7px 1px rgba(0,0,0,0.15);
+  -webkit-border-radius: 0.2em;border-radius: 0.2em;
+}
+#tooltip-wrapper .tooltip {
+  max-height: 100%;
+  overflow-y: scroll;
+}
+.tooltip-title {
+  font-weight: bold;
+  font-size: 80%;
+  color: #a0a0a0;
+  margin-top: 20px;
+}
+.tooltip table {
+  width: 100%;
+  padding: 10px;
+}
+.tooltip table tr, .tooltip table td, .tooltip table p {
+  padding: 0;
+  margin: 0;
+  border-spacing: 0;
+}
+.tooltip table td a {
+  text-decoration: none;
+  font-weight: bold;
+  text-transform: lowercase;
+  font-size: 80%;
+}
+.tooltip-close-button {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  font-size: 22px;
+  font-family: arial;
+  cursor: pointer;
+}
+.tooltip-bottom-note {
+  color: #a0a0a0;
+  font-size: 80%;
+  margin-bottom: 5px;
+}
+
+.button-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.button {
+  padding: 10px 10px;
+  width: calc(50% - 5px);
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+  pointer-events: all;
+}
+
+.button-default {
+  color: white;
+  background-color: #4CAF50;
+}
+.button-default:hover {
+  background-color: #3e8e41;
+}
+.button-simplified {
+  color: white;
+  background-color: #a0a0a0;
+}
+.button-simplified:hover {
+  background-color: #c0c0c0;
+}
+
+#controls-wrapper {
+  position: absolute;
+  width: 200px;
+}
+
+#controls-wrapper span {
+  font-size: 80%;
+  line-height: 20px;
+  margin-left: 5px;
+}
+
+#search {
+  width: calc(100% - 12px);
+}
+
+#search, #viz-select, #preset-select {
+  background: #ffffff;
+  border: 1px solid #a0a0a0;
+  -webkit-border-radius: 0.2em;border-radius: 0.2em;
+  padding: 5px;
+  margin-top: 10px;
+}
+
+#tabs-wrapper .tabs-left .tab p {
+  background: #ffffff;
+  color: #202020;
+}
+
+#tabs-wrapper .tabs-left .tab:hover p {
+  background: #f0f0f0;
+}
+
+#tabs-wrapper .tabs-left .tab:selected {
+  background: #f8f8f8;
+}
+
+#tabs-wrapper .tab-view-header {
+  width: 100%;
+  height: 110px;
+  line-height: 110px;
+  padding-bottom: 20px;
+}
+
+#tabs-wrapper .tab-view-header img {
+  float: left;
+  height: 110px;
+}
+
+#tabs-wrapper .tab-view-header span {
+  float: left;
+  font-weight: bold;
+  font-size: 150%;
+  margin-left: 140px;
+}
+
+svg text, svg circle {
+  paint-order: stroke;
+}
