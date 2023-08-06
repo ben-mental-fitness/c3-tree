@@ -113,6 +113,22 @@
         <input style="float:left;display:block" type="checkbox" id="checkbox-leaf-titles" checked>
         <span style="float:left;display:block">Show leaf titles</span>
         <div style="clear: both;"></div>
+        <input style="float:left;display:block" type="checkbox" id="checkbox-twist-circle" checked>
+        <span style="float:left;display:block">Large twist circle</span>
+        <div style="clear: both;"></div>
+        <br/>
+        <input style="float:left;display:block" type="checkbox" class="checkbox-status" id="checkbox-status-Published" checked>
+        <span style="float:left;display:block">Status: Published</span>
+        <div style="clear: both;"></div>
+        <input style="float:left;display:block" type="checkbox" class="checkbox-status" id="checkbox-status-Accepted" checked>
+        <span style="float:left;display:block">Status: Accepted</span>
+        <div style="clear: both;"></div>
+        <input style="float:left;display:block" type="checkbox" class="checkbox-status" id="checkbox-status-Submitted" checked>
+        <span style="float:left;display:block">Status: Submitted</span>
+        <div style="clear: both;"></div>
+        <input style="float:left;display:block" type="checkbox" class="checkbox-status" id="checkbox-status-Manuscript" checked>
+        <span style="float:left;display:block">Status: Manuscript</span>
+        <div style="clear: both;"></div>
       </center>
     </div>
 
@@ -124,14 +140,38 @@
 
     <script type="text/javascript">
 
+      let checkboxesChecked = {
+      };
+
+      d3.selectAll("input[type='checkbox']").each(function() {
+        checkboxesChecked[d3.select(this).attr("id")] = d3.select(this).property("checked");
+        if(d3.select(this).attr("class") === "checkbox-status" && !checkboxesChecked[d3.select(this).attr("id")]) {
+          d3.select(this).property("checked", true);
+          checkboxesChecked[d3.select(this).attr("id")] = true;
+        }
+      });
       d3.select("#checkbox-image").on("change", (event) => {
-        const checked = d3.select("#checkbox-image").property("checked");
-        d3.select("#center-image").attr("opacity", checked ? 1.0 : 0.0)
+        checkboxesChecked["checkbox-image"] = !checkboxesChecked["checkbox-image"];
+        d3.select("#center-image").attr("opacity", checkboxesChecked["checkbox-image"] ? 1.0 : 0.0)
+      });
+      d3.select("#checkbox-twist-circle").on("change", (event) => {
+        checkboxesChecked["checkbox-twist-circle"] = !checkboxesChecked["checkbox-twist-circle"];
+        rerenderTree();
       });
       d3.select("#checkbox-leaf-titles").on("change", (event) => {
-        const checked = d3.select("#checkbox-leaf-titles").property("checked");
-        d3.selectAll(".node-text")
-          .attr("opacity", (d) => d.data.depth > 2 && checked ? 1.0 : 0.0)
+        checkboxesChecked["checkbox-leaf-titles"] = !checkboxesChecked["checkbox-leaf-titles"];
+        rerenderTree();
+      });
+      d3.selectAll(".checkbox-status").on("change", function() {
+        const checkboxId = d3.select(this).attr("id");
+        checkboxesChecked[checkboxId] = !checkboxesChecked[checkboxId];
+        const statusAffected = checkboxId.replace("checkbox-status-", "")
+        root.leaves().forEach((d) => {
+          if(d.data.props.status === statusAffected) {
+            setTreeVisibility(d.data, checkboxesChecked[checkboxId]);
+          }
+        });
+        rerenderTree();
       });
 
       const addLineBreaks = (text, maxWidth, dy, lineHeight) => {
@@ -188,13 +228,12 @@
           mode = "viz-select-0";
           d3.selectAll("#curves-wrapper-center").attr("opacity", 1.0);
           d3.selectAll("#curves-wrapper-leaves").attr("opacity", 0.0);
-          d3.selectAll(".node-circle").attr("opacity", (d) => d.data.visible || d.parent?.data.visible || d.parent?.data.id === "r" ? 1.0 : 0.0);
         } else {
           mode = "viz-select-1";
           d3.selectAll("#curves-wrapper-center").attr("opacity", 0.0);
           d3.selectAll("#curves-wrapper-leaves").attr("opacity", 1.0);
-          d3.selectAll(".node-circle").attr("opacity", (d) => !d.children && d.data.visible ? 1.0 : 0.0)
         }
+        rerenderTree(false);
       });
 
       const initializePresetsDropdown = (presets) => {
@@ -241,6 +280,7 @@
       d3.select("#hover-tooltip").style("width", `${tooltipWidth}px`).style("height", "auto")
 
       const radius = d3.min([canvasWidth - margin.left - margin.right, canvasHeight - margin.top - margin.bottom]) / 2 - 150;
+      const outerRadius = radius + 90;
 
       const radialTreeLine = d3.linkRadial()
         .source((d) => ({
@@ -296,6 +336,14 @@
         // curves from center to leaves
         //d3.selectAll(".center-to-leaf-path").remove();
 
+
+        d3.select("#twist-circle")
+          .attr("opacity", checkboxesChecked["checkbox-twist-circle"] ? 1.0 : 0.0)
+          .style("pointer-events", checkboxesChecked["checkbox-twist-circle"] ? "visibleStroke" : "none")
+        d3.selectAll("#twist-circle-small-g *")
+          .attr("opacity", checkboxesChecked["checkbox-twist-circle"] ? 0.0 : 1.0)
+          .style("pointer-events", checkboxesChecked["checkbox-twist-circle"] ? "none" : "visibleStroke")
+
         d3.select("#main-transform")
             .attr("transform", `translate(${canvasWidth / 2.0},${canvasHeight / 2.0})
               rotate(${(twist) * 180 / Math.PI})`);
@@ -308,7 +356,7 @@
               .attr("d", radialTreeLine)
               .attr("stroke", (d) => d.target.data.color)
               .attr("stroke-width", 1.5)
-              .attr("opacity", (d) => d.source.data.visible ? 1.0 : 0.0)
+              .attr("opacity", (d) => d.source.data.visible && d.target.data.visible ? 1.0 : 0.0)
           });
 
         d3.select("#curves-wrapper-leaves")
@@ -342,7 +390,7 @@
               .attr("x", (d) => {
                 let angle = d.x + twist;
                 angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
-                return angle < Math.PI ? 6 : -6;
+                return angle < Math.PI ? 12 : -12;
               })
               .attr("text-anchor", (d) => {
                 let angle = d.x + twist;
@@ -354,17 +402,20 @@
                 angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
                 return `rotate(${angle >= Math.PI ? 180 : 0})`;
               })
+
             update.selectAll(".node-text").transition(animation)
-              .attr("opacity", (d) => d.data.depth > 2 && (d.data.visible || d.parent?.data.visible) ? 1.0 : 0.0)
+              .attr("opacity", (d) => d.data.depth > 2 && (d.data.visible /*|| d.parent?.data.visible*/) && checkboxesChecked["checkbox-leaf-titles"] ? 1.0 : 0.0)
 
             update.selectAll(".text-leaf-interact-area")
               .style("pointer-events", (d) => d.data.visible ? "all" : "none");
 
             
-            update.selectAll(".node-circle")
-              .attr("opacity", (d) => mode === "viz-select-0" && (d.data.visible || d.parent?.data.visible || d.parent?.data.id === "r") ? 1.0 : 0.0);
+            
 
           });
+
+        d3.selectAll(".node-circle")
+          .attr("opacity", (d) => mode === "viz-select-0" && (d.data.visible /*|| d.parent?.data.visible*/ || d.parent?.data.id === "r") ? 1.0 : 0.0);
 
         d3.select("#category-labels-wrapper")
           .selectAll(".category-labels")
@@ -420,7 +471,7 @@
         d3.select("#d3-canvas")
           .append("image")
           .attr("id", "center-image")
-          .attr("opacity", 1.0)
+          .attr("opacity", checkboxesChecked["checkbox-image"] ? 1.0 : 0.0)
           .attr("href", "/center_logo.png")
           .attr("width", radius * brainSize)
           .attr("height", radius * brainSize * brainAspectRatio)
@@ -559,7 +610,49 @@
               .attr("id", "sticky-tooltip")
               .style("display", "block")
               .style("left", `${left}px`)
-              .style("top", `${top}px`);
+              .style("top", `${top}px`)
+              .style("pointer-events", "all")
+              .style("cursor", "move")
+              .on("mousedown", (event) => {
+                event.stopPropagation();
+                event.preventDefault();
+                let startPointerPos = [event.pageX, event.pageY];
+                let startPos = [
+                  parseInt(d3.select("#sticky-tooltip").style("left")),
+                  parseInt(d3.select("#sticky-tooltip").style("top"))
+                ];
+                const boundingRect = d3.select("#sticky-tooltip").node().getBoundingClientRect();
+                const tooltipHeight = boundingRect.height;
+                d3.select("body")
+                  .on("mousemove.dragTooltip", (event) => {
+                    let pointerPos = [event.pageX, event.pageY];
+                    let deltaX = pointerPos[0] - startPointerPos[0];
+                    let deltaY = pointerPos[1] - startPointerPos[1];
+                    if(startPos[0] + deltaX > width - tooltipWidth) {
+                      deltaX = (width - tooltipWidth) - startPos[0];
+                    } else if(startPos[0] + deltaX < 0) {
+                      deltaX = - startPos[0];
+                    }
+                    if(startPos[1] + deltaY > height - tooltipHeight) {
+                      deltaY = (height - tooltipHeight) - startPos[1];
+                    } else if(startPos[1] + deltaY < 0) {
+                      deltaY = - startPos[1];
+                    }
+
+                    d3.select("#sticky-tooltip")
+                      .style("left", `${startPos[0] + deltaX}px`)
+                      .style("top", `${startPos[1] + deltaY}px`)
+                  })
+                  .on("mouseup.dragTooltip,mouseleave.dragTooltip", (event) => {
+                    d3.select("body")
+                      .on("mousemove.dragTooltip", null)
+                      .on("mouseup.dragTooltip,mouseleave.dragTooltip", null);
+                  });
+              })
+              .on("click", (event) => {
+                event.stopPropagation();
+                event.preventDefault();
+              });
             d3.select("#hover-tooltip.tooltip").style("display", "none")
             stickyTooltip.style("pointer-events", "all");
             stickyTooltip.select(".tooltip-close-button")
@@ -671,28 +764,47 @@
             else
               d3.select("#hover-tooltip .tooltip-collapsible-button").style("display", "block").style("pointer-events", "all");
 
-            //if(d3.select("#sticky-tooltip").empty()) {
-              d3.select("#hover-tooltip.tooltip")
-                .style("left", `${pointerPos[0] + 10}px`)
-                .style("top", `${pointerPos[1] + 10}px`)
-                .style("display", "block")
-                .raise();
-            //}
-
             d3.select(`#${d.data.id}-text`).style("font-weight", "bold");
             d3.selectAll(`path[data-connection-data-source="${d.data.props.data_source}"]`)
-              .attr("stroke", "#86A2F4")
+              .attr("stroke", "#2652F4")
               .raise();
           })
           .on("mousemove", (event, d) => {
             //if(d3.select("#sticky-tooltip").empty()) {
               const boundingRect = d3.select("#hover-tooltip.tooltip").node().getBoundingClientRect();
               const pointerPos = [event.pageX, event.pageY];
-              const left = event.pageX + tooltipWidth >= width - 20 ? event.pageX - tooltipWidth - 10 : event.pageX + 10;
-              const top = event.pageY + boundingRect.height >= height - 20 ? event.pageY - boundingRect.height - 10 : event.pageY + 10;
-              d3.select("#hover-tooltip.tooltip")
-                .style("left", `${left}px`)
-                .style("top", `${top}px`);
+              
+              
+              if(mode === "viz-select-0") {
+                const left = event.pageX + tooltipWidth >= width - 20 ? event.pageX - tooltipWidth - 10 : event.pageX + 10;
+                const top = event.pageY + boundingRect.height >= height - 20 ? event.pageY - boundingRect.height - 10 : event.pageY + 10;
+                d3.select("#hover-tooltip.tooltip")
+                  .style("left", `${left}px`)
+                  .style("top", `${top}px`)
+                  .style("display", "block")
+                  .raise();
+              } else {
+                let left = event.pageX + 10;
+                const top = event.pageY + 10;
+                const xOffset = pointerPos[0] < width / 2.0 
+                  ? (radius - pointerPos[0]) - tooltipWidth 
+                  : pointerPos[0] - radius;
+                const y = (top - height / 2.0) / (outerRadius);
+                let x = Math.sqrt(1 - Math.pow(y, 2)) * outerRadius;
+                if(pointerPos[0] < width / 2.0)
+                  left = x * -1.0 + width / 2.0 - tooltipWidth;
+                else
+                  left = x + width / 2.0;
+                
+                //console.log(x);
+                d3.select("#hover-tooltip.tooltip")
+                  //.style("left", `${pointerPos[0] + xOffset + 10}px`)
+                  .style("left", `${left}px`)
+                  .style("top", `${pointerPos[1] + 10}px`)
+                  .style("display", "block")
+                  .raise();
+              }
+
             //}
           })
           .on("mouseleave", (event, d) => {
@@ -706,9 +818,20 @@
         node.append("circle")
           .attr("class", "node-circle")
           .attr("fill", (d) => d.data.color)
+          .attr("r", (d) => d.data.props.status === "Accepted" || d.data.props.status === "Published" ? 4 : d.data.props.status === "Manuscript" ? 0 : 2)
+          //.attr("opacity", (d) => d.children ? 0.0 : 1.0)
+          .attr("transform", "translate(4,0)")
+          .attr("opacity", (d) => d.depth === 0 ? 0.0 : 1.0);
+
+        node.filter((d) => d.data.props.status).append("circle")
+          .attr("class", "node-circle")
+          .attr("fill", "transparent")
+          .attr("stroke", (d) => d.data.color)
+          .attr("stroke-width", 2)
           //.attr("opacity", (d) => d.children ? 0.0 : 1.0)
           .attr("opacity", (d) => d.depth === 0 ? 0.0 : 1.0)
-          .attr("r", (d) => d.children ? 4 : 2);
+          .attr("transform", "translate(4,0)")
+          .attr("r", (d) => 4);
 
         node.filter((d) => d.depth !== 0 && d.children).append("circle")
           .attr("class", "node-interact-area")
@@ -729,7 +852,7 @@
 
         svg.append("circle")
           .attr("id", "twist-circle")
-          .attr("r", radius + 90)
+          .attr("r", outerRadius)
           .attr("fill", "none")
           .attr("stroke", "#e0e0e0")
           .attr("stroke-width", 10)
@@ -766,6 +889,61 @@
               });
           });
 
+        const twistCircleSmallX = canvasWidth / 2.0 + outerRadius;
+        const twistCircleSmallY = canvasHeight / 2.0 + outerRadius;
+        const twistCircleSmall = d3.select("#d3-canvas").append("g").attr("id", "twist-circle-small-g")
+        twistCircleSmall.append("polygon")
+          .attr("id", "twist-circle-small-triangle")
+          .attr("points", "50 15, 100 100, 0 100")
+          .attr("fill", "transparent")
+          .attr("fill", "none")
+          .attr("stroke", "#e0e0e0")
+          .attr("stroke-width", 10)
+          .attr("transform", `
+            translate(${twistCircleSmallX},${twistCircleSmallY})
+            scale(0.7,0.7) translate(${- 50},${- 15 - 85 / 2.0 - 11})`);
+        twistCircleSmall.append("circle")
+          .attr("id", "twist-circle-small")
+          .attr("transform", `translate(${twistCircleSmallX},${twistCircleSmallY})`)
+          .attr("r", 50)
+          .attr("fill", "none")
+          .attr("stroke", "#e0e0e0")
+          .attr("stroke-width", 10)
+          .style("pointer-events", "visibleStroke")
+          .style("cursor", "grab")
+          .on("mousedown.twistCircle", (event) => {
+            const startX = twistCircleSmallX - event.clientX;
+            const startY = twistCircleSmallY - event.clientY;
+            let lastAngle = Math.atan2(startX, startY);
+
+            d3.select("body")
+              .on("mousemove.twistCircle", (event) => {
+                const x = twistCircleSmallX - event.clientX;
+                const y = twistCircleSmallY - event.clientY;
+                const angle = Math.atan2(x, y);
+
+                const deltaAngle = lastAngle - angle;
+                twist += deltaAngle;
+                lastAngle = angle;
+
+                twistCircleSmall.attr("transform", `translate(${twistCircleSmallX},${twistCircleSmallY}) rotate(${twist * 180 / Math.PI}) translate(${-twistCircleSmallX},${-twistCircleSmallY})`)
+
+                rerenderTree(false);
+              })
+              .on("mouseleave.twistCircle,mouseup.twistCircle", (event) => {
+                d3.select("body")
+                  .on("mousemove.twistCircle", null)
+                  .on("mouseleave.twistCircle", null)
+                  .on("mouseup.twistCircle", null);
+              })
+              .on("mouseup", (event) => {
+                d3.select("body")
+                  .on("mousemove.twistCircle", null)
+                  .on("mouseleave.twistCircle", null)
+                  .on("mouseup.twistCircle", null);
+              });
+          });
+
         rerenderTree(false);
       }
 
@@ -773,7 +951,7 @@
 
     <script type="text/javascript">
 
-      const colors = ["#8C88BA", "#BF84AE", "#DB95AC", "#FBB9A6", "#F6A294"];
+      const colors = ["#8C88BA", "#BF84AE", "#DB95AC", "#FBB9A6", "#F6A294", "#B0DBEA", "#B3E5BE", "#CFC69D"];
 
       const buildHierarchy = ((parentLevel, data, presetsAvailable, presetsParent, depth) => {
         data.filter((d) => d.parent === parentLevel.text).forEach((d) => {
@@ -789,8 +967,11 @@
             "props": {
               "publication_link": d.publication_link,
               "data_source": d.data_source,
+              "status": d.Status,
               "info_main": {},
-              "info_collapsed": {},
+              "info_collapsed": {
+                "Status": d.Status,
+              },
             },
             "presets": [...presetsParent, ...presetsAvailable.filter((preset) => !presetsParent.includes(preset) && d[`[PRESET]${preset}`] === "x")],
             "children": [],
@@ -881,6 +1062,8 @@
 
       window.addEventListener("load", (event) => {
         
+        console.log("sending data request");
+        
         var xhr = new XMLHttpRequest();
         xhr.open("POST", "/fetch_c3tree_data_from_google_sheet", true);
         xhr.send(null);
@@ -903,7 +1086,7 @@
         }
 
         xhr.onerror = (err) => {
-          console.log(err);
+          console.warn(err);
         }
         
       });

@@ -100,16 +100,21 @@ app.post("/fetch_c3tree_data_from_google_sheet", (req, res) => {
       .then((auth) => {
         const sheets = google.sheets({version: "v4", auth});
 
-        const sheetRes = sheets.spreadsheets.values.get({
+        const mainDataSheet = sheets.spreadsheets.values.get({
           //spreadsheetId: "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms",
           spreadsheetId: "11tCraeH710zGQ0-OhJ-8wwcrZRbRRvSWrHO-llYueuM",
           //range: "collapsableRadialTreeData",
           range: "NCS & LHW Projects",
         });
 
-        sheetRes.then((sheetRes) => {
-          const rows = sheetRes.data.values;
-          if (!rows || rows.length === 0) {
+        const metaDataSheet = sheets.spreadsheets.values.get({
+          spreadsheetId: "11tCraeH710zGQ0-OhJ-8wwcrZRbRRvSWrHO-llYueuM",
+          range: "MetaData",
+        });
+
+        Promise.all([mainDataSheet, metaDataSheet]).then(([mainDataSheet, metaDataSheet]) => {
+          const mainDataRows = mainDataSheet.data.values;
+          if (!mainDataRows || mainDataRows.length === 0) {
             res.json({ 
               message: "Failure! No data / no rows returned :-(", 
               data: null,
@@ -117,8 +122,9 @@ app.post("/fetch_c3tree_data_from_google_sheet", (req, res) => {
           }
 
           res.json({ 
-            message: `Success! # rows: ${rows.length}`, 
-            data: rows,
+            message: `Success! # mainDataSheet: ${mainDataRows.length}`, 
+            mainData: mainDataRows,
+            metaData: metaDataSheet.data.values
           })
         }).catch((err) => {
           console.warn(err);
@@ -131,9 +137,17 @@ app.post("/fetch_c3tree_data_from_google_sheet", (req, res) => {
   }
 });
 
-app.get("/", (req, res) => {
+app.use(express.static("../frontend/static"));
+app.use(express.static("public"));
+
+/*app.get('*', (req, res) => {
+   res.sendFile(path.resolve(__dirname, 'public', 'index.html'));
+});*/
+
+app.get("*", (req, res) => {
+  console.log("serving /");
   res.writeHead(200, { "content-type": "text/html" })
-  fs.createReadStream("../frontend/index.html").pipe(res)
+  fs.createReadStream("public/templates/index.html").pipe(res)
 });
 
 const options = {};
