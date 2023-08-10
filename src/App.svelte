@@ -1,13 +1,68 @@
 <script>
 	import * as d3 from 'd3';
 
-	let simplifiedMode = false;
+	import { onMount } from 'svelte';
+
+	import introJs from 'intro.js';
+	import 'intro.js/minified/introjs.min.css';
+
+	const introTourSteps = [{
+			element: '#main-viz-wrapper',
+			intro: ''
+		},
+		{
+			element: '#main-transform',
+			intro: 'This is the main visualization. Research themes are displayed with their papers in a hierarchy.'
+		},
+		{
+			element: '#main-transform .text-leaf-interact-area',
+			intro: 'Each leaf represents a research paper. These can be clicked to gain additional information.'
+		},
+		{
+			element: '#main-transform .node-group',
+			intro: 'Each node is connected according to their relation - a theme may have subthemes or papers, a subtheme has papers. These can be clicked to toggle their visibility.'
+		},
+		{
+			element: '#controls-wrapper',
+			intro: 'Here are some additional settings for the visualization.'
+		},
+	]
+
+	const startIntroTour = () => {
+		introJs().start();
+
+		document.querySelector("#main-viz-wrapper").appendChild(document.querySelector(".introjs-overlay"));
+		document.querySelector("#main-viz-wrapper").appendChild(document.querySelector(".introjs-helperLayer"));
+		document.querySelector("#main-viz-wrapper").appendChild(document.querySelector(".introjs-tooltipReferenceLayer"));
+	};
+
+	//
+	// config
+	//
+
+	const colors = ["#8C88BA", "#BF84AE", "#DB95AC", "#FBB9A6", "#F6A294", "#B0DBEA", "#B3E5BE", "#CFC69D"];
+	const animDurationIn = 750;
+	const animDurationOut = 400;
+	const margin = {
+		top: 90,
+		right: 90,
+		bottom: 90,
+		left: 90,
+	}
+
+	//
+	//
+	//
+
+	let simplifiedMode = true;
 	let secondTooltip = null;
 
 	let checkboxesChecked = {
 	};
 
 	let data;
+	let introData;
+	let presets;
 	let header;
 	let rawData;
 	let visibleTeams = [];
@@ -17,13 +72,6 @@
 	let selectedNode = undefined;
 
 	let mode = null;
-
-	const margin = {
-		top: 90,
-		right: 90,
-		bottom: 90,
-		left: 90,
-	}
 	let width  = null;
 	let height = null;
 	let canvasWidth = null;
@@ -32,10 +80,133 @@
 	let radius = null;
 	let outerRadius = null;
 
-	const colors = ["#8C88BA", "#BF84AE", "#DB95AC", "#FBB9A6", "#F6A294", "#B0DBEA", "#B3E5BE", "#CFC69D"];
+	//
+	// show / hide parts
+	//
+
+	const showWelcomeDialog = () => {
+		d3.select("#welcome-dialog")
+			.style("opacity", 0.0)
+			.style("display", "block");
+		d3.selectAll("#welcome-dialog")
+			.transition("opacity")
+			.duration(animDurationOut)
+			.ease(d3.easeQuadOut)
+			.style("opacity", 1.0);
+	}
+
+	const hideWelcomeDialog = () => {
+		d3.selectAll("#welcome-dialog")
+			.transition("opacity")
+			.duration(animDurationOut)
+			.ease(d3.easeQuadOut)
+			.style("opacity", 0.0);
+		d3.selectAll("#welcome-dialog")
+			.transition("display")
+			.delay(animDurationOut)
+			.style("display", "none");
+	};
 
 	const showMainViz = () => {
 
+		showLoader();
+		hideWelcomeDialog();
+		checkShowDisplayCompatability();
+
+		d3.select("#tabs-wrapper")
+			.transition("opacity")
+			.duration(animDurationOut)
+			.ease(d3.easeQuadOut)
+			.style("opacity", 0.0);
+
+		setTimeout(() => {
+
+			d3.select("#main-viz-wrapper")
+				.style("display", "block");
+
+			updateLeafTextAppearence();
+
+			setTimeout(() => {
+				hideLoader();
+				d3.select("#main-viz-wrapper")
+					.transition("opacity")
+					.duration(animDurationIn)
+					.ease(d3.easeQuadOut)
+					.style("opacity", 1.0);
+				d3.select("#tabs-wrapper")
+					.transition("display")
+					.delay(animDurationIn)
+					.style("display", "none");
+			}, 1000);
+
+		}, animDurationOut);
+		
+	};
+
+	const showSimplifiedVersion = () => {
+
+		hideWelcomeDialog();
+		checkShowDisplayCompatability();
+
+		d3.select("#main-viz-wrapper")
+			.style("display", "none")
+			.transition("opacity")
+			.duration(animDurationOut)
+			.ease(d3.easeQuadOut)
+			.style("opacity", 0.0);
+		d3.select("#tabs-wrapper")
+			.style("display", "block")
+			.transition("opacity")
+			.duration(animDurationIn)
+			.ease(d3.easeQuadOut)
+			.style("opacity", 1.0);
+		d3.select("#main-viz-wrapper")
+			.transition("display")
+			.delay(animDurationIn)
+			.style("display", "none")
+			
+	};
+
+	//
+	// utils
+	//
+
+	const showLoader = () => {
+		d3.select("#loader").style("display", "block");
+	}
+
+	const hideLoader = () => {
+		d3.select("#loader").style("display", "none");
+	}
+
+	const updateLeafTextAppearence = async (d, line, node) => {
+
+		d3.selectAll(".node-text-1st-line")
+			.each(function(d) {
+				let text = d.data.text;
+				d3.select(this).text(text);
+				let computedTextLength = d3.select(this).node().getComputedTextLength();
+				while(computedTextLength > 70) {
+					text = `${text.slice(0,-5)}`;
+					d3.select(this).text(text);
+					computedTextLength = d3.select(this).node().getComputedTextLength();
+					d.data.textLength = text.length;
+				}
+			});
+		d3.selectAll(".node-text-2nd-line")
+			.each(function(d) {
+				let text = d.data.text.substr(d.data.textLength);
+				d3.select(this).text(text);
+				let computedTextLength = d3.select(this).node().getComputedTextLength();
+				while(computedTextLength > 70) {
+					text = `${text.slice(0,-5)}...`;
+					d3.select(this).text(text);
+					computedTextLength = d3.select(this).node().getComputedTextLength();
+				}
+			});
+	}
+
+	const checkShowDisplayCompatability = () => {
 		const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 		const isPortraitView = window.innerWidth < window.innerHeight;
 
@@ -48,42 +219,34 @@
 			d3.select("#min-width-dialog .please-desktop").style("display", "none");
 			d3.select("#min-width-dialog").style("display", "block");
 		}
+	}
 
-		rerenderTree(false);
+	const getParentWithDepth = (d, depth) => {
+		let parent = d.parent;
+		while(parent && parent.depth > depth)
+			parent = parent.parent;
+		return depth === parent?.depth ? parent : null;
+	};
 
-		d3.select("#main-viz-wrapper")
-			.style("opacity", 0.0)
-			.transition("appear")
-			.duration(1000)
-			.ease(d3.easeQuadOut)
-			.style("opacity", 1.0);
+	const setTreeVisibility = (d, visible) => {
+		d.visible = visible;
+		if(d.children?.length > 0) 
+			d.children.map((child) => setTreeVisibility(child, visible));
+	};
 
-		d3.selectAll("#welcome-dialog")
-			.style("opacity", 1.0)
-			.transition("disappear")
-			.duration(1000)
-			.ease(d3.easeQuadOut)
-			.style("opacity", 0.0);
-
-		d3.selectAll("#welcome-dialog")
-			.transition("vanish")
-			.delay(1000)
-			.style("display", "none");
-	};	
-
-	const addLineBreaks = (text, maxWidth, dy, lineHeight) => {
+	const addSVGTextLineBreaks = (text, maxWidth, dy, lineHeight) => {
 		const y = text.attr("y");
 		const words = text.text().split(/\s+/).reverse();
 
 		let word;
 		let line = [];
 		let tspan = text
-		.text(null)
-		.append("tspan")
-		.attr("x", 0)
-		.attr("y", y)
-		.attr("dy", `${dy}em`)
-		.attr("data-initial-dy", dy);
+			.text(null)
+			.append("tspan")
+			.attr("x", 0)
+			.attr("y", y)
+			.attr("dy", `${dy}em`)
+			.attr("data-initial-dy", dy);
 		let lineCount = 1;
 
 		while ((word = words.pop())) {
@@ -94,12 +257,12 @@
 				tspan.text(line.join(" "));
 				line = [word];
 				tspan = text
-				.append("tspan")
-				.attr("x", 0)
-				.attr("y", y)
-				.attr("dy", `${lineHeight}em`)
-				.attr("data-initial-dy", lineHeight)
-				.text(word);
+					.append("tspan")
+					.attr("x", 0)
+					.attr("y", y)
+					.attr("dy", `${lineHeight}em`)
+					.attr("data-initial-dy", lineHeight)
+					.text(word);
 				lineCount += 1;
 			}
 		}
@@ -107,51 +270,41 @@
 		return lineCount;
 	};
 
-	const getParentWithDepth = (d, depth) => {
-		let parent = d.parent;
-		while(parent && parent.depth > depth)
-			parent = parent.parent;
-		return depth === parent?.depth ? parent : null;
-	}
+	//
+	// presets dropdown
+	//
 
 	const initializePresetsDropdown = (presets) => {
 		d3.select("#preset-select")
-		.style("display", "block")
-		.selectAll("option")
-		.data(["No preset (all visible)", ...presets])
-		.join("option")
-		.attr("value", (d) => d)
-		.text((d) => d);
+			.style("display", "block")
+			.selectAll("option")
+			.data(["No preset (all visible)", ...presets])
+			.join("option")
+			.attr("value", (d) => d)
+			.text((d) => d);
 
 		d3.select("#preset-select")
-		.on("change", (event) => {
-			const chosenPreset = event.target.value;
-			root.descendants().forEach((d) => {
-				d.data.visible = !d.data.presets.includes(chosenPreset) && d.depth > 0;
-			})
-			rerenderTree();
-		});
-	}
+			.on("change", (event) => {
+				const chosenPreset = event.target.value;
+				root.descendants().forEach((d) => {
+					d.data.visible = !d.data.presets.includes(chosenPreset) && d.depth > 0;
+				})
+				rerenderTree();
+			});
+	};
 
+	//
+	// math function definitions
+	//
 
-
-	const radialTreeLine = d3.linkRadial()
+	const radialTreeLineFunction = d3.linkRadial()
 		.source((d) => {
 			const x = d.source.x;
 			const y = d.source.y + (d.source.parent ? (d.source.parent.y - d.source.y) * 0.7 : 0);
-			if(d.source.depth === 1) {
-				const length = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))
-				return {
-					x: x,
-					y: y / length * 60,
-				}
-			} else {
-				return {
-					x: x,
-					y: y,
-				}
-			}
-
+			if(d.source.depth === 1)
+				return { x: x, y: y / Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)) * 60 }
+			else
+				return { x: x, y: y }
 		})
 		.target((d) => ({
 			x: d.target.x,
@@ -159,11 +312,13 @@
 		}))
 		.angle((d) => d.x)
 		.radius((d) => d.y);
-	const connectedEdgesLine = d3.lineRadial()
+
+	const connectedEdgesLineFunction = d3.lineRadial()
 		.curve(d3.curveBundle.beta(0.9))
 		.radius((d) => d.y)
 		.angle((d) => d.x);
-	const separation = (a, b) => {
+
+	const separationFunction = (a, b) => {
 		if((a.parent && !a.parent.data.visible) && (b.parent && !b.parent.data.visible))
 			return 0.05;
 		else if(!a.data.visible && !b.data.visible) 
@@ -175,13 +330,8 @@
 	};
 
 
-	const calcTreeDepths = (d) => d.children?.length > 0 ? d.children.map(calcTreeDepths).flat() : d.depth;
 
-	const setTreeVisibility = (d, visible) => {
-		d.visible = visible;
-		if(d.children?.length > 0) 
-			d.children.map((child) => setTreeVisibility(child, visible));
-	}
+	
 
 	const nodeOnClick = (d) => {
 		if("Members" in d.data.props.info_main) {
@@ -198,7 +348,7 @@
 	}
 
 
-	const rerenderTree = (animated = true) => {
+	const rerenderTree = async (animated = true) => {
 
 		if(!root) return;
 
@@ -208,7 +358,7 @@
 		twist = twist < 0 ? twist + Math.PI * 2.0 : twist;
 
 		const treeFunction = d3.cluster().size([2 * Math.PI, radius]);
-		treeFunction.separation(separation)(root);
+		treeFunction.separation(separationFunction)(root);
 
 		const animation = d3.transition().duration(animated ? 750 : 0).ease(d3.easeQuadOut);
 
@@ -219,6 +369,7 @@
 		d3.select("#twist-circle")
 			.transition(animation)
 			.attr("opacity", checkboxesChecked["checkbox-twist-circle"] && !simplifiedMode ? 1.0 : 0.0)
+			
 			.style("pointer-events", checkboxesChecked["checkbox-twist-circle"] && !simplifiedMode ? "visibleStroke" : "none")
 		d3.selectAll("#twist-circle-small-g *")
 			.transition(animation)
@@ -236,10 +387,10 @@
 			.data(root.links())
 			.call((update) => {
 				update.transition(animation)
-					.attr("d", radialTreeLine)
+					.attr("d", radialTreeLineFunction)
 					.attr("stroke", (d) => d.target.data.color)
 					.attr("stroke-width", 1.5)
-					.attr("opacity", (d) => d.source.data.visible && d.target.data.visible ? 1.0 : 0.0)
+					.attr("opacity", (d) => d.source.data.visible/* && d.target.data.visible*/ ? 1.0 : 0.0)
 			});
 
 		d3.select("#curves-wrapper-leaves")
@@ -253,7 +404,7 @@
 					(d) => [leaf, d]);
 			}))
 			.call((update) => {
-				update.transition(animation).attr("d", ([i, o]) => connectedEdgesLine(i.path(o)))
+				update.transition(animation).attr("d", ([i, o]) => connectedEdgesLineFunction(i.path(o)))
 				.attr("opacity", (d) => d[0].data.visible && d[1].data.visible ? 0.1 : 0.0);
 			});
 
@@ -294,7 +445,7 @@
 					})
 
 				update.selectAll(".node-text").transition(animation)
-					.attr("opacity", (d) => (d.data.depth > 2 || d.data.depth === d.data.maxDepth)&& (d.data.visible /*|| d.parent?.data.visible*/) && checkboxesChecked["checkbox-leaf-titles"] && !simplifiedMode ? 1.0 : 0.0)
+					.attr("opacity", (d) => (d.data.depth > 2 || d.data.depth === d.data.maxDepth)&& (d.data.visible || d.parent?.data.visible) && checkboxesChecked["checkbox-leaf-titles"] && !simplifiedMode ? 1.0 : 0.0)
 
 				update.selectAll(".text-leaf-interact-area")
 					.style("pointer-events", (d) => d.data.visible && !simplifiedMode ? "all" : "none");
@@ -303,7 +454,7 @@
 
 		d3.selectAll(".node-circle")
 			.transition(animation)
-			.attr("opacity", (d) => mode === "viz-select-0" && !simplifiedMode && (d.data.visible /*|| d.parent?.data.visible*/ || d.parent?.data.id === "r") ? 1.0 : 0.0);
+			.attr("opacity", (d) => mode === "viz-select-0" && !simplifiedMode && (d.data.visible || d.parent?.data.visible || d.parent?.data.id === "r") ? 1.0 : 0.0);
 
 		d3.select("#category-labels-wrapper")
 			.selectAll(".category-labels")
@@ -329,25 +480,24 @@
 
 
 
-	const createCollapsableRadialTree = () => {
+	const createCollapsableRadialTree = (data, separationFunction, radius) => {
 
 		root = d3.hierarchy(data);
 
 		const treeFunction = d3.cluster().size([2 * Math.PI, radius]);
-		treeFunction.separation(separation)(root);
+		treeFunction.separation(separationFunction)(root);
 
 		d3.select("body")
-		.on("click", (event) => {
+			.on("click", (event) => {
 
-			if(!d3.select("#sticky-tooltip").empty()) {
-				d3.selectAll(`path[data-connection-data-source="${selectedNode.data.props.data_source}"]`)
-				.attr("stroke", "#d0d0d0");
-				selectedNode = undefined;
-				d3.select("#sticky-tooltip").remove();
-			}
-		})
+				if(!d3.select("#sticky-tooltip").empty()) {
+					d3.selectAll(`path[data-connection-data-source="${selectedNode.data.props.data_source}"]`) // modular: selectedNode
+						.attr("stroke", "#d0d0d0");
+					selectedNode = undefined;
+					d3.select("#sticky-tooltip").remove();
+				}
+			});
 
-		d3.select("#loader").style("display", "none");
 		d3.select("#d3-canvas").selectAll("*").remove();
 		const svg = d3.select("#d3-canvas")
 			.attr("opacity", 1.0)
@@ -456,7 +606,7 @@
 			.attr("r", "4");
 		legendWrapper.append("text")
 			.attr("fill", "#202020")
-		.text("Manuscript")
+			.text("Manuscript")
 			.attr("dominant-baseline", "middle")
 			.attr("text-anchor", "left")
 			.attr("font-size", "120%")
@@ -500,7 +650,7 @@
 			.attr("fill", (d) => d.data.color)
 			.text((d) => d.data.text)
 			.each(function(d) {
-				addLineBreaks(d3.select(this), canvasWidth / 2 - radius - 80, 0, 1.0)
+				addSVGTextLineBreaks(d3.select(this), canvasWidth / 2 - radius - 80, 0, 1.0)
 			});
 
 		// curves from center to leaves
@@ -512,7 +662,7 @@
 			.data(root.links())
 			.join("path")
 			.attr("class", "center-to-leaf-path")
-			.attr("d", radialTreeLine)
+			.attr("d", radialTreeLineFunction)
 			.attr("stroke", (d) => d.target.data.color)
 			.attr("stroke-width", 1.5)
 			.attr("opacity", (d) => d.source.data.depth > 0 ? 1.0 : 0.0);
@@ -536,7 +686,7 @@
 			.attr("stroke", "#d0d0d0")
 			.attr("stroke-width", 1.0)
 			.attr("opacity", 0.5)
-			.attr("d", ([i, o]) => connectedEdgesLine(i.path(o)));
+			.attr("d", ([i, o]) => connectedEdgesLineFunction(i.path(o)));
 
 
 		const outerNodes = svg.append("g")
@@ -572,16 +722,7 @@
 			.attr("fill", (d) => d.data.color)
 			.attr("font-size", "10px")
 			.style("pointer-events", "none")
-			.text((d) => d.data.text)
-			.each(function(d) {
-				let textLength = d3.select(this).node().getComputedTextLength();
-				let text = d.data.text;
-				while(textLength > 70) {
-					text = `${text.slice(0,-5)}`;
-					d3.select(this).text(text);
-					textLength = d3.select(this).node().getComputedTextLength();
-				}
-			});
+			.each(function(d) { updateLeafTextAppearence(d, 1, this); });
 		node.append("text")
 			.attr("class", "node-text node-text-2nd-line")
 			.attr("id", (d) => `${d.data.id}-text-2nd-line`)
@@ -593,16 +734,7 @@
 			.attr("fill", (d) => d.data.color)
 			.attr("font-size", "10px")
 			.style("pointer-events", "none")
-			.text((d) => d.data.text.substr(70))
-			.each(function(d) {
-				let textLength = d3.select(this).node().getComputedTextLength();
-				let text = d.data.text.substr(70);
-				while(textLength > 70) {
-					text = `${text.slice(0,-5)}...`;
-					d3.select(this).text(text);
-					textLength = d3.select(this).node().getComputedTextLength();
-				}
-			});
+			.each(function(d) { updateLeafTextAppearence(d, 2, this); });
 
 		node.filter((d) => !d.children).append("rect")
 			.attr("class", "text-leaf-interact-area")
@@ -611,7 +743,6 @@
 			.attr("y", -10)
 			.attr("width", 70)
 			.attr("height", 30)
-			.style("pointer-events", "all")
 			.style("cursor", "pointer")
 
 
@@ -1004,7 +1135,7 @@
 			.attr("fill", "none")
 			.attr("stroke", "#e0e0e0")
 			.attr("stroke-width", 10)
-			.style("pointer-events", "visibleStroke")
+			.style("pointer-events", !simplifiedMode ? "visibleStroke" : "none")
 			.style("cursor", "grab")
 			.on("mousedown.twistCircle", (event) => {
 				const startX = canvasWidth / 2.0 - event.clientX;
@@ -1095,7 +1226,11 @@
 		rerenderTree(false);
 	};
 
-	const createTabsView = () => {
+	//
+	// TabView
+	//
+
+	const createTabsView = (data) => {
 
 		const pageDim = d3.select("body").node().getBoundingClientRect();
 		const marginTop = 30;
@@ -1168,29 +1303,209 @@
 			.style("white-space", "pre-wrap")
 			.text((d) => d.props.themeDescLong)
 
+		contents.append("div")
+			.style("width", "320px")
+			.style("height", "240px")
+			.style("margin", "0 auto")
+			.append("video")
+			.attr("src", "vid/The VRGeo Palm Rejection Solution.mp4")
+			.attr("width", "320")
+			.attr("height", "240")
+			.attr("controls", true)
+			.text("Sorry, your browser doesn't support embedded videos.");
+
+		const collapsibleContentToggler = contents.append("div")
+			.attr("class", "collapsible-content-toggler")
+			.style("cursor", "pointer")
+			.style("margin", "40px 30px 10px")
+			.style("color", "#404040")
+			.on("click", (event, d) => {
+
+				const entry = d3.select(`#${d.id}-content .collapsible-content-wrapper`);
+				const collapsed = entry.attr("data-collapsed")
+
+				if(collapsed === "true") {
+					entry.attr("data-collapsed", "false")
+						.style("display", "block")
+						.transition("appear")
+						.duration(animDurationIn)
+						.ease(d3.easeQuadOut)
+						.style("height", "auto")
+
+					d3.select(`#${d.id}-content .collapsible-content-toggler .collapse-icon-toggler path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
+						.attr("transform", "translate(256,256) rotate(180) translate(-256,-256)");
+				} else {
+					entry.attr("data-collapsed", "true")
+					.style("display", "none")
+						.transition("appear")
+						.duration(animDurationOut)
+						.ease(d3.easeQuadOut)
+						.style("height", "0")
+
+					entry.attr("data-collapsed", "true")
+						.transition("display")
+						.delay(animDurationOut)
+						.style("display", "none");
+
+					d3.select(`#${d.id}-content .collapsible-content-toggler .collapse-icon-toggler path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
+						.attr("transform", "translate(256,256) rotate(90) translate(-256,-256)");
+				}
+			});
+
+		collapsibleContentToggler.append("p")
+			.style("float", "left")
+			.style("height", "40px")
+			.style("padding", "0")
+			.style("margin", "0")
+			.style("line-height", "40px")
+			.text("Publications and more Information");
+
+		collapsibleContentToggler.append("svg")
+			.attr("class", "collapse-icon-toggler")
+			.style("float", "left")
+			.attr("viewBox", "0 0 512 512")
+			.style("margin", "12.5px 5px")
+			.attr("width", "15px")
+			.attr("height", "15px")
+			.attr("xmlns", "http://www.w3.org/2000/svg")
+			.append("path")
+			.attr("d", "M233.4 105.4c12.5-12.5 32.8-12.5 45.3 0l192 192c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L256 173.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l192-192z")
+			.attr("fill", "#404040")
+			.attr("transform", "translate(256,256) rotate(90) translate(-256,-256)")
+
+		collapsibleContentToggler.append("div")
+			.style("clear", "both");
+
+		const collapsibleContent = contents.append("div")
+			.style("padding", "0 30px 20px")
+			.style("margin", "10px 0")
+			.attr("class", "collapsible-content-wrapper")
+			.attr("data-collapsed", "true")
+			.style("height", "0")
+			.style("display", "none")
+
+		const papersList = collapsibleContent.append("div")
+			.selectAll(".papers-list-item")
+			.data((d, i) => {
+				const subthemes = rawData.filter((rD) => rD["parent"] === d.text).map((rD) => rD["text"]);
+				return rawData.filter((rD) => subthemes.indexOf(rD["parent"]) !== -1).map((rD, rI) => ({...rD, parentIndex: i, rIndex: rI }));
+			})
+			.join("div")
+			.attr("id", (d, i) => `papers-list-item-${d.parentIndex}-${i}`)
+			.attr("class", ".papers-list-item")
+			.style("cursor", "pointer")
+			.style("border", "1px solid #d0d0d0")
+			.style("padding", "0 10px")
+			.on("click", (event, d, i) => {
+
+				const entry = d3.select(`#papers-list-item-${d.parentIndex}-${d.rIndex} .papers-list-item-content`);
+				const collapsed = entry.attr("data-collapsed")
+
+				if(collapsed === "true") {
+					entry.attr("data-collapsed", "false")
+						.style("display", "block")
+						.transition("appear")
+						.duration(animDurationIn)
+						.ease(d3.easeQuadOut)
+						.style("height", "auto")
+
+					d3.select(`#papers-list-item-${d.parentIndex}-${d.rIndex} .collapse-icon-paper path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
+						.attr("transform", "translate(256,256) rotate(180) translate(-256,-256)");
+				} else {
+					entry.attr("data-collapsed", "true")
+					.style("display", "none")
+						.transition("appear")
+						.duration(animDurationOut)
+						.ease(d3.easeQuadOut)
+						.style("height", "0")
+
+					entry.attr("data-collapsed", "true")
+						.transition("display")
+						.delay(animDurationOut)
+						.style("display", "none");
+
+					d3.select(`#papers-list-item-${d.parentIndex}-${d.rIndex} .collapse-icon-paper path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
+						.attr("transform", "translate(256,256) rotate(90) translate(-256,-256)");
+				}
+			});
+
+		papersList.append("p")
+			.style("width", "80%")
+			.style("float", "left")
+			.text((d) => d["text"])
+
+		papersList.append("svg")
+			.attr("class", "collapse-icon-paper")
+			.style("float", "right")
+			.attr("viewBox", "0 0 512 512")
+			.style("margin", "12.5px 5px")
+			.attr("width", "15px")
+			.attr("height", "15px")
+			.attr("xmlns", "http://www.w3.org/2000/svg")
+			.append("path")
+			.attr("d", "M233.4 105.4c12.5-12.5 32.8-12.5 45.3 0l192 192c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L256 173.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l192-192z")
+			.attr("fill", "#404040")
+			.attr("transform", "translate(256,256) rotate(90) translate(-256,-256)")
+
+		papersList.append("div")
+			.style("clear", "both");
+
+		const papersListContent = papersList.append("div")
+			.attr("class", "papers-list-item-content")
+			.attr("data-collapsed", "true")
+			.style("display", "none");
+
+		papersListContent.each(function (d) {
+			let collapsibleInfo = false;
+			Object.keys(d).filter((key) => key.indexOf("[INFO_MAIN]") !== -1).forEach((key) => {
+				if(d[key] && d[key] !== "") {
+					collapsibleInfo = true;
+					d3.select(this).append("p")
+						.style("font-weight", "bold")
+						.text(key.replace("[INFO_MAIN]", ""));
+					d3.select(this).append("p")
+						.style("padding-bottom", "5px")
+						.text(d[key]);
+				}
+			});
+			Object.keys(d).filter((key) => key.indexOf("[INFO_COLLAPSED]") !== -1).forEach((key) => {
+				if(d[key] && d[key] !== "") {
+					collapsibleInfo = true;
+					d3.select(this).append("p")
+						.style("font-weight", "bold")
+						.text(key.replace("[INFO_COLLAPSED]", ""));
+					d3.select(this).append("p")
+						.style("padding-bottom", "5px")
+						.text(d[key]);
+				}
+			});
+			if(!collapsibleInfo) {
+				d3.select(this).append("p")
+					.style("font-weight", "bold")
+					.text("No additional information.");
+			}
+			return;
+			Object.keys(d).filter((key) => key.indexOf("[INFO_COLLAPSED]") !== -1).forEach((key) => {
+				level.props.info_collapsed[key.replace("[INFO_COLLAPSED]", "")] = d[key];
+			});
+			console.log(d);
+			Object.entries(d.info_collapsed).forEach(([key, value]) => {
+				if(value && value !== "") {
+					papersListContent.append("p")
+						.style("font-weight", "bold")
+						.text(key);
+					papersListContent.append("p")
+						.style("padding-bottom", "5px")
+						.text(value);
+				}
+			});
+		});
+
+
 		d3.select("#tabs-wrapper .button")
 			.style("margin", "20px 0")
 			.style("display", "inline-block")
-			.on("click", () => {
-				const animation = d3.transition().duration(750).ease(d3.easeQuadOut);
-
-				simplifiedMode = true;
-				rerenderTree(false);
-
-				d3.select("#tabs-wrapper")
-					.transition(animation)
-					.style("opacity", 0.0);
-
-				d3.select("#tabs-wrapper")
-					.transition("vanish")
-					.delay(750)
-					.style("display", "none")
-
-				d3.select("#main-viz-wrapper")
-					.transition(animation)
-					.delay(750)
-					.style("opacity", 1.0);
-			})
+			.on("click", showMainViz)
 
 		let selectedTab = data.children[0];
 
@@ -1234,8 +1549,40 @@
 
 		showContentOfSelectedTab(false);
 
-
 	};
+
+	//
+	// search
+	//
+	
+
+	const highlightSearchTerm = (searchTerm) => {
+
+		d3.selectAll(".category-labels tspan")
+			.attr("stroke", (d) => {
+				return d.data.text.toLowerCase().includes(searchTerm.toLowerCase()) || d.data.props?.themeDescShort?.toLowerCase().includes(searchTerm.toLowerCase()) ? "#ffee22" : null
+			})
+			.attr("stroke-width", 5);
+
+		d3.selectAll(".outer-node-group circle")
+			.attr("stroke", (d) => {
+				return d.data.text.toLowerCase().includes(searchTerm.toLowerCase()) || d.data.props?.info_main?.description?.toLowerCase().includes(searchTerm.toLowerCase()) ? "#ffee22" : null
+			})
+			.attr("stroke-width", 5);
+
+		d3.selectAll(".node-group text")
+			.attr("stroke", (d) => {
+				return d.data.text.toLowerCase().includes(searchTerm.toLowerCase()) || 
+				(d.data.props?.info_main && (d.data.props?.info_main["Full title"]?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+					d.data.props?.info_main["Summary"]?.toLowerCase().includes(searchTerm.toLowerCase())))
+				? "#ffee22" : null
+			})
+			.attr("stroke-width", 5);
+	};
+
+	//
+	// Tree bulding
+	//
 
 	const buildHierarchy = ((parentLevel, data, presetsAvailable, presetsParent, depth, maxDepth = 5) => {
 		//console.log(data.filter((d) => parentLevel.text !== "" && parentLevel.text !== undefined && d.parent === parentLevel.text))
@@ -1297,7 +1644,7 @@
 		});
 	});
 
-	const parseSheetData = ((data, presets) => {
+	const startBuildHierarchy = ((data, presets) => {
 
 		const hierarchyRootLevel = {
 			"id": "r",
@@ -1315,126 +1662,31 @@
 		return hierarchyRootLevel;
 	});
 
-	const parseMetaData = (responseMetaData, metaDataHeader) => {
-		d3.select("#welcome-dialog").style("display", "block");
-		responseMetaData.forEach((metaInfo) => {
-			switch(metaInfo[0]) {
-				case "welcomeMessageTitle":
-				d3.select("#welcome-dialog h3").html(metaInfo[1]);
-				break;
-				case "welcomeMessageBody":
-				d3.select("#welcome-dialog span").html(metaInfo[1]);
-				break;
-				case "tabViewTitle":
-				d3.select("#tab-view-title").html(metaInfo[1]);
-				break;
-			}
-		})
-	};
-
-	const parseNCSAndLHWData = (responseData, header) => {
-		rawData = [];
-		const themesAdded = [];
-		let theme = "";
-		let subThemesAdded = [];
-		responseData.forEach((row) => {
-
-			// new theme
-			if(row[0] !== undefined && row[0] !== "" && !themesAdded.includes(row[0])) {
-				theme = row[0];
-				rawData.push({
-					"text": theme,
-					"parent": "ROOT",
-					"themeDescLong": row[1],
-					"themeDescShort": row[2],
-				});
-				themesAdded.push(theme);
-				subThemesAdded = [];
-			}
-
-			// new subtheme
-			if(row[3] !== undefined && row[3] !== "" && !subThemesAdded.includes(row[3])) {
-				let subTheme = row[3];
-				rawData.push({
-					"text": subTheme,
-					"parent": theme,
-					"[INFO_MAIN]description": row[4]
-				});
-				subThemesAdded.push(subTheme);
-			}
-
-			const d = {
-				"text": row[5],
-				"parent": row[3],
-			};
-			header.slice(5).forEach((column, i) => {
-				d[column] = row[i + 5]
-			});
-			rawData.push(d);
+	const addIntroSteps = (introData) => {
+		console.log(introData);
+		introData.forEach((step) => {
+			d3.select(`${step["CSS selector"]}`)
+				.attr("data-step", step["stepNum"])
+				.attr("data-intro", step["text"]);
 		});
-
-		return rawData;
-	};
-
-	const parseDefaultData = (responseData, header) => {
-		const rawData = responseData.map((row) => {
-			const d = {};
-			header.forEach((column, i) => {
-				d[column] = row[i]
-			});
-			return d;
-		});
-
-		return rawData;
-	};
-
-	const highlightSearchTermOld = (d, searchTerm) => {
-		switch(depth) {
-			case 1:
-			if(d.text.includes(searchTerm)) {
-
-			}
-			break;
-
-			default:
-			break;
-		}
-	};
-
-	const highlightSearchTerm = (searchTerm) => {
-
-		d3.selectAll(".category-labels tspan")
-			.attr("stroke", (d) => {
-				return d.data.text.toLowerCase().includes(searchTerm.toLowerCase()) || d.data.props?.themeDescShort?.toLowerCase().includes(searchTerm.toLowerCase()) ? "#ffee22" : null
-			})
-			.attr("stroke-width", 5);
-
-		d3.selectAll(".outer-node-group circle")
-			.attr("stroke", (d) => {
-				return d.data.text.toLowerCase().includes(searchTerm.toLowerCase()) || d.data.props?.info_main?.description?.toLowerCase().includes(searchTerm.toLowerCase()) ? "#ffee22" : null
-			})
-			.attr("stroke-width", 5);
-
-		d3.selectAll(".node-group text")
-			.attr("stroke", (d) => {
-				return d.data.text.toLowerCase().includes(searchTerm.toLowerCase()) || 
-				(d.data.props?.info_main && (d.data.props?.info_main["Full title"]?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-					d.data.props?.info_main["Summary"]?.toLowerCase().includes(searchTerm.toLowerCase())))
-				? "#ffee22" : null
-			})
-			.attr("stroke-width", 5);
-	};
-
-	const rebuildTree = () => {
-		const presets = header.filter((column) => column.includes("[PRESET]")).map((column) => column.replace("[PRESET]", ""));
-		data = parseSheetData(rawData, presets);
-		createTabsView();
-		createCollapsableRadialTree();
 	}
 
+	const rebuildTree = () => {
+		data = startBuildHierarchy(rawData, presets);
+		createTabsView(data);
+		createCollapsableRadialTree(data, separationFunction, radius);
+		addIntroSteps(introData);
+	}
 
+	//
+	//
+	//
+
+	// init function
 
 	window.addEventListener("load", (event) => {
+
+		showLoader();
 
 		width  = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
 		height = (window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight);
@@ -1493,29 +1745,13 @@
 		});
 
 		d3.select("#welcome-dialog .button.button-simplified").on("click", (event) => {
-			d3.select("#tabs-wrapper")
-				.style("display", "block")
-				.style("opacity", 0.0)
-				.transition("appear")
-				.duration(750)
-				.ease(d3.easeQuadOut)
-				.style("opacity", 1.0);
-
-			d3.selectAll("#welcome-dialog")
-				.style("opacity", 1.0)
-				.transition("disappear")
-				.duration(750)
-				.ease(d3.easeQuadOut)
-				.style("opacity", 0.0);
-
-			d3.selectAll("#welcome-dialog")
-				.transition("vanish")
-				.delay(750)
-				.style("display", "none");
+			simplifiedMode = true;
+			showSimplifiedVersion();
 		});
 
-		d3.select("#welcome-dialog .button.button-default").on("click", (event) => {
+		d3.select("#welcome-dialog .button.button-default").on("click", async (event) => {
 			simplifiedMode = false;
+			await rerenderTree(false);
 			showMainViz();
 		});
 
@@ -1543,17 +1779,138 @@
 
 		if(width < height) {
 			//d3.select("#controls-wrapper").style("left", "50%").style("top", `${(height - width) / 2.0 - 20}px`).style("margin-left", "-100px");
+			//d3.select("#controls-wrapper").style("left", "50%").style("top", `${(height - width) / 2.0 - 20}px`).style("margin-left", "-100px");
 			d3.select("#controls-wrapper").style("left", "50%").style("top", `${(height - width) / 2.0 - 20}px`).style("margin-left", "-100px");
 			d3.selectAll(".canvas-wrapper").style("margin-top", `${(height - width) / 2.0}px`)
+			d3.select("#back-button")
+				.style("display", "block")
+				.style("left" `20px`)
+				.style("top" `${(height - width) / 2.0}px`);
+			d3.select("#help-button")
+				.style("display", "block")
+				.style("right" `20px`)
+				.style("top" `${(height - width) / 2.0}px`);
 		} else {
 			//d3.select("#controls-wrapper").style("left", `${(width - height) / 2.0 - 220}px`).style("top", `35%`);
-			d3.select("#controls-wrapper").style("left", `${(width - height) / 2.0 - 220}px`).style("top", `100px`);
+			//d3.select("#controls-wrapper").style("left", `${(width - height) / 2.0 - 220}px`).style("top", `100px`);
+			d3.select("#controls-wrapper")
+				.style("left", `${(width - height) / 2.0 - 220}px`)
+				.style("top", `50%`)
+				.style("height", "366px")
+				.style("margin-top", `-${366 / 2}px`);
+			d3.select("#back-button")
+				.style("display", "block")
+				.style("left", `${(width - height) / 2.0 + 20}px`)
+				.style("top", "20px");
+			d3.select("#help-button")
+				.style("display", "block")
+				.style("right", `${(width - height) / 2.0 + 20}px`)
+				.style("top", "20px");
 		}
 		d3.select("#controls-wrapper").style("display", "block");
+
 		d3.selectAll(".canvas-wrapper").style("width", `${canvasWidth}px`).style("height", `${canvasHeight}px`)
+
+		d3.select("#back-button").on("click", (event) => {
+			showSimplifiedVersion();
+		});
+		d3.select("#help-button").on("click", (event) => {
+			startIntroTour();
+		});
 
 		
 		d3.select("#hover-tooltip").style("width", `${tooltipWidth}px`).style("height", "auto")
+
+		//
+		// data preprocessing
+		//
+
+		const parseMetaData = (responseMetaData, metaDataHeader) => {
+			
+			responseMetaData.forEach((metaInfo) => {
+				switch(metaInfo[0]) {
+					case "welcomeMessageTitle":
+					d3.select("#welcome-dialog h3").html(metaInfo[1]);
+					break;
+					case "welcomeMessageBody":
+					d3.select("#welcome-dialog span").html(metaInfo[1]);
+					break;
+					case "tabViewTitle":
+					d3.select("#tab-view-title").html(metaInfo[1]);
+					break;
+				}
+			})
+		};
+
+		const parseIntroData = (responseIntroData) => {
+			const introHeader = responseIntroData[0];
+			introData = responseIntroData.slice(1).map((row) => {
+				const step = {};
+				step[introHeader[0]] = row[0];
+				step[introHeader[1]] = row[1];
+				step[introHeader[2]] = row[2];
+				return step;
+			});
+		}
+
+		const parseNCSAndLHWData = (responseData, header) => {
+			rawData = [];
+			const themesAdded = [];
+			let theme = "";
+			let subThemesAdded = [];
+			responseData.forEach((row) => {
+
+				// new theme
+				if(row[0] !== undefined && row[0] !== "" && !themesAdded.includes(row[0])) {
+					theme = row[0];
+					rawData.push({
+						"text": theme,
+						"parent": "ROOT",
+						"themeDescLong": row[1],
+						"themeDescShort": row[2],
+					});
+					themesAdded.push(theme);
+					subThemesAdded = [];
+				}
+
+				// new subtheme
+				if(row[3] !== undefined && row[3] !== "" && !subThemesAdded.includes(row[3])) {
+					let subTheme = row[3];
+					rawData.push({
+						"text": subTheme,
+						"parent": theme,
+						"[INFO_MAIN]description": row[4]
+					});
+					subThemesAdded.push(subTheme);
+				}
+
+				const d = {
+					"text": row[5],
+					"parent": row[3],
+				};
+				header.slice(5).forEach((column, i) => {
+					d[column] = row[i + 5]
+				});
+				rawData.push(d);
+			});
+
+			console.log(rawData);
+
+			return rawData;
+		};
+
+		const parseDefaultData = (responseData, header) => {
+			const rawData = responseData.map((row) => {
+				const d = {};
+				header.forEach((column, i) => {
+					d[column] = row[i]
+				});
+				return d;
+			});
+
+			return rawData;
+		};
+
 
 		// initialize request
 
@@ -1567,12 +1924,12 @@
 				if(xhr.status === 200) {
 					const response = JSON.parse(xhr.responseText);
 					header = response.mainData[0];
-					const presets = header.filter((column) => column.includes("[PRESET]")).map((column) => column.replace("[PRESET]", ""));
+					presets = header.filter((column) => column.includes("[PRESET]")).map((column) => column.replace("[PRESET]", ""));
 					rawData = parseNCSAndLHWData(response.mainData.slice(1), header);
 					parseMetaData(response.metaData.slice(1), response.metaData[0]);
-					data = parseSheetData(rawData, presets);
-					createTabsView();
-					createCollapsableRadialTree();
+					parseIntroData(response.introData);
+
+					rebuildTree();
 					initializePresetsDropdown(presets);
 
 					d3.select("#search").node().value = "";
@@ -1585,7 +1942,11 @@
 						highlightSearchTerm(d, searchTerm);
 						});*/
 						} else highlightSearchTerm("##-##");
-						});
+					});
+
+
+					showWelcomeDialog();
+					hideLoader();
 
 				} else {
 
@@ -1598,6 +1959,10 @@
 			console.warn(err);
 		}
 
+		//
+		//
+		//
+
 	});
 
 	// skip welcome dialog
@@ -1605,13 +1970,17 @@
 </script>
 
 <main>
+
+	<!-- draft notice -->
 	<div id="draft-notice" style="background: #ffffff;display:block;position: absolute;left:10px;bottom:10px;width: 300px;font-size: 80%;border: 1px solid #f0f0f0;padding:10px;text-align: left;z-index: 99;">
 		<span><b>Draft visualisation</b> - not for publication or sharing. The information in this visualisation draft is being collaboratively developed and will be launched in Autumn 2023. Information included in the visualisation may contain errors.</span>
 	</div>
 
-	<div id="welcome-dialog" style="display:none;position: absolute;left:50%;top:50%;width: 800px;min-height: 300px;margin-left:-400px;margin-top:-200px;border: 1px solid #f0f0f0;padding:20px;text-align: left;z-index: 99;">
+	<!-- welcome dialog -->
+
+	<div id="welcome-dialog" style="display:none;position: absolute;left:50%;top:50%;width: 800px;min-height: 300px;margin-left:-400px;margin-top:-200px;border: 1px solid #f0f0f0;padding:20px;text-align: left;z-index: 99; opacity: 1.0;">
 		<center>
-			<h3></h3><br/>
+			<h3>Welcome!</h3><br/>
 		</center>
 		<span></span>
 		<br/><br/><br/>
@@ -1619,7 +1988,10 @@
 			<button class="button button-simplified" style="margin-right:10px">Simplified version</button>
 			<button class="button button-default">Default version</button>
 		</div>
+
 	</div>
+
+	<!-- min-width dialog  -->
 
 	<div id="min-width-dialog" style="display:none;position: absolute;left:50%;top:50%;width: 500px;min-height: 200px;margin-left:-250px;margin-top:-200px;border: 1px solid #f0f0f0;padding:20px;text-align: left;z-index: 99;background:#ffffff">
 		<center>
@@ -1631,12 +2003,13 @@
 		</div>
 	</div>
 
-	<div id="main-viz-wrapper" style="opacity: 0.0;">
-		<div id="loader" style="position: absolute; left: 50%; top: 50%; width: 400px; height: 300px; margin: -150px 0 0 -200px;text-align: center">
-			<span>Welcome!<br/>Now loading data from Google Sheet API...</span>
-			<img src="/loading_bars.svg" alt="loading-bars"/>
+	<div id="main-viz-wrapper" style="opacity: 0.0;display: none;">
+
+		<div class="canvas-wrapper" >
+			<svg id="d3-canvas" opacity="0.0"/>
 		</div>
 
+		<!-- tooltip -->
 
 		<div id="tooltip-wrapper">
 			<div id="hover-tooltip" class="tooltip" style="display:none;z-index:99">
@@ -1661,6 +2034,8 @@
 				<center><div class="tooltip-bottom-note">Click on the leaf to stick.</div></center>
 			</div>
 		</div>
+
+		<!-- controls -->
 
 		<div id="controls-wrapper" style="display:none;">
 			<center>
@@ -1704,12 +2079,20 @@
 			</center>
 		</div>
 
-		<div class="canvas-wrapper">
-			<svg id="d3-canvas" opacity="0.0"/>
+		<!-- additional controls -->
+
+		<div id="back-button" style="display: none;position: absolute;color:#808080;font-size:80%;cursor:pointer;">
+			&lt; back to simplified version
 		</div>
+		<div id="help-button" style="display: none;position: absolute;color:#808080;font-size:400%;font-weight: bold;cursor:pointer;">
+			?
+		</div>
+
 	</div>
 
-	<div id="tabs-wrapper" style="display: none;opacity: 0.0;position: absolute;left:0;top:0">
+	<!-- simplified / tab view -->
+
+	<div id="tabs-wrapper" style="opacity: 0.0;display: none; position: absolute;left:0;top:0">
 		<div class="tab-view-header">
 			<img src="/center_logo.png" alt="Logo"/>
 			<span id="tab-view-title">Welcome</span>
@@ -1721,6 +2104,14 @@
 			<button class="button button-default" style="display:none">Go to visualization</button>
 		</center>
 	</div>
+
+	<!-- loader -->
+
+	<div id="loader" style="position: absolute; left: 50%; top: 50%; width: 400px; height: 300px; margin: -150px 0 0 -200px;text-align: center">
+		<img src="/loading_bars.svg" alt="loading-bars"/>
+	</div>
+
+
 </main>
 
 <style>

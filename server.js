@@ -90,20 +90,31 @@ const protocol = process.env.USE_HTTPS === "TRUE" ? https : http;
 app.post('/fetch_c3tree_data_from_google_sheet', (req, res) => {
 
   if(process.env.OFFLINE_MODE === 'TRUE') { // TODO: change to csv
-    const data = JSON.parse(fs.readFileSync('../data/c3Tree-demoData - collapsableRadialTreeData.json', 'utf8'));
+    //const data = JSON.parse(fs.readFileSync('../data/c3Tree-demoData - collapsableRadialTreeData.json', 'utf8'));
+    const mainDataJSON = JSON.parse(fs.readFileSync('./data/c3Tree-datasheet - NCS & LHW Projects.json', 'utf8'));
+    const metaDataJSON = JSON.parse(fs.readFileSync('./data/c3Tree-datasheet - MetaData.json', 'utf8'));
+
+    const mainData = [];
+    const metaData = [];
+
+    mainData.push(Object.keys(mainDataJSON[0]));
+    metaData.push(Object.keys(metaDataJSON[0]));
+
+    mainDataJSON.slice(1).forEach((d) => mainData.push(Object.entries(d).map((entry) => entry[1])));
+    metaDataJSON.slice(1).forEach((d) => metaData.push(Object.entries(d).map((entry) => entry[1])));
+
     res.json({ 
-      message: `Success! # rows: ${data.length}`, 
-      data: data,
-    })
+      message: `Success! # mainDataSheet: ${mainData.length}`, 
+      mainData: mainData,
+      metaData: metaData,
+    });
   } else {
     authorize()
       .then((auth) => {
         const sheets = google.sheets({version: 'v4', auth});
 
         const mainDataSheet = sheets.spreadsheets.values.get({
-          //spreadsheetId: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms',
           spreadsheetId: '11tCraeH710zGQ0-OhJ-8wwcrZRbRRvSWrHO-llYueuM',
-          //range: 'collapsableRadialTreeData',
           range: 'NCS & LHW Projects',
         });
 
@@ -112,7 +123,22 @@ app.post('/fetch_c3tree_data_from_google_sheet', (req, res) => {
           range: 'MetaData',
         });
 
-        Promise.all([mainDataSheet, metaDataSheet]).then(([mainDataSheet, metaDataSheet]) => {
+        const introDataSheet = sheets.spreadsheets.values.get({
+          spreadsheetId: '11tCraeH710zGQ0-OhJ-8wwcrZRbRRvSWrHO-llYueuM',
+          range: 'Intro',
+        });
+
+        const teamDataSheet = sheets.spreadsheets.values.get({
+          spreadsheetId: '11tCraeH710zGQ0-OhJ-8wwcrZRbRRvSWrHO-llYueuM',
+          range: 'Team',
+        });
+
+        Promise.all([mainDataSheet, metaDataSheet, introDataSheet, teamDataSheet]).then(([
+            mainDataSheet, 
+            metaDataSheet,
+            introDataSheet,
+            teamDataSheet
+          ]) => {
           const mainDataRows = mainDataSheet.data.values;
           if (!mainDataRows || mainDataRows.length === 0) {
             res.json({ 
@@ -124,7 +150,9 @@ app.post('/fetch_c3tree_data_from_google_sheet', (req, res) => {
           res.json({ 
             message: `Success! # mainDataSheet: ${mainDataRows.length}`, 
             mainData: mainDataRows,
-            metaData: metaDataSheet.data.values
+            metaData: metaDataSheet.data.values,
+            introData: introDataSheet.data.values,
+            teamData: teamDataSheet.data.values
           })
         }).catch((err) => {
           console.warn(err);
