@@ -32,6 +32,7 @@
     "googleapis": "105",
     "intro.js": "^7.0.1",
     "sirv-cli": "^2.0.0",
+    "svelte-hamburgers": "^4.1.1",
     "svelte-tour": "^1.0.7"
   }
 }

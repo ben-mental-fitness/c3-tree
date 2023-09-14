@@ -6,6 +6,14 @@
 	import introJs from 'intro.js';
 	import 'intro.js/minified/introjs.min.css';
 
+	// menu
+	import { Hamburger } from 'svelte-hamburgers';
+
+    import Menu from './Menu.svelte';
+
+    let open;
+	// menu
+
 	const introTourSteps = [{
 			element: '#main-viz-wrapper',
 			intro: ''
@@ -211,9 +219,9 @@
 		const isPortraitView = window.innerWidth < window.innerHeight;
 
 		if(isMobile) {
-			d3.select("#min-width-dialog .please-desktop").style("display", null);
-			d3.select("#min-width-dialog .please-maximize").style("display", "none");
-			d3.select("#min-width-dialog").style("display", "block");
+			//d3.select("#min-width-dialog .please-desktop").style("display", null);
+			//d3.select("#min-width-dialog .please-maximize").style("display", "none");
+			//d3.select("#min-width-dialog").style("display", "block");
 		} else if(isPortraitView) {
 			d3.select("#min-width-dialog .please-maximize").style("display", null);
 			d3.select("#min-width-dialog .please-desktop").style("display", "none");
@@ -513,7 +521,7 @@
 
 		// center image
 		const brainAspectRatio = 0.822;
-		const brainSize = 0.65;
+		const brainSize = 0.5;
 		d3.select("#d3-canvas")
 			.append("image")
 			.attr("id", "center-image")
@@ -525,7 +533,7 @@
 			.style("cursor", "pointer")
 			.attr("transform", `translate(
 				${width / 2.0 - radius * brainSize / 2.0},
-				${height / 2.0 - radius * brainSize / 2.0 * brainAspectRatio - 8})`)
+				${height / 2.0 - radius * brainSize / 2.0 * brainAspectRatio})`)
 			.on("click", (event) => {
 				simplifiedMode = !simplifiedMode;
 				rerenderTree();
@@ -1115,10 +1123,17 @@
 		node.filter((d) => d.depth !== 0 && d.children).append("circle")
 			.attr("class", "node-interact-area")
 			.attr("fill", "transparent")
-			.attr("opacity", 0.0)
+			.attr("opacity", 1.0)
 			.attr("r", 8)
 			.style("pointer-events", "all")
 			.style("cursor", "pointer")
+			.attr("transform", "translate(4,0)")
+			.on("mouseover", function(event, d) {
+				d3.select(this).attr("stroke-width", "2").attr("stroke", "#d0d0d0");
+			})
+			.on("mouseleave", function(event, d) {
+				d3.select(this).attr("stroke-width", "0").attr("stroke", "transparent");
+			})
 			.on("click", (event, d) => nodeOnClick(d));
 
 		if(d3.select("#viz-select").node().value === "0") {
@@ -1232,6 +1247,8 @@
 
 	const createTabsView = (data) => {
 
+		const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
 		const pageDim = d3.select("body").node().getBoundingClientRect();
 		const marginTop = 30;
 		const marginBottom = 250;
@@ -1243,8 +1260,8 @@
 
 		d3.select("#tabs-wrapper")
 			.style("margin", `${marginTop}px 0 ${marginBottom}px 0`)
-			.style("width", `${tabWidth + contentWidth + 3}px`)
-			.style("left", `calc(50% - ${(tabWidth + contentWidth) / 2.0}px)`)
+			.style("width", isMobile ? "100%" : `${tabWidth + contentWidth + 3}px`)
+			.style("left", isMobile ? "0" : `calc(50% - ${(tabWidth + contentWidth) / 2.0}px)`)
 			/*.style("display", "flex")
 			.style("flex-direction", "column")
 			.style("align-items", "center")
@@ -1273,20 +1290,38 @@
 			.style("margin", "6px")
 			.text((d) => d.text);
 
-		const contents = d3.select("#tabs-wrapper .content-right")
-			.style("float", "left")
-			.style("border-top", "1px solid #d0d0d0")
-			.style("border-right", "1px solid #d0d0d0")
-			.style("border-bottom", "1px solid #d0d0d0")
-			.style("height", `${contentHeight}px`)
-			.style("width", `${contentWidth}px`)
-			.style("overflow-y", "scroll")
-			.selectAll(".content")
-			.data(data.children)
-			.join("div")
-			.attr("class", "content")
-			.attr("id", (d) => `${d.id}-content`)
-			.style("display", (d, i) => i > -1 ? "none" : "default")
+		let contents;
+
+		if(isMobile) {
+			contents = d3.select("#tabs-wrapper .mobile-version .content-mobile")
+				.style("border-top", "1px solid #d0d0d0")
+				.style("border-right", "1px solid #d0d0d0")
+				.style("border-bottom", "1px solid #d0d0d0")
+				.style("width", `100%px`)
+				.style("overflow-y", "scroll")
+				.selectAll(".content")
+				.data(data.children)
+				.join("div")
+				.attr("class", "content")
+				.attr("id", (d) => `${d.id}-content`)
+				.style("display", (d, i) => i > -1 ? "none" : "default")
+		}  else {
+
+			contents = d3.select("#tabs-wrapper .desktop-version .content-right")
+				.style("float", "left")
+				.style("border-top", "1px solid #d0d0d0")
+				.style("border-right", "1px solid #d0d0d0")
+				.style("border-bottom", "1px solid #d0d0d0")
+				.style("height", `${contentHeight}px`)
+				.style("width", `${contentWidth}px`)
+				.style("overflow-y", "scroll")
+				.selectAll(".content")
+				.data(data.children)
+				.join("div")
+				.attr("class", "content")
+				.attr("id", (d) => `${d.id}-content`)
+				.style("display", (d, i) => i > -1 ? "none" : "default")
+		}
 
 		contents.append("p")
 			.attr("class", "title")
@@ -1303,7 +1338,7 @@
 			.style("white-space", "pre-wrap")
 			.text((d) => d.props.themeDescLong)
 
-		contents.append("div")
+		/*contents.append("div")
 			.style("width", "320px")
 			.style("height", "240px")
 			.style("margin", "0 auto")
@@ -1312,7 +1347,19 @@
 			.attr("width", "320")
 			.attr("height", "240")
 			.attr("controls", true)
-			.text("Sorry, your browser doesn't support embedded videos.");
+			.text("Sorry, your browser doesn't support embedded videos.");*/
+
+		/*contents.append("div")
+			.style("width", "440px")
+			.style("height", "320px")
+			.style("margin", "0 auto")
+			.append("iframe")
+			.attr("src", "https://www.youtube.com/embed/aS_jYmMV9_g")
+			.attr("width", "440")
+			.attr("height", "320")
+			.attr("frameborder", "0")
+			//.attr("allow", "accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture")
+			.attr("allowfullscreen", true);*/
 
 		const collapsibleContentToggler = contents.append("div")
 			.attr("class", "collapsible-content-toggler")
@@ -1516,10 +1563,10 @@
 			d3.selectAll(".tabs-left .tab")
 				.transition(animation)
 				.style("border-color", "rgb(208, 208, 208) rgb(209, 209, 209) rgb(208, 208, 208) rgb(208, 208, 208)");
-			d3.selectAll(".content-right .content")
+			d3.selectAll(".content-right .content,.content-mobile .content")
 				.transition(animation)
 				.style("opacity", 0.0)
-			d3.selectAll(".content-right .content")
+			d3.selectAll(".content-right .content,.content-mobile .content")
 				.transition("textVanish")
 				.delay(animated ? 750 : 0)
 				.style("display", "none")
@@ -1546,6 +1593,17 @@
 			selectedTab = d;
 			showContentOfSelectedTab(true);
 		});
+
+		
+		d3.select(".hamburger").on("click", (event) => {
+			d3.selectAll(".hamburger-link")
+				.on("click", function(event) {
+					selectedTab = data.children.find((d) => d.text === d3.select(this).attr("data-link"));
+					showContentOfSelectedTab(true);
+					open = false;
+				});
+		})
+		
 
 		showContentOfSelectedTab(false);
 
@@ -1693,6 +1751,12 @@
 		canvasWidth = width;
 		canvasHeight = height;
 
+		if(width < 768) { // mobile version
+			//d3.select("#welcome-dialog .button-default").attr("disabled", "true");
+		} else {
+			//d3.select("#welcome-dialog .button-default").attr("disabled", null);
+		}
+
 		radius = d3.min([canvasWidth - margin.left - margin.right, canvasHeight - margin.top - margin.bottom]) / 2 - 150;
 		outerRadius = radius + 90;
 
@@ -1784,12 +1848,12 @@
 			d3.selectAll(".canvas-wrapper").style("margin-top", `${(height - width) / 2.0}px`)
 			d3.select("#back-button")
 				.style("display", "block")
-				.style("left" `20px`)
-				.style("top" `${(height - width) / 2.0}px`);
+				.style("left", "20px")
+				.style("top", `${(height - width) / 2.0}px`);
 			d3.select("#help-button")
 				.style("display", "block")
-				.style("right" `20px`)
-				.style("top" `${(height - width) / 2.0}px`);
+				.style("right", "20px")
+				.style("top", `${(height - width) / 2.0}px`);
 		} else {
 			//d3.select("#controls-wrapper").style("left", `${(width - height) / 2.0 - 220}px`).style("top", `35%`);
 			//d3.select("#controls-wrapper").style("left", `${(width - height) / 2.0 - 220}px`).style("top", `100px`);
@@ -1915,14 +1979,15 @@
 		// initialize request
 
 		var xhr = new XMLHttpRequest();
+		xhr.open("POST", "https://c3tree.framed-mice.eu/fetch_c3tree_data_from_google_sheet", true);
 		//xhr.open("POST", "/fetch_c3tree_data_from_google_sheet", true);
-		xhr.open("POST", "http://localhost:8001/fetch_c3tree_data_from_google_sheet", true);
 		xhr.send(null);
 		xhr.onload = () => {
 
 			if(xhr.readyState === 4) {
 				if(xhr.status === 200) {
 					const response = JSON.parse(xhr.responseText);
+					console.log(response);
 					header = response.mainData[0];
 					presets = header.filter((column) => column.includes("[PRESET]")).map((column) => column.replace("[PRESET]", ""));
 					rawData = parseNCSAndLHWData(response.mainData.slice(1), header);
@@ -1978,12 +2043,14 @@
 
 	<!-- welcome dialog -->
 
-	<div id="welcome-dialog" style="display:none;position: absolute;left:50%;top:50%;width: 800px;min-height: 300px;margin-left:-400px;margin-top:-200px;border: 1px solid #f0f0f0;padding:20px;text-align: left;z-index: 99; opacity: 1.0;">
+	<div id="welcome-dialog" style="display:none;">
 		<center>
 			<h3>Welcome!</h3><br/>
 		</center>
 		<span></span>
-		<br/><br/><br/>
+		<br/><br/>
+		<span id="mobile-availability-note">Note: The main visualization is currently only available on a desktop PC.</span>
+		<br/>
 		<div class="button-row">
 			<button class="button button-simplified" style="margin-right:10px">Simplified version</button>
 			<button class="button button-default">Default version</button>
@@ -2092,17 +2159,23 @@
 
 	<!-- simplified / tab view -->
 
-	<div id="tabs-wrapper" style="opacity: 0.0;display: none; position: absolute;left:0;top:0">
+	<div id="tabs-wrapper" style="opacity: 0.0;display: none;">
+		<Hamburger bind:open color="white"/>
 		<div class="tab-view-header">
 			<img src="/center_logo.png" alt="Logo"/>
 			<span id="tab-view-title">Welcome</span>
 		</div>
 		<div style="clear:both"></div>
-		<div class="tabs-left"></div>
-		<div class="content-right"></div>
-		<center>
-			<button class="button button-default" style="display:none">Go to visualization</button>
-		</center>
+		<div class="desktop-version">
+			<div class="tabs-left"></div>
+			<div class="content-right"></div>
+			<center>
+				<button class="button button-default" style="display:none">Go to visualization</button>
+			</center>
+		</div>
+		<div class="mobile-version">
+			<div class="content-mobile"></div>
+		</div>
 	</div>
 
 	<!-- loader -->
@@ -2111,9 +2184,110 @@
 		<img src="/loading_bars.svg" alt="loading-bars"/>
 	</div>
 
-
 </main>
 
+<div class="hamburger-wrapper">
+	
+
+	<Menu bind:open />
+</div>
+
+
+
+
+
 <style>
+
+	body {
+		overflow: hidden;
+	}
+
+	#welcome-dialog {
+		position: absolute;
+		left:50%;
+		top:50%;
+		width: 800px;
+		min-height: 300px;
+		margin-left:-400px;
+		margin-top:-200px;
+		border: 1px solid #f0f0f0;
+		padding:20px;
+		text-align: left;
+		z-index: 99;
+		opacity: 1.0;
+	}
+	#welcome-dialog #mobile-availability-note {
+		display: none;
+		font-style: italic;
+	}
+
+	#tabs-wrapper {
+		 position: absolute;
+		 left:0;
+		 top:0;
+	}
+	#tabs-wrapper #tab-view-title {
+		display: initial;
+	}
+	#tabs-wrapper .desktop-version {
+		display: block;
+	}
+	#tabs-wrapper .mobile-version {
+		display: none;
+	}
+	.hamburger-wrapper {
+		display: none;
+		width: 100%;
+	}
+
+	@media screen and (max-width: 768px) {
+		body {
+			overflow-y: scroll;
+		}
+	    #welcome-dialog {
+			position: absolute;
+			left:10px;
+			top:50%;
+			width: calc(100% - 60px);
+			margin-left:0;
+			margin-top:-350px;
+			padding:20px;
+		}
+		#welcome-dialog .button-row {
+			display: block;
+		}
+		#welcome-dialog .button {
+			width: 100%;
+			margin-top: 10px;
+		}
+		#welcome-dialog .button-default {
+			display: none;
+		}
+		#welcome-dialog #mobile-availability-note {
+			display: initial;
+		}
+
+		#tabs-wrapper {
+			position: relative;
+			left:0 !important;
+			top:0;
+		}
+		#tabs-wrapper #tab-view-title {
+			display: none;
+		}
+		#tabs-wrapper .desktop-version {
+			display: none;
+		}
+		#tabs-wrapper .mobile-version {
+			display: block;
+			width: 100%;
+		}
+		.hamburger-wrapper {
+			display: initial;
+			position: fixed;
+			left: 10px;
+			top: 10px;
+		}
+	}
 	
 </style>

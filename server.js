@@ -13,6 +13,7 @@ import { authenticate } from '@google-cloud/local-auth';
 import { google } from 'googleapis';
 
 const GOOGLE_API_TOKEN_JSON_PATH = path.join(process.cwd(), process.env.GOOGLE_API_TOKEN_JSON);
+const GOOGLE_API_CREDENTIALS_SA = path.join(process.cwd(), process.env.GOOGLE_API_TOKEN_JSON);
 
 
 
