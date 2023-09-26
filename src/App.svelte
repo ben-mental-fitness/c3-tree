@@ -1,4 +1,4 @@
-<script>
+<script type="text/javascript">
 	import * as d3 from 'd3';
 
 	import { onMount } from 'svelte';
@@ -58,6 +58,9 @@
 		left: 90,
 	}
 
+	const brainAspectRatio = 0.822;
+	const brainSize = 0.5;
+
 	//
 	//
 	//
@@ -69,6 +72,7 @@
 	};
 
 	let data;
+	let dataSimplified;
 	let introData;
 	let presets;
 	let header;
@@ -76,6 +80,7 @@
 	let visibleTeams = [];
 	let metaData;
 	let root;
+	let rootSimplified;
 	let twist = 0;
 	let selectedNode = undefined;
 
@@ -189,7 +194,7 @@
 
 	const updateLeafTextAppearence = async (d, line, node) => {
 
-		d3.selectAll(".node-text-1st-line")
+		d3.selectAll("#node-group-wrapper .node-text-1st-line")
 			.each(function(d) {
 				let text = d.data.text;
 				d3.select(this).text(text);
@@ -201,12 +206,24 @@
 					d.data.textLength = text.length;
 				}
 			});
-		d3.selectAll(".node-text-2nd-line")
+		d3.selectAll("#node-group-wrapper .node-text-2nd-line")
 			.each(function(d) {
 				let text = d.data.text.substr(d.data.textLength);
 				d3.select(this).text(text);
 				let computedTextLength = d3.select(this).node().getComputedTextLength();
 				while(computedTextLength > 70) {
+					text = `${text.slice(0,-5)}...`;
+					d3.select(this).text(text);
+					computedTextLength = d3.select(this).node().getComputedTextLength();
+				}
+			});
+
+		d3.selectAll("#node-group-simplified-wrapper .node-text-1st-line")
+			.each(function(d) {
+				let text = d.data.text.substr(d.data.textLength);
+				d3.select(this).text(text);
+				let computedTextLength = d3.select(this).node().getComputedTextLength();
+				while(computedTextLength > 150) {
 					text = `${text.slice(0,-5)}...`;
 					d3.select(this).text(text);
 					computedTextLength = d3.select(this).node().getComputedTextLength();
@@ -294,9 +311,21 @@
 		d3.select("#preset-select")
 			.on("change", (event) => {
 				const chosenPreset = event.target.value;
-				root.descendants().forEach((d) => {
-					d.data.visible = !d.data.presets.includes(chosenPreset) && d.depth > 0;
-				})
+				if(chosenPreset === "No preset (all visible)") {
+					root.descendants().forEach((d) => d.data.visible = d.depth > 0);
+				} else {
+					root.descendants().forEach((d) => d.data.visible = false);
+					root.descendants().forEach((d) => {
+						if(d.data.presets.includes(chosenPreset) && d.depth > 0) {
+							d.data.visible = d.depth > 0;
+							let parent = d.parent;
+							while(parent) {
+								parent.data.visible = parent.depth > 0;
+								parent = parent.parent;
+							}
+						}
+					})
+				}
 				rerenderTree();
 			});
 	};
@@ -358,7 +387,7 @@
 
 	const rerenderTree = async (animated = true) => {
 
-		if(!root) return;
+		if(!root || !rootSimplified) return;
 
 		d3.select("#controls-wrapper").style("opacity", simplifiedMode ? "0.0" : "1.0")
 
@@ -367,6 +396,7 @@
 
 		const treeFunction = d3.cluster().size([2 * Math.PI, radius]);
 		treeFunction.separation(separationFunction)(root);
+		treeFunction.separation(separationFunction)(rootSimplified);
 
 		const animation = d3.transition().duration(animated ? 750 : 0).ease(d3.easeQuadOut);
 
@@ -390,6 +420,10 @@
 		d3.select("#curves-wrapper-center")
 			.transition(animation)
 			.attr("opacity",  !simplifiedMode && mode === "viz-select-0" ? 1.0 : 0.0)
+		d3.select("#curves-wrapper-simplified")
+			.transition(animation)
+			.attr("opacity",  simplifiedMode ? 1.0 : 0.0)
+
 		const curvesCenterUpdate = d3.select("#curves-wrapper-center")
 			.selectAll(".center-to-leaf-path")
 			.data(root.links())
@@ -427,8 +461,7 @@
 			.attr("opacity", (d) => d.data.visible ? 1 : 0)
 			.style("pointer-events", (d) => d.data.visible && !simplifiedMode ? "all" : "none")
 
-
-		const nodeGroupUpdate = d3.selectAll(".node-group")
+		d3.selectAll("#node-group-wrapper .node-group")
 			.data(root.descendants())
 			.call((update) => {
 				update.transition(animation)
@@ -453,29 +486,69 @@
 					})
 
 				update.selectAll(".node-text").transition(animation)
-					.attr("opacity", (d) => (d.data.depth > 2 || d.data.depth === d.data.maxDepth)&& (d.data.visible || d.parent?.data.visible) && checkboxesChecked["checkbox-leaf-titles"] && !simplifiedMode ? 1.0 : 0.0)
+					.attr("opacity", (d) => (d.data.depth > 2 || d.data.depth === d.data.maxDepth) && (d.data.visible || d.parent?.data.visible) && checkboxesChecked["checkbox-leaf-titles"] && !simplifiedMode && !d.children ? 1.0 : 0.0)
 
 				update.selectAll(".text-leaf-interact-area")
 					.style("pointer-events", (d) => d.data.visible && !simplifiedMode ? "all" : "none");
 
 			});
-
-		d3.selectAll(".node-circle")
+		d3.selectAll("#node-group-wrapper .node-circle")
 			.transition(animation)
 			.attr("opacity", (d) => mode === "viz-select-0" && !simplifiedMode && (d.data.visible || d.parent?.data.visible || d.parent?.data.id === "r") ? 1.0 : 0.0);
 
+		console.log(d3.selectAll("#node-group-wrapper .node-interact-area"));
+		d3.selectAll("#node-group-wrapper .node-interact-area")
+			.style("pointer-events", !simplifiedMode && d3.select("#viz-select").node().value === "0" ? "all" : "none")
+
+		d3.selectAll("#node-group-simplified-wrapper .node-group-simplified")
+			.data(rootSimplified.descendants())
+			.call((update) => {
+				update.transition(animation)
+					.attr("transform", (d) => `rotate(${d.x * 180 / Math.PI - 90}) 
+					translate(${d.depth === 1 ? 55 : d.y + (d.parent && d.children ? (d.parent.y - d.y) * 0.7 : 0)},0)`)
+
+				update.selectAll(".node-text")
+					.attr("x", (d) => {
+						let angle = d.x + twist;
+						angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
+						return angle < Math.PI ? 12 : -12;
+					})
+					.attr("text-anchor", (d) => {
+						let angle = d.x + twist;
+						angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
+						return angle < Math.PI ? "start" : "end";
+					})
+					.attr("transform", (d) => {
+						let angle = d.x + twist;
+						angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
+						return `rotate(${angle >= Math.PI ? 180 : 0})`;
+					})
+
+				update.selectAll(".node-text").transition(animation)
+					.attr("opacity", (d) => d.data.depth === 2 && checkboxesChecked["checkbox-leaf-titles"] && simplifiedMode && !d.children ? 1.0 : 0.0)
+
+				update.selectAll(".text-leaf-interact-area")
+					.style("pointer-events", (d) => simplifiedMode ? "all" : "none");
+
+			});
+		d3.selectAll("#node-group-simplified-wrapper .node-circle")
+			.transition(animation)
+			.attr("opacity", (d) => simplifiedMode ? 1.0 : 0.0);
+
+
 		d3.select("#category-labels-wrapper")
 			.selectAll(".category-labels")
+			.data(simplifiedMode ? rootSimplified.descendants().filter((d) => d.depth === 1) : root.descendants().filter((d) => d.depth === 1))
 			.transition(animation)
 			.attr("transform", (d, i) => {
-				const angle = simplifiedMode ? i / root.descendants().filter((d) => d.depth === 1).length * Math.PI * 2 : d.x;
+				const angle = d.x;
 				return `rotate(${angle * 180 / Math.PI - 90}) 
-				translate(${radius + (simplifiedMode ? 0 : 200)},0)
+				translate(${radius + 200},0)
 				rotate(${(-angle - twist) * 180 / Math.PI + 90}) `;
 
 			})
 			.attr("text-anchor", (d, i) => {
-				let angle = twist + (simplifiedMode ? i / root.descendants().filter((d) => d.depth === 1).length * Math.PI * 2 : d.x);
+				let angle = twist + d.x;
 				angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
 				return angle < Math.PI ? "start" : "end"
 			})
@@ -491,9 +564,11 @@
 	const createCollapsableRadialTree = (data, separationFunction, radius) => {
 
 		root = d3.hierarchy(data);
+		rootSimplified = d3.hierarchy(dataSimplified);
 
 		const treeFunction = d3.cluster().size([2 * Math.PI, radius]);
 		treeFunction.separation(separationFunction)(root);
+		treeFunction.separation(separationFunction)(rootSimplified);
 
 		d3.select("body")
 			.on("click", (event) => {
@@ -520,8 +595,6 @@
 			.attr("transform", `translate(${canvasWidth / 2.0},${canvasHeight / 2.0})`);
 
 		// center image
-		const brainAspectRatio = 0.822;
-		const brainSize = 0.5;
 		d3.select("#d3-canvas")
 			.append("image")
 			.attr("id", "center-image")
@@ -675,6 +748,20 @@
 			.attr("stroke-width", 1.5)
 			.attr("opacity", (d) => d.source.data.depth > 0 ? 1.0 : 0.0);
 
+		// curves from center to leave (simplified version)
+		svg.append("g")
+			.attr("id", "curves-wrapper-simplified")
+			.attr("fill", "none")
+			.attr("opacity", 0.0)
+			.selectAll(".center-to-leaf-path")
+			.data(rootSimplified.links())
+			.join("path")
+			.attr("class", "center-to-leaf-path")
+			.attr("d", radialTreeLineFunction)
+			.attr("stroke", (d) => d.target.data.color)
+			.attr("stroke-width", 1.5)
+			.attr("opacity", (d) => d.source.data.depth > 0 ? 1.0 : 0.0);
+
 		// curves from leaf to leaf (connected edges)
 		const leaves = root.leaves();
 		svg.append("g")
@@ -743,13 +830,42 @@
 			.attr("font-size", "10px")
 			.style("pointer-events", "none")
 			.each(function(d) { updateLeafTextAppearence(d, 2, this); });
-
 		node.filter((d) => !d.children).append("rect")
 			.attr("class", "text-leaf-interact-area")
 			.attr("fill", "transparent")
 			.attr("opacity", 0.5)
 			.attr("y", -10)
 			.attr("width", 70)
+			.attr("height", 30)
+			.style("cursor", "pointer")
+
+		// texts (leaves etc.)
+		const nodeSimplified = svg.append("g")
+			.attr("id", "node-group-simplified-wrapper")
+			.selectAll(".node-group-simplified")
+			.data(rootSimplified.descendants())
+			.join("g")
+			.attr("class", "node-group-simplified")
+			.attr("transform", (d) => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y + (d.parent && d.children ? (d.parent.y - d.y) * 0.7 : 0)},0)`);
+
+		nodeSimplified.append("text")
+			.attr("class", "node-text node-text-1st-line")
+			.attr("id", (d) => `${d.data.id}-text`)
+			.attr("dy", "0")
+			.attr("paint-order", "stroke")
+			.attr("stroke", "white")
+			.attr("stroke-width", 3)
+			.attr("opacity", (d) => d.data.depth === 2 ? 1.0 : 0.0)
+			.attr("fill", (d) => d.data.color)
+			.attr("font-size", "10px")
+			.style("pointer-events", "none")
+			.each(function(d) { updateLeafTextAppearence(d, 1, this); });
+		nodeSimplified.filter((d) => !d.children).append("rect")
+			.attr("class", "text-leaf-interact-area")
+			.attr("fill", "transparent")
+			.attr("opacity", 0.5)
+			.attr("y", -10)
+			.attr("width", 150)
 			.attr("height", 30)
 			.style("cursor", "pointer")
 
@@ -768,7 +884,7 @@
 						.append("p")
 						.style("white-space", "pre-wrap")
 						.text(d.data.props.themeDescLong);
-				} else if("Members" in d.data.props.info_main) {
+				} else if("Members" in d.data.props.info_main && false) {
 					if(visibleTeams.indexOf(d.data.text) !== -1) {
 						visibleTeams.splice(visibleTeams.indexOf(d.data.text, 1));
 					} else {
@@ -1125,7 +1241,7 @@
 			.attr("fill", "transparent")
 			.attr("opacity", 1.0)
 			.attr("r", 8)
-			.style("pointer-events", "all")
+			.style("pointer-events", !simplifiedMode && d3.select("#viz-select").node().value === "0" ? "all" : "none")
 			.style("cursor", "pointer")
 			.attr("transform", "translate(4,0)")
 			.on("mouseover", function(event, d) {
@@ -1255,8 +1371,12 @@
 		const tabHeight = Math.floor((pageDim.height - marginTop - marginBottom - 2 * data.children.length) / data.children.length);
 		const tabWidth = 250;
 
+		console.log(tabHeight)
+
 		const contentWidth = 750;
 		const contentHeight = tabHeight * data.children.length + 2 * data.children.length - 2;
+
+		console.log(contentHeight);
 
 		d3.select("#tabs-wrapper")
 			.style("margin", `${marginTop}px 0 ${marginBottom}px 0`)
@@ -1349,17 +1469,17 @@
 			.attr("controls", true)
 			.text("Sorry, your browser doesn't support embedded videos.");*/
 
-		/*contents.append("div")
+		contents.append("div")
 			.style("width", "440px")
 			.style("height", "320px")
 			.style("margin", "0 auto")
 			.append("iframe")
-			.attr("src", "https://www.youtube.com/embed/aS_jYmMV9_g")
+			.attr("src", "https://www.youtube.com/embed/aS_jYmMV9_g?origin=https://c3tree.framed-mice.eu")
 			.attr("width", "440")
 			.attr("height", "320")
 			.attr("frameborder", "0")
 			//.attr("allow", "accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture")
-			.attr("allowfullscreen", true);*/
+			.attr("allowfullscreen", true);
 
 		const collapsibleContentToggler = contents.append("div")
 			.attr("class", "collapsible-content-toggler")
@@ -1642,7 +1762,7 @@
 	// Tree bulding
 	//
 
-	const buildHierarchy = ((parentLevel, data, presetsAvailable, presetsParent, depth, maxDepth = 5) => {
+	const buildHierarchy = ((parentLevel, data, presetsAvailable, presetsParent, depth, maxDepth) => {
 		//console.log(data.filter((d) => parentLevel.text !== "" && parentLevel.text !== undefined && d.parent === parentLevel.text))
 		data.filter((d) => parentLevel.text !== "" && parentLevel.text !== undefined && d.text !== undefined && d.text !== "" && d.parent === parentLevel.text).forEach((d) => {
 
@@ -1702,7 +1822,7 @@
 		});
 	});
 
-	const startBuildHierarchy = ((data, presets) => {
+	const startBuildHierarchy = ((data, presets, maxDepth = 15) => {
 
 		const hierarchyRootLevel = {
 			"id": "r",
@@ -1715,7 +1835,7 @@
 			"children": [],
 		};
 
-		buildHierarchy(hierarchyRootLevel, data, presets, [], 1);
+		buildHierarchy(hierarchyRootLevel, data, presets, [], 1, maxDepth);
 
 		return hierarchyRootLevel;
 	});
@@ -1731,6 +1851,8 @@
 
 	const rebuildTree = () => {
 		data = startBuildHierarchy(rawData, presets);
+		dataSimplified = startBuildHierarchy(rawData, presets, 2);
+		console.log(data);
 		createTabsView(data);
 		createCollapsableRadialTree(data, separationFunction, radius);
 		addIntroSteps(introData);
@@ -1742,23 +1864,11 @@
 
 	// init function
 
-	window.addEventListener("load", (event) => {
+	const initialize = () => {
 
 		showLoader();
 
-		width  = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-		height = (window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight);
-		canvasWidth = width;
-		canvasHeight = height;
-
-		if(width < 768) { // mobile version
-			//d3.select("#welcome-dialog .button-default").attr("disabled", "true");
-		} else {
-			//d3.select("#welcome-dialog .button-default").attr("disabled", null);
-		}
-
-		radius = d3.min([canvasWidth - margin.left - margin.right, canvasHeight - margin.top - margin.bottom]) / 2 - 150;
-		outerRadius = radius + 90;
+		
 
 		secondTooltip = d3.select("#checkbox-status-second-tooltip")?.property("checked");
 		mode = d3.select("#viz-select").node().value === "0" ? "viz-select-0" : "viz-select-1";
@@ -1841,39 +1951,9 @@
 			rerenderTree(false);
 		});
 
-		if(width < height) {
-			//d3.select("#controls-wrapper").style("left", "50%").style("top", `${(height - width) / 2.0 - 20}px`).style("margin-left", "-100px");
-			//d3.select("#controls-wrapper").style("left", "50%").style("top", `${(height - width) / 2.0 - 20}px`).style("margin-left", "-100px");
-			d3.select("#controls-wrapper").style("left", "50%").style("top", `${(height - width) / 2.0 - 20}px`).style("margin-left", "-100px");
-			d3.selectAll(".canvas-wrapper").style("margin-top", `${(height - width) / 2.0}px`)
-			d3.select("#back-button")
-				.style("display", "block")
-				.style("left", "20px")
-				.style("top", `${(height - width) / 2.0}px`);
-			d3.select("#help-button")
-				.style("display", "block")
-				.style("right", "20px")
-				.style("top", `${(height - width) / 2.0}px`);
-		} else {
-			//d3.select("#controls-wrapper").style("left", `${(width - height) / 2.0 - 220}px`).style("top", `35%`);
-			//d3.select("#controls-wrapper").style("left", `${(width - height) / 2.0 - 220}px`).style("top", `100px`);
-			d3.select("#controls-wrapper")
-				.style("left", `${(width - height) / 2.0 - 220}px`)
-				.style("top", `50%`)
-				.style("height", "366px")
-				.style("margin-top", `-${366 / 2}px`);
-			d3.select("#back-button")
-				.style("display", "block")
-				.style("left", `${(width - height) / 2.0 + 20}px`)
-				.style("top", "20px");
-			d3.select("#help-button")
-				.style("display", "block")
-				.style("right", `${(width - height) / 2.0 + 20}px`)
-				.style("top", "20px");
-		}
 		d3.select("#controls-wrapper").style("display", "block");
 
-		d3.selectAll(".canvas-wrapper").style("width", `${canvasWidth}px`).style("height", `${canvasHeight}px`)
+		calculateDimensions();		
 
 		d3.select("#back-button").on("click", (event) => {
 			showSimplifiedVersion();
@@ -2028,7 +2108,99 @@
 		//
 		//
 
-	});
+	};
+
+	const calculateDimensions = () => {
+		width  = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+		height = (window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight);
+		canvasWidth = width;
+		canvasHeight = height;
+
+		if(width < 768) { // mobile version
+			//d3.select("#welcome-dialog .button-default").attr("disabled", "true");
+		} else {
+			//d3.select("#welcome-dialog .button-default").attr("disabled", null);
+		}
+
+		radius = d3.min([canvasWidth - margin.left - margin.right, canvasHeight - margin.top - margin.bottom]) / 2 - 150;
+		outerRadius = radius + 90;
+
+		if(width < height) {
+			//d3.select("#controls-wrapper").style("left", "50%").style("top", `${(height - width) / 2.0 - 20}px`).style("margin-left", "-100px");
+			//d3.select("#controls-wrapper").style("left", "50%").style("top", `${(height - width) / 2.0 - 20}px`).style("margin-left", "-100px");
+			d3.select("#controls-wrapper").style("left", "50%").style("top", `${(height - width) / 2.0 - 20}px`).style("margin-left", "-100px");
+			d3.selectAll(".canvas-wrapper").style("margin-top", `${(height - width) / 2.0}px`)
+			d3.select("#back-button")
+				.style("display", "block")
+				.style("left", "20px")
+				.style("top", `${(height - width) / 2.0}px`);
+			d3.select("#help-button")
+				.style("display", "block")
+				.style("right", "20px")
+				.style("top", `${(height - width) / 2.0}px`);
+		} else {
+			//d3.select("#controls-wrapper").style("left", `${(width - height) / 2.0 - 220}px`).style("top", `35%`);
+			//d3.select("#controls-wrapper").style("left", `${(width - height) / 2.0 - 220}px`).style("top", `100px`);
+			d3.select("#controls-wrapper")
+				.style("left", `${(width - height) / 2.0 - 220}px`)
+				.style("top", `50%`)
+				.style("height", "366px")
+				.style("margin-top", `-${366 / 2}px`)
+				.style("margin-left", null);
+			d3.select("#back-button")
+				.style("display", "block")
+				.style("left", `${(width - height) / 2.0 + 20}px`)
+				.style("top", "20px");
+			d3.select("#help-button")
+				.style("display", "block")
+				.style("right", `${(width - height) / 2.0 + 20}px`)
+				.style("top", "20px");
+		}
+
+		d3.selectAll(".canvas-wrapper").style("width", `${canvasWidth}px`).style("height", `${canvasHeight}px`)
+
+		// d3 things
+
+		d3.select("#main-transform")
+			.attr("transform", `translate(${canvasWidth / 2.0},${canvasHeight / 2.0}) rotate(${(twist) * 180 / Math.PI})`);
+
+		d3.select("#d3-canvas")
+			.attr("viewBox", [0, 0, canvasWidth, canvasHeight])
+			.attr("width", canvasWidth)
+			.attr("height", canvasHeight)
+
+		if(canvasWidth < canvasHeight) {
+			const margin = (canvasHeight - canvasWidth) / 2.0;
+			d3.select(".legend-wrapper")
+				.attr("transform", `translate(
+					${canvasWidth - 150},
+					${margin + canvasWidth - 80})`)
+		} else {
+			const margin = (canvasWidth - canvasHeight) / 2.0;
+			d3.select(".legend-wrapper")
+				.attr("transform", `translate(
+					${margin + canvasHeight - 150},
+					${canvasHeight - 80})`)
+		}
+
+		d3.select("#category-labels-wrapper")
+			.selectAll(".category-labels")
+			.each(function(d) {
+				addSVGTextLineBreaks(d3.select(this), canvasWidth / 2 - radius - 80, 0, 1.0)
+			});
+
+		d3.select("#twist-circle").attr("r", outerRadius)
+
+		d3.select("#center-image")
+			.attr("width", radius * brainSize)
+			.attr("height", radius * brainSize * brainAspectRatio)
+			.attr("transform", `translate(
+				${width / 2.0 - radius * brainSize / 2.0},
+				${height / 2.0 - radius * brainSize / 2.0 * brainAspectRatio})`)
+	};
+
+	window.addEventListener("load", (event) => initialize());
+	window.addEventListener("resize", (event) => calculateDimensions());
 
 	// skip welcome dialog
 	//showMainViz();
@@ -2037,7 +2209,7 @@
 <main>
 
 	<!-- draft notice -->
-	<div id="draft-notice" style="background: #ffffff;display:block;position: absolute;left:10px;bottom:10px;width: 300px;font-size: 80%;border: 1px solid #f0f0f0;padding:10px;text-align: left;z-index: 99;">
+	<div id="draft-notice" style="background: #ffffff;display:block;position: fixed;left:10px;bottom:10px;width: 300px;font-size: 80%;border: 1px solid #f0f0f0;padding:10px;text-align: left;z-index: 99;">
 		<span><b>Draft visualisation</b> - not for publication or sharing. The information in this visualisation draft is being collaboratively developed and will be launched in Autumn 2023. Information included in the visualisation may contain errors.</span>
 	</div>
 
