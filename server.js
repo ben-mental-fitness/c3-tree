@@ -9,12 +9,17 @@ import http from 'http';
 import https from 'https';
 import fs from 'fs';
 
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
 import { authenticate } from '@google-cloud/local-auth';
 import { google } from 'googleapis';
 
 const GOOGLE_API_TOKEN_JSON_PATH = path.join(process.cwd(), process.env.GOOGLE_API_TOKEN_JSON);
 const GOOGLE_API_CREDENTIALS_SA = path.join(process.cwd(), process.env.GOOGLE_API_TOKEN_JSON);
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 
 // define necessary Google Sheet API callbacks
@@ -81,7 +86,7 @@ async function authorize() {
 const app = express();
 app.use(cors());
 
-app.use(express.static('public'));
+app.use(express.static('dist'));
 //app.use(express.static('../frontend/static'));
 //app.use(express.static('./node_modules'));
 
@@ -167,7 +172,7 @@ app.post('/fetch_c3tree_data_from_google_sheet', (req, res) => {
 });
 
 app.get('*', (req, res) => {
-   res.sendFile(path.resolve(__dirname, 'public', 'index.html'));
+   res.sendFile(path.resolve(__dirname, 'dist', 'index.html'));
 });
 
 /*app.get("*", (req, res) => {

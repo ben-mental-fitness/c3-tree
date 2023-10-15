@@ -11,7 +11,7 @@
 
     import Menu from './Menu.svelte';
 
-    let open;
+    let menuOpen;
 	// menu
 
 	const introTourSteps = [{
@@ -1720,7 +1720,7 @@
 				.on("click", function(event) {
 					selectedTab = data.children.find((d) => d.text === d3.select(this).attr("data-link"));
 					showContentOfSelectedTab(true);
-					open = false;
+					menuOpen = false;
 				});
 		})
 		
@@ -2332,7 +2332,7 @@
 	<!-- simplified / tab view -->
 
 	<div id="tabs-wrapper" style="opacity: 0.0;display: none;">
-		<Hamburger bind:open color="white"/>
+		<Hamburger bind:open={menuOpen} color="white"/>
 		<div class="tab-view-header">
 			<img src="/center_logo.png" alt="Logo"/>
 			<span id="tab-view-title">Welcome</span>
@@ -2361,7 +2361,7 @@
 <div class="hamburger-wrapper">
 	
 
-	<Menu bind:open />
+	<Menu bind:open={menuOpen} />
 </div>
 
 
