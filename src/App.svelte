@@ -3,54 +3,47 @@
 
 	import { onMount } from 'svelte';
 
-	import introJs from 'intro.js';
-	import 'intro.js/minified/introjs.min.css';
-
 	// menu
 	import { Hamburger } from 'svelte-hamburgers';
 
-    import Menu from './Menu.svelte';
+    import Menu from './components/Menu.svelte';
+    import Loader from './components/Loader.svelte';
+    import WelcomeDialog from './components/WelcomeDialog.svelte';
+    import DraftNotice from './components/DraftNotice.svelte';
+    import IntroTour from './components/IntroTour.svelte';
+    import Controls from './components/Controls.svelte';
+    import MinWidthDialog from './components/MinWidthDialog.svelte';
+
+    import { updateLeafTextAppearence } from './helper/updateLeafTextAppearence';
+    import { addSVGTextLineBreaks } from './helper/addSVGTextLineBreaks';
+    import { getParentWithDepth } from './helper/getParentWithDepth';
+    import { setTreeVisibility } from './helper/setTreeVisibility';
+    import { radialTreeLineFunction, connectedEdgesLineFunction, separationFunction } from './helper/d3Functions';
+    
+    // child component states
 
     let menuOpen;
-	// menu
 
-	const introTourSteps = [{
-			element: '#main-viz-wrapper',
-			intro: ''
-		},
-		{
-			element: '#main-transform',
-			intro: 'This is the main visualization. Research themes are displayed with their papers in a hierarchy.'
-		},
-		{
-			element: '#main-transform .text-leaf-interact-area',
-			intro: 'Each leaf represents a research paper. These can be clicked to gain additional information.'
-		},
-		{
-			element: '#main-transform .node-group',
-			intro: 'Each node is connected according to their relation - a theme may have subthemes or papers, a subtheme has papers. These can be clicked to toggle their visibility.'
-		},
-		{
-			element: '#controls-wrapper',
-			intro: 'Here are some additional settings for the visualization.'
-		},
-	]
+    let loaderVisible;
 
-	const startIntroTour = () => {
-		introJs().start();
+    let welcomeDialogVisible;
 
-		document.querySelector("#main-viz-wrapper").appendChild(document.querySelector(".introjs-overlay"));
-		document.querySelector("#main-viz-wrapper").appendChild(document.querySelector(".introjs-helperLayer"));
-		document.querySelector("#main-viz-wrapper").appendChild(document.querySelector(".introjs-tooltipReferenceLayer"));
-	};
+	let introTourStartTrigger;
+	let introData;
+
+	let controlsVisible;
+	let presets;
+
+	let checkShowDisplayCompatabilityTrigger;
+
 
 	//
 	// config
 	//
 
 	const colors = ["#8C88BA", "#BF84AE", "#DB95AC", "#FBB9A6", "#F6A294", "#B0DBEA", "#B3E5BE", "#CFC69D"];
-	const animDurationIn = 750;
-	const animDurationOut = 400;
+	let animDurationIn = 750;
+	let animDurationOut = 400;
 	const margin = {
 		top: 90,
 		right: 90,
@@ -73,8 +66,7 @@
 
 	let data;
 	let dataSimplified;
-	let introData;
-	let presets;
+	
 	let header;
 	let rawData;
 	let visibleTeams = [];
@@ -97,34 +89,11 @@
 	// show / hide parts
 	//
 
-	const showWelcomeDialog = () => {
-		d3.select("#welcome-dialog")
-			.style("opacity", 0.0)
-			.style("display", "block");
-		d3.selectAll("#welcome-dialog")
-			.transition("opacity")
-			.duration(animDurationOut)
-			.ease(d3.easeQuadOut)
-			.style("opacity", 1.0);
-	}
-
-	const hideWelcomeDialog = () => {
-		d3.selectAll("#welcome-dialog")
-			.transition("opacity")
-			.duration(animDurationOut)
-			.ease(d3.easeQuadOut)
-			.style("opacity", 0.0);
-		d3.selectAll("#welcome-dialog")
-			.transition("display")
-			.delay(animDurationOut)
-			.style("display", "none");
-	};
-
 	const showMainViz = () => {
 
-		showLoader();
-		hideWelcomeDialog();
-		checkShowDisplayCompatability();
+		loaderVisible = true;
+		welcomeDialogVisible = false;
+		checkShowDisplayCompatabilityTrigger = true;
 
 		d3.select("#tabs-wrapper")
 			.transition("opacity")
@@ -140,7 +109,7 @@
 			updateLeafTextAppearence();
 
 			setTimeout(() => {
-				hideLoader();
+				loaderVisible = false;
 				d3.select("#main-viz-wrapper")
 					.transition("opacity")
 					.duration(animDurationIn)
@@ -158,8 +127,8 @@
 
 	const showSimplifiedVersion = () => {
 
-		hideWelcomeDialog();
-		checkShowDisplayCompatability();
+		welcomeDialogVisible = false;
+		checkShowDisplayCompatabilityTrigger = true;
 
 		d3.select("#main-viz-wrapper")
 			.style("display", "none")
@@ -180,196 +149,6 @@
 			
 	};
 
-	//
-	// utils
-	//
-
-	const showLoader = () => {
-		d3.select("#loader").style("display", "block");
-	}
-
-	const hideLoader = () => {
-		d3.select("#loader").style("display", "none");
-	}
-
-	const updateLeafTextAppearence = async (d, line, node) => {
-
-		d3.selectAll("#node-group-wrapper .node-text-1st-line")
-			.each(function(d) {
-				let text = d.data.text;
-				d3.select(this).text(text);
-				let computedTextLength = d3.select(this).node().getComputedTextLength();
-				while(computedTextLength > 70) {
-					text = `${text.slice(0,-5)}`;
-					d3.select(this).text(text);
-					computedTextLength = d3.select(this).node().getComputedTextLength();
-					d.data.textLength = text.length;
-				}
-			});
-		d3.selectAll("#node-group-wrapper .node-text-2nd-line")
-			.each(function(d) {
-				let text = d.data.text.substr(d.data.textLength);
-				d3.select(this).text(text);
-				let computedTextLength = d3.select(this).node().getComputedTextLength();
-				while(computedTextLength > 70) {
-					text = `${text.slice(0,-5)}...`;
-					d3.select(this).text(text);
-					computedTextLength = d3.select(this).node().getComputedTextLength();
-				}
-			});
-
-		d3.selectAll("#node-group-simplified-wrapper .node-text-1st-line")
-			.each(function(d) {
-				let text = d.data.text.substr(d.data.textLength);
-				d3.select(this).text(text);
-				let computedTextLength = d3.select(this).node().getComputedTextLength();
-				while(computedTextLength > 150) {
-					text = `${text.slice(0,-5)}...`;
-					d3.select(this).text(text);
-					computedTextLength = d3.select(this).node().getComputedTextLength();
-				}
-			});
-	}
-
-	const checkShowDisplayCompatability = () => {
-		const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-		const isPortraitView = window.innerWidth < window.innerHeight;
-
-		if(isMobile) {
-			//d3.select("#min-width-dialog .please-desktop").style("display", null);
-			//d3.select("#min-width-dialog .please-maximize").style("display", "none");
-			//d3.select("#min-width-dialog").style("display", "block");
-		} else if(isPortraitView) {
-			d3.select("#min-width-dialog .please-maximize").style("display", null);
-			d3.select("#min-width-dialog .please-desktop").style("display", "none");
-			d3.select("#min-width-dialog").style("display", "block");
-		}
-	}
-
-	const getParentWithDepth = (d, depth) => {
-		let parent = d.parent;
-		while(parent && parent.depth > depth)
-			parent = parent.parent;
-		return depth === parent?.depth ? parent : null;
-	};
-
-	const setTreeVisibility = (d, visible) => {
-		d.visible = visible;
-		if(d.children?.length > 0) 
-			d.children.map((child) => setTreeVisibility(child, visible));
-	};
-
-	const addSVGTextLineBreaks = (text, maxWidth, dy, lineHeight) => {
-		const y = text.attr("y");
-		const words = text.text().split(/\s+/).reverse();
-
-		let word;
-		let line = [];
-		let tspan = text
-			.text(null)
-			.append("tspan")
-			.attr("x", 0)
-			.attr("y", y)
-			.attr("dy", `${dy}em`)
-			.attr("data-initial-dy", dy);
-		let lineCount = 1;
-
-		while ((word = words.pop())) {
-			line.push(word);
-			tspan.text(line.join(" "));
-			if (line.length > 1 && tspan.node() && tspan.node().getComputedTextLength() > maxWidth) {
-				line.pop();
-				tspan.text(line.join(" "));
-				line = [word];
-				tspan = text
-					.append("tspan")
-					.attr("x", 0)
-					.attr("y", y)
-					.attr("dy", `${lineHeight}em`)
-					.attr("data-initial-dy", lineHeight)
-					.text(word);
-				lineCount += 1;
-			}
-		}
-
-		return lineCount;
-	};
-
-	//
-	// presets dropdown
-	//
-
-	const initializePresetsDropdown = (presets) => {
-		d3.select("#preset-select")
-			.style("display", "block")
-			.selectAll("option")
-			.data(["No preset (all visible)", ...presets])
-			.join("option")
-			.attr("value", (d) => d)
-			.text((d) => d);
-
-		d3.select("#preset-select")
-			.on("change", (event) => {
-				const chosenPreset = event.target.value;
-				if(chosenPreset === "No preset (all visible)") {
-					root.descendants().forEach((d) => d.data.visible = d.depth > 0);
-				} else {
-					root.descendants().forEach((d) => d.data.visible = false);
-					root.descendants().forEach((d) => {
-						if(d.data.presets.includes(chosenPreset) && d.depth > 0) {
-							d.data.visible = d.depth > 0;
-							let parent = d.parent;
-							while(parent) {
-								parent.data.visible = parent.depth > 0;
-								parent = parent.parent;
-							}
-						}
-					})
-				}
-				rerenderTree();
-			});
-	};
-
-	//
-	// math function definitions
-	//
-
-	const radialTreeLineFunction = d3.linkRadial()
-		.source((d) => {
-			const x = d.source.x;
-			const y = d.source.y + (d.source.parent ? (d.source.parent.y - d.source.y) * 0.7 : 0);
-			if(d.source.depth === 1)
-				return { x: x, y: y / Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)) * 60 }
-			else
-				return { x: x, y: y }
-		})
-		.target((d) => ({
-			x: d.target.x,
-			y: d.target.y + (d.target.parent && d.target.children ? (d.target.parent.y - d.target.y) * 0.7 : 0),
-		}))
-		.angle((d) => d.x)
-		.radius((d) => d.y);
-
-	const connectedEdgesLineFunction = d3.lineRadial()
-		.curve(d3.curveBundle.beta(0.9))
-		.radius((d) => d.y)
-		.angle((d) => d.x);
-
-	const separationFunction = (a, b) => {
-		if((a.parent && !a.parent.data.visible) && (b.parent && !b.parent.data.visible))
-			return 0.05;
-		else if(!a.data.visible && !b.data.visible) 
-			return a.parent?.parent === b.parent?.parent ? 0.2 : 2;
-		else if(!a.data.visible || !b.data.visible)
-			return a.parent?.parent === b.parent?.parent ? 0.5 : 1;
-		else
-			return a.parent == b.parent ? 2 : 3;
-	};
-
-
-
-	
-
 	const nodeOnClick = (d) => {
 		if("Members" in d.data.props.info_main) {
 			if(visibleTeams.indexOf(d.data.text) !== -1) {
@@ -389,7 +168,7 @@
 
 		if(!root || !rootSimplified) return;
 
-		d3.select("#controls-wrapper").style("opacity", simplifiedMode ? "0.0" : "1.0")
+		controlsVisible = !simplifiedMode;
 
 		twist = twist > Math.PI * 2.0 ? twist - Math.PI * 2.0 : twist;
 		twist = twist < 0 ? twist + Math.PI * 2.0 : twist;
@@ -1840,14 +1619,7 @@
 		return hierarchyRootLevel;
 	});
 
-	const addIntroSteps = (introData) => {
-		console.log(introData);
-		introData.forEach((step) => {
-			d3.select(`${step["CSS selector"]}`)
-				.attr("data-step", step["stepNum"])
-				.attr("data-intro", step["text"]);
-		});
-	}
+	
 
 	const rebuildTree = () => {
 		data = startBuildHierarchy(rawData, presets);
@@ -1855,7 +1627,6 @@
 		console.log(data);
 		createTabsView(data);
 		createCollapsableRadialTree(data, separationFunction, radius);
-		addIntroSteps(introData);
 	}
 
 	//
@@ -1866,9 +1637,7 @@
 
 	const initialize = () => {
 
-		showLoader();
-
-		
+		loaderVisible = true;
 
 		secondTooltip = d3.select("#checkbox-status-second-tooltip")?.property("checked");
 		mode = d3.select("#viz-select").node().value === "0" ? "viz-select-0" : "viz-select-1";
@@ -1927,16 +1696,7 @@
 			simplifiedMode = false;
 			await rerenderTree(false);
 			showMainViz();
-		});
-
-		d3.select("#min-width-dialog .button").on("click", (event) => {
-			d3.select("#min-width-dialog")
-				.style("opacity", 1.0)
-				.transition("disappear")
-				.duration(750)
-				.ease(d3.easeQuadOut)
-				.style("opacity", 0.0);
-		});
+		});		
 
 		d3.select("#viz-select").on("change", (event) => {
 			if(event.target.value === "0") {
@@ -1951,18 +1711,11 @@
 			rerenderTree(false);
 		});
 
-		d3.select("#controls-wrapper").style("display", "block");
-
 		calculateDimensions();		
 
-		d3.select("#back-button").on("click", (event) => {
-			showSimplifiedVersion();
-		});
-		d3.select("#help-button").on("click", (event) => {
-			startIntroTour();
-		});
+		d3.select("#back-button").on("click", (event) => showSimplifiedVersion());
+		d3.select("#help-button").on("click", (event) => introTourStartTrigger = true);
 
-		
 		d3.select("#hover-tooltip").style("width", `${tooltipWidth}px`).style("height", "auto")
 
 		//
@@ -1985,17 +1738,6 @@
 				}
 			})
 		};
-
-		const parseIntroData = (responseIntroData) => {
-			const introHeader = responseIntroData[0];
-			introData = responseIntroData.slice(1).map((row) => {
-				const step = {};
-				step[introHeader[0]] = row[0];
-				step[introHeader[1]] = row[1];
-				step[introHeader[2]] = row[2];
-				return step;
-			});
-		}
 
 		const parseNCSAndLHWData = (responseData, header) => {
 			rawData = [];
@@ -2072,10 +1814,9 @@
 					presets = header.filter((column) => column.includes("[PRESET]")).map((column) => column.replace("[PRESET]", ""));
 					rawData = parseNCSAndLHWData(response.mainData.slice(1), header);
 					parseMetaData(response.metaData.slice(1), response.metaData[0]);
-					parseIntroData(response.introData);
+					introData = response.introData;
 
 					rebuildTree();
-					initializePresetsDropdown(presets);
 
 					d3.select("#search").node().value = "";
 					d3.select("#search").on("keyup", (event) => {
@@ -2090,8 +1831,8 @@
 					});
 
 
-					showWelcomeDialog();
-					hideLoader();
+					welcomeDialogVisible = true;
+					loaderVisible = false;
 
 				} else {
 
@@ -2197,50 +1938,25 @@
 			.attr("transform", `translate(
 				${width / 2.0 - radius * brainSize / 2.0},
 				${height / 2.0 - radius * brainSize / 2.0 * brainAspectRatio})`)
-	};
+	};	
 
-	window.addEventListener("load", (event) => initialize());
-	window.addEventListener("resize", (event) => calculateDimensions());
+	onMount(() => {
+		initialize();
+		window.addEventListener("resize", (event) => calculateDimensions());
+	});
 
 	// skip welcome dialog
 	//showMainViz();
 </script>
 
 <main>
+	
+	<DraftNotice/>
+	<WelcomeDialog bind:visible={welcomeDialogVisible} {animDurationOut} {animDurationIn}/>
+	<IntroTour bind:introTourStartTrigger bind:introData/>
+	<MinWidthDialog bind:checkShowDisplayCompatabilityTrigger/>
 
-	<!-- draft notice -->
-	<div id="draft-notice" style="background: #ffffff;display:block;position: fixed;left:10px;bottom:10px;width: 300px;font-size: 80%;border: 1px solid #f0f0f0;padding:10px;text-align: left;z-index: 99;">
-		<span><b>Draft visualisation</b> - not for publication or sharing. The information in this visualisation draft is being collaboratively developed and will be launched in Autumn 2023. Information included in the visualisation may contain errors.</span>
-	</div>
-
-	<!-- welcome dialog -->
-
-	<div id="welcome-dialog" style="display:none;">
-		<center>
-			<h3>Welcome!</h3><br/>
-		</center>
-		<span></span>
-		<br/><br/>
-		<span id="mobile-availability-note">Note: The main visualization is currently only available on a desktop PC.</span>
-		<br/>
-		<div class="button-row">
-			<button class="button button-simplified" style="margin-right:10px">Simplified version</button>
-			<button class="button button-default">Default version</button>
-		</div>
-
-	</div>
-
-	<!-- min-width dialog  -->
-
-	<div id="min-width-dialog" style="display:none;position: absolute;left:50%;top:50%;width: 500px;min-height: 200px;margin-left:-250px;margin-top:-200px;border: 1px solid #f0f0f0;padding:20px;text-align: left;z-index: 99;background:#ffffff">
-		<center>
-			<h3 class="please-maximize" style="display:none">Please maximaze your browser window for best experience.</h3><br/>
-			<h3 class="please-desktop" style="display:none">This visualization was optimized for desktop use only.</h3><br/>
-		</center>
-		<div class="button-row">
-			<button class="button button-simplified" style="margin-right:10px">Close</button>
-		</div>
-	</div>
+	
 
 	<div id="main-viz-wrapper" style="opacity: 0.0;display: none;">
 
@@ -2275,48 +1991,8 @@
 		</div>
 
 		<!-- controls -->
-
-		<div id="controls-wrapper" style="display:none;">
-			<center>
-				<input id="search" type="text" placeholder="search text..." />
-				<select id="viz-select" style="width:200px">
-					<option value="0">Radial Tree</option>
-					<option value="1">Connected Edges</option>
-				</select>
-				<select id="preset-select" style="display:none;width:200px">
-				</select>
-				<br/><br/>
-				<input style="float:left;display:block" type="checkbox" id="checkbox-image" checked>
-				<span style="float:left;display:block">Show center image</span>
-				<div style="clear: both;"></div>
-				<input style="float:left;display:block" type="checkbox" id="checkbox-leaf-titles" checked>
-				<span style="float:left;display:block">Show leaf titles</span>
-				<div style="clear: both;"></div>
-				<input style="float:left;display:block" type="checkbox" id="checkbox-twist-circle" checked>
-				<span style="float:left;display:block">Large twist circle</span>
-				<div style="clear: both;"></div>
-				<input style="float:left;display:block" type="checkbox" id="checkbox-node-text" checked>
-				<span style="float:left;display:block">Node text second line</span>
-				<div style="clear: both;"></div>
-				<br/>
-				<input style="float:left;display:block" type="checkbox" class="checkbox-status" id="checkbox-status-Published" checked>
-				<span style="float:left;display:block">Status: Published</span>
-				<div style="clear: both;"></div>
-				<input style="float:left;display:block" type="checkbox" class="checkbox-status" id="checkbox-status-Accepted" checked>
-				<span style="float:left;display:block">Status: Accepted</span>
-				<div style="clear: both;"></div>
-				<input style="float:left;display:block" type="checkbox" class="checkbox-status" id="checkbox-status-Submitted" checked>
-				<span style="float:left;display:block">Status: Submitted</span>
-				<div style="clear: both;"></div>
-				<input style="float:left;display:block" type="checkbox" class="checkbox-status" id="checkbox-status-Manuscript" checked>
-				<span style="float:left;display:block">Status: Manuscript</span>
-				<div style="clear: both;"></div>
-				<br/>
-				<input style="float:left;display:block" type="checkbox" id="checkbox-status-second-tooltip" checked>
-				<span style="float:left;display:block">Second tooltip</span>
-				<div style="clear: both;"></div>
-			</center>
-		</div>
+		<Controls bind:visible={controlsVisible} bind:presets/>
+		
 
 		<!-- additional controls -->
 
@@ -2350,18 +2026,12 @@
 		</div>
 	</div>
 
-	<!-- loader -->
-
-	<div id="loader" style="position: absolute; left: 50%; top: 50%; width: 400px; height: 300px; margin: -150px 0 0 -200px;text-align: center">
-		<img src="/loading_bars.svg" alt="loading-bars"/>
-	</div>
+	<Loader bind:visible={loaderVisible}/>
 
 </main>
 
 <div class="hamburger-wrapper">
-	
-
-	<Menu bind:open={menuOpen} />
+	<Menu bind:open={menuOpen}/>
 </div>
 
 
@@ -2372,25 +2042,6 @@
 
 	body {
 		overflow: hidden;
-	}
-
-	#welcome-dialog {
-		position: absolute;
-		left:50%;
-		top:50%;
-		width: 800px;
-		min-height: 300px;
-		margin-left:-400px;
-		margin-top:-200px;
-		border: 1px solid #f0f0f0;
-		padding:20px;
-		text-align: left;
-		z-index: 99;
-		opacity: 1.0;
-	}
-	#welcome-dialog #mobile-availability-note {
-		display: none;
-		font-style: italic;
 	}
 
 	#tabs-wrapper {
@@ -2416,29 +2067,6 @@
 		body {
 			overflow-y: scroll;
 		}
-	    #welcome-dialog {
-			position: absolute;
-			left:10px;
-			top:50%;
-			width: calc(100% - 60px);
-			margin-left:0;
-			margin-top:-350px;
-			padding:20px;
-		}
-		#welcome-dialog .button-row {
-			display: block;
-		}
-		#welcome-dialog .button {
-			width: 100%;
-			margin-top: 10px;
-		}
-		#welcome-dialog .button-default {
-			display: none;
-		}
-		#welcome-dialog #mobile-availability-note {
-			display: initial;
-		}
-
 		#tabs-wrapper {
 			position: relative;
 			left:0 !important;
