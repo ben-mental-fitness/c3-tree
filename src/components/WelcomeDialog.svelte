@@ -2,8 +2,8 @@
 	import * as d3 from 'd3';
 
 	export let visible = false;
-	export let animDurationOut;
-	export let animDurationIn;
+	export let ANIM_DURATION_OUT;
+	export let ANIM_DURATION_IN;
 
 	const showWelcomeDialog = () => {
 		console.log(d3.select("#welcome-dialog"));
@@ -12,7 +12,7 @@
 			.style("display", "block");
 		d3.selectAll("#welcome-dialog")
 			.transition("opacity")
-			.duration(animDurationOut)
+			.duration(ANIM_DURATION_OUT)
 			.ease(d3.easeQuadOut)
 			.style("opacity", 1.0);
 	}
@@ -20,17 +20,16 @@
 	const hideWelcomeDialog = () => {
 		d3.selectAll("#welcome-dialog")
 			.transition("opacity")
-			.duration(animDurationOut)
+			.duration(ANIM_DURATION_OUT)
 			.ease(d3.easeQuadOut)
 			.style("opacity", 0.0);
 		d3.selectAll("#welcome-dialog")
 			.transition("display")
-			.delay(animDurationOut)
+			.delay(ANIM_DURATION_OUT)
 			.style("display", "none");
 	};
 
 	$: if (visible) {
-		console.log("!");
 	    showWelcomeDialog();
 	}
 

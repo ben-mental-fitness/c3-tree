@@ -20,6 +20,11 @@
 		}
 	}
 
+	$:if(checkShowDisplayCompatabilityTrigger) {
+		checkShowDisplayCompatability();
+		checkShowDisplayCompatabilityTrigger = false;
+	}
+
 	onMount(() => {
 		d3.select("#min-width-dialog .button").on("click", (event) => {
 			d3.select("#min-width-dialog")
@@ -30,13 +35,6 @@
 				.style("opacity", 0.0);
 		});
 	});
-
-	
-
-	$:if(checkShowDisplayCompatabilityTrigger) {
-		checkShowDisplayCompatability();
-		checkShowDisplayCompatabilityTrigger = false;
-	}
 
 </script>
 

@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 
-export const updateLeafTextAppearence = async (d, line, node) => {
+export const updateLeafTextAppearence = async () => {
 
 	d3.selectAll("#node-group-wrapper .node-text-1st-line")
 		.each(function(d) {
