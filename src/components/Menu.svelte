@@ -7,7 +7,7 @@
 
 {#if open}
     <div>
-        {#each ['Mental Health ','Healthcare disruption','Society & Health ','Serology ','Long Covid ','OpenSAFELY','Other ','Treatment ','Team','Data'] as link, i}
+        {#each ['Mental Health ','Healthcare disruption','Society & Health ','Serology ','Long Covid ','OpenSAFELY','Other ','Treatment ','Teams','Data'] as link, i}
             <p transition:fly={{ y: -15, delay: 50 * i }} data-link="{link}" class="hamburger-link">
                 {link}
             </p>

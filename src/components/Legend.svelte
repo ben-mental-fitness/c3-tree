@@ -5,7 +5,6 @@
 	export let canvasHeight;
 
 	$:if(canvasWidth && canvasHeight) {
-		console.log(canvasWidth, canvasHeight)
 		d3.select("#d3-canvas").selectAll('.legend-wrapper').remove();
 		const legendWrapper = d3.select("#d3-canvas").append("g")
 			.attr("class", "legend-wrapper")
@@ -20,7 +19,7 @@
 			const margin = (canvasWidth - canvasHeight) / 2.0;
 			legendWrapper
 				.attr("transform", `translate(
-					${margin + canvasHeight - 150},
+					${margin + canvasHeight},
 					${canvasHeight - 80})`)
 		}
 

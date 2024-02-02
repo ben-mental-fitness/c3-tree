@@ -32,12 +32,14 @@
     let mode = null;
     let rerenderTreeTrigger = null;
     let root;
+    let rootConnections;
 	let rootSimplified;
 
 	let simplifiedMode = true;
 	let twist = 0;
 
 	let data;
+	let dataConnections;
 	let dataSimplified;
 	let header;
 	let rawData;
@@ -137,7 +139,7 @@
 
 		var xhr = new XMLHttpRequest();
 		xhr.open("POST", "https://c3tree.framed-mice.eu/fetch_c3tree_data_from_google_sheet", true);
-		//xhr.open("POST", "/fetch_c3tree_data_from_google_sheet", true);
+		//xhr.open("POST", "http://localhost:8001/fetch_c3tree_data_from_google_sheet", true);
 		xhr.send(null);
 		xhr.onload = () => {
 
@@ -148,10 +150,12 @@
 					presets = header.filter((column) => column.includes("[PRESET]")).map((column) => column.replace("[PRESET]", ""));
 					rawData = parseNCSAndLHWData(response.mainData.slice(1), header);
 					parseMetaData(response.metaData.slice(1), response.metaData[0]);
-					introData = response.introData;
 
-					data = startBuildHierarchy(rawData, presets, visibleTeams);
-					dataSimplified = startBuildHierarchy(rawData, presets, visibleTeams, 2);
+					data = startBuildHierarchy(rawData, presets, visibleTeams, true);
+					dataConnections = startBuildHierarchy(rawData, presets, visibleTeams, false);
+					dataSimplified = startBuildHierarchy(rawData, presets, visibleTeams, false, 2);
+
+					introData = response.introData;
 
 					welcomeDialogVisible = true;
 					loaderVisible = false;
@@ -175,7 +179,8 @@
 
 	onMount(() => {
 		
-		mode = d3.select("#viz-select").node().value === "0" ? "viz-select-0" : "viz-select-1";
+		//mode = d3.select("#viz-select").node().value === "0" ? "viz-select-0" : "viz-select-1";
+		mode = d3.select("#checkbox-viz-select-cluster").property("checked") ? "viz-select-0" : "viz-select-1";
 		
 		d3.select("#welcome-dialog .button.button-simplified").on("click", (event) => {
 			simplifiedMode = true;
@@ -211,7 +216,7 @@
 	<DimensionsCalculator bind:width bind:height bind:canvasWidth bind:canvasHeight bind:radius bind:outerRadius bind:twist {BRAIN_SIZE} {BRAIN_ASPECT_RATIO}/>
 
 	<CollapsibleRadialTree {BRAIN_SIZE} {BRAIN_ASPECT_RATIO} {TOOLTIP_WIDTH}
-		bind:data bind:dataSimplified bind:root bind:rootSimplified
+		bind:data bind:dataSimplified bind:dataConnections bind:root bind:rootConnections bind:rootSimplified
 		bind:simplifiedMode bind:twist
 		bind:width bind:height bind:canvasWidth bind:canvasHeight bind:radius bind:outerRadius
 		bind:controlsVisible bind:presets bind:checkboxesChecked bind:rerenderTreeTrigger bind:mode/>

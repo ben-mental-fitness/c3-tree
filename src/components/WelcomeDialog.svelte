@@ -6,7 +6,6 @@
 	export let ANIM_DURATION_IN;
 
 	const showWelcomeDialog = () => {
-		console.log(d3.select("#welcome-dialog"));
 		d3.select("#welcome-dialog")
 			.style("opacity", 0.0)
 			.style("display", "block");
@@ -18,6 +17,7 @@
 	}
 
 	const hideWelcomeDialog = () => {
+		d3.select("#welcome-dialog-logo").remove();
 		d3.selectAll("#welcome-dialog")
 			.transition("opacity")
 			.duration(ANIM_DURATION_OUT)
@@ -40,7 +40,10 @@
     
 </script>
 
+<img src="/center_logo.png" alt="Logo" id="welcome-dialog-logo" style="position:absolute;left:50px;top:50px;width:200px"/>
+
 <div id="welcome-dialog" style="display:none;">
+
 	<center>
 		<h3>Welcome!</h3><br/>
 	</center>

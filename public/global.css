@@ -93,11 +93,11 @@ html, body {
 
 #controls-wrapper {
   position: absolute;
-  width: 200px;
+  width: 220px;
 }
 
 #controls-wrapper span {
-  font-size: 80%;
+  font-size: 90%;
   line-height: 20px;
   margin-left: 5px;
 }

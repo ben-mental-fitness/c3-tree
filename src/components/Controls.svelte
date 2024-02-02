@@ -31,6 +31,7 @@
 				} else {
 					root.descendants().forEach((d) => d.data.visible = false);
 					root.descendants().forEach((d) => {
+						console.log(d.data.presets.includes(chosenPreset))
 						if(d.data.presets.includes(chosenPreset) && d.depth > 0) {
 							d.data.visible = d.depth > 0;
 							let parent = d.parent;
@@ -64,6 +65,18 @@
 		});
 		d3.select("#checkbox-second-tooltip").on("change", (event) => {
 			checkboxesChecked["checkbox-second-tooltip"] = d3.select("#checkbox-second-tooltip").property("checked");
+		});
+		d3.select("#checkbox-simple-view").on("change", (event) => {
+			checkboxesChecked["checkbox-simple-view"] = d3.select("#checkbox-simple-view").property("checked");
+			d3.select("#checkbox-detailed-view").property("checked", !checkboxesChecked["checkbox-simple-view"]);
+			d3.select("#checkbox-simple-view").property("checked", checkboxesChecked["checkbox-simple-view"]);
+			rerenderTreeTrigger = true;
+		});
+		d3.select("#checkbox-detailed-view").on("change", (event) => {
+			checkboxesChecked["checkbox-simple-view"] = !d3.select("#checkbox-detailed-view").property("checked");
+			d3.select("#checkbox-detailed-view").property("checked", !checkboxesChecked["checkbox-simple-view"]);
+			d3.select("#checkbox-simple-view").property("checked", checkboxesChecked["checkbox-simple-view"]);
+			rerenderTreeTrigger = true;
 		});
 		d3.select("#checkbox-twist-circle").on("change", (event) => {
 			checkboxesChecked["checkbox-twist-circle"] = !checkboxesChecked["checkbox-twist-circle"];
@@ -99,6 +112,47 @@
 			rerenderTreeTrigger = false;
 		});
 
+		d3.select("#checkbox-viz-select-cluster").on("click", (event) => {
+			mode = "viz-select-0";
+			d3.selectAll("#curves-wrapper-center").attr("opacity", 1.0);
+			d3.selectAll("#curves-wrapper-leaves").attr("opacity", 0.0);
+			rerenderTreeTrigger = false;
+			d3.select("#checkbox-viz-select-connections").property("checked", false);
+		});
+
+		d3.select("#checkbox-viz-select-connections").on("click", (event) => {
+			mode = "viz-select-1";
+			d3.selectAll("#curves-wrapper-center").attr("opacity", 0.0);
+			d3.selectAll("#curves-wrapper-leaves").attr("opacity", 1.0);
+			rerenderTreeTrigger = false;
+			d3.select("#checkbox-viz-select-cluster").property("checked", false);
+		});
+
+		d3.select('#checkbox-detailed-view-themes-publications').on("click", (event) => {
+			checkboxesChecked["checkbox-detailed-view-themes-publications"] = !checkboxesChecked["checkbox-detailed-view-themes-publications"];
+			root.descendants().forEach((d) => {
+				if(['Mental Health ','Healthcare disruption','Society & Health ','Serology ','Long Covid ','OpenSAFELY','Other ','Treatment '].includes(d.data.text))
+					setTreeVisibility(d.data, checkboxesChecked["checkbox-detailed-view-themes-publications"]);
+			})
+			rerenderTreeTrigger = true;
+		})
+		d3.select('#checkbox-detailed-view-team').on("click", (event) => {
+			checkboxesChecked["checkbox-detailed-view-team"] = !checkboxesChecked["checkbox-detailed-view-team"];
+			root.descendants().forEach((d) => {
+				if(d.data.text === 'Team' || d.data.text === 'Teams')
+					setTreeVisibility(d.data, checkboxesChecked["checkbox-detailed-view-team"]);
+			})
+			rerenderTreeTrigger = true;
+		})
+		d3.select('#checkbox-detailed-view-data-sources').on("click", (event) => {
+			checkboxesChecked["checkbox-detailed-view-data-sources"] = !checkboxesChecked["checkbox-detailed-view-data-sources"];
+			root.descendants().forEach((d) => {
+				if(d.data.text === 'Data')
+					setTreeVisibility(d.data, checkboxesChecked["checkbox-detailed-view-data-sources"]);
+			})
+			rerenderTreeTrigger = true;
+		})
+
 		d3.selectAll(".checkbox-status").on("change", function() {
 			const checkboxId = d3.select(this).attr("id");
 			checkboxesChecked[checkboxId] = !checkboxesChecked[checkboxId];
@@ -114,44 +168,80 @@
 
 </script>
 
-<div id="controls-wrapper" style="display:{visible ? 'block' : 'none'}">
+<div id="controls-wrapper">
 	<center>
-		<Search/>
-		<select id="viz-select" style="width:200px">
-			<option value="0">Radial Tree</option>
-			<option value="1">Connected Edges</option>
-		</select>
-		<select id="preset-select" style="display:none;width:200px">
-		</select>
-		<br/><br/>
-		<input style="float:left;display:block" type="checkbox" id="checkbox-image" checked>
-		<span style="float:left;display:block">Show center image</span>
+		<Search/><br/><br/>
+		<input style="float:left;display:block" type="checkbox" id="checkbox-simple-view">
+		<span style="float:left;display:block">Simple version</span>
 		<div style="clear: both;"></div>
-		<input style="float:left;display:block" type="checkbox" id="checkbox-leaf-titles" checked>
-		<span style="float:left;display:block">Show leaf titles</span>
+		<input style="float:left;display:block" type="checkbox" id="checkbox-detailed-view" checked>
+		<span style="float:left;display:block">Detailed visualisation</span>
 		<div style="clear: both;"></div>
-		<input style="float:left;display:block" type="checkbox" id="checkbox-twist-circle" checked>
-		<span style="float:left;display:block">Large twist circle</span>
-		<div style="clear: both;"></div>
-		<input style="float:left;display:block" type="checkbox" id="checkbox-node-text" checked>
-		<span style="float:left;display:block">Node text second line</span>
-		<div style="clear: both;"></div>
-		<br/>
-		<input style="float:left;display:block" type="checkbox" class="checkbox-status" id="checkbox-status-Published" checked>
-		<span style="float:left;display:block">Status: Published</span>
-		<div style="clear: both;"></div>
-		<input style="float:left;display:block" type="checkbox" class="checkbox-status" id="checkbox-status-Accepted" checked>
-		<span style="float:left;display:block">Status: Accepted</span>
-		<div style="clear: both;"></div>
-		<input style="float:left;display:block" type="checkbox" class="checkbox-status" id="checkbox-status-Submitted" checked>
-		<span style="float:left;display:block">Status: Submitted</span>
-		<div style="clear: both;"></div>
-		<input style="float:left;display:block" type="checkbox" class="checkbox-status" id="checkbox-status-Manuscript" checked>
-		<span style="float:left;display:block">Status: Manuscript</span>
-		<div style="clear: both;"></div>
-		<br/>
-		<input style="float:left;display:block" type="checkbox" id="checkbox-second-tooltip" checked>
-		<span style="float:left;display:block">Second tooltip</span>
-		<div style="clear: both;"></div>
+
+		<div style="display:{visible ? 'block' : 'none'}"> 
+			<span style="float:left;display:block">&nbsp;&nbsp;Show information about:</span>
+			<div style="clear: both;"></div>
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-themes-publications" checked>
+			<span style="float:left;display:block">Themes and Publications</span>
+			<div style="clear: both;"></div>
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-team">
+			<span style="float:left;display:block">Team</span>
+			<div style="clear: both;"></div>
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-data-sources">
+			<span style="float:left;display:block">Data Sources</span>
+			<div style="clear: both;"></div>
+
+			<span style="float:left;display:block">&nbsp;&nbsp;Layout:</span>
+			<div style="clear: both;"></div>
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-viz-select-cluster" checked>
+			<span style="float:left;display:block">Cluster by theme</span>
+			<div style="clear: both;"></div>
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-viz-select-connections">
+			<span style="float:left;display:block">Connections</span>
+			<div style="clear: both;"></div>
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-leaf-titles" checked>
+			<span style="float:left;display:block">Show leaf titles</span>
+			<div style="clear: both;"></div>
+		</div>
+		
+		<br/><br/><br/>
+
+		<div style="display:{visible ? 'block' : 'none'}"> 
+			<!-- <Search/>
+			<select id="viz-select" style="width:200px">
+				<option value="0">Radial Tree</option>
+				<option value="1">Connected Edges</option>
+			</select>
+			<select id="preset-select" style="display:none;width:200px">
+			</select>
+			<br/><br/> -->
+			<input style="float:left;display:none" type="checkbox" id="checkbox-image" checked>
+			<span style="float:left;display:none">Show center image</span>
+			<div style="clear: both;"></div>
+			
+			<input style="float:left;display:none" type="checkbox" id="checkbox-twist-circle" checked>
+			<span style="float:left;display:none">Large twist circle</span>
+			<div style="clear: both;"></div>
+			<input style="float:left;display:none" type="checkbox" id="checkbox-node-text">
+			<span style="float:left;display:none">Node text second line</span>
+			<div style="clear: both;"></div>
+			<br/>
+			<input style="float:left;display:none" type="checkbox" class="checkbox-status" id="checkbox-status-Published" checked>
+			<span style="float:left;display:none">Status: Published</span>
+			<div style="clear: both;"></div>
+			<input style="float:left;display:none" type="checkbox" class="checkbox-status" id="checkbox-status-Accepted" checked>
+			<span style="float:left;display:none">Status: Accepted</span>
+			<div style="clear: both;"></div>
+			<input style="float:left;display:none" type="checkbox" class="checkbox-status" id="checkbox-status-Submitted" checked>
+			<span style="float:left;display:none">Status: Submitted</span>
+			<div style="clear: both;"></div>
+			<input style="float:left;display:none" type="checkbox" class="checkbox-status" id="checkbox-status-Manuscript" checked>
+			<span style="float:left;display:none">Status: Manuscript</span>
+			<div style="clear: both;"></div>
+			<br/>
+			<input style="float:left;display:none" type="checkbox" id="checkbox-second-tooltip">
+			<span style="float:left;display:none">Second tooltip</span>
+			<div style="clear: both;"></div>
+		</div>
 	</center>
 </div>

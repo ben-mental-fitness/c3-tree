@@ -121,8 +121,9 @@
 			.style("width", "440px")
 			.style("height", "320px")
 			.style("margin", "0 auto")
+			.style('display', (d) => d.youtubeId !== undefined ? 'block' : 'none')
 			.append("iframe")
-			.attr("src", "https://www.youtube.com/embed/aS_jYmMV9_g?origin=https://c3tree.framed-mice.eu")
+			.attr("src", (d) => d.youtubeId !== undefined ? `https://www.youtube.com/embed/${d.youtubeId}?origin=https://c3tree.framed-mice.eu` : '')
 			.attr("width", "440")
 			.attr("height", "320")
 			.attr("frameborder", "0")
@@ -151,7 +152,7 @@
 						.attr("transform", "translate(256,256) rotate(180) translate(-256,-256)");
 				} else {
 					entry.attr("data-collapsed", "true")
-					.style("display", "none")
+						.style("display", "none")
 						.transition("appear")
 						.duration(ANIM_DURATION_OUT)
 						.ease(d3.easeQuadOut)

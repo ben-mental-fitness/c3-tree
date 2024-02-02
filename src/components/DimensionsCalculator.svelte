@@ -57,7 +57,8 @@
 				.style("left", `${(width - height) / 2.0 - 220}px`)
 				.style("top", `50%`)
 				.style("height", "366px")
-				.style("margin-top", `-${366 / 2}px`)
+				//.style("margin-top", `-${366 / 2}px`)
+				.style("margin-top", `-${550 / 2}px`)
 				.style("margin-left", null);
 			d3.select("#back-button")
 				.style("display", "block")

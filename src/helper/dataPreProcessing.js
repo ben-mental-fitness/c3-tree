@@ -32,28 +32,29 @@ export const parseNCSAndLHWData = (responseData, header) => {
 				'parent': 'ROOT',
 				'themeDescLong': row[1],
 				'themeDescShort': row[2],
+				'youtubeId': row[3],
 			});
 			themesAdded.push(theme);
 			subThemesAdded = [];
 		}
 
 		// new subtheme
-		if(row[3] !== undefined && row[3] !== '' && !subThemesAdded.includes(row[3])) {
-			let subTheme = row[3];
+		if(row[4] !== undefined && row[4] !== '' && !subThemesAdded.includes(row[4])) {
+			let subTheme = row[4];
 			rawData.push({
 				'text': subTheme,
 				'parent': theme,
-				'[INFO_MAIN]description': row[4]
+				'[INFO_MAIN]description': row[5]
 			});
 			subThemesAdded.push(subTheme);
 		}
 
 		const d = {
-			'text': row[5],
-			'parent': row[3],
+			'text': row[6],
+			'parent': row[4],
 		};
-		header.slice(5).forEach((column, i) => {
-			d[column] = row[i + 5]
+		header.slice(6).forEach((column, i) => {
+			d[column] = row[i + 6]
 		});
 		rawData.push(d);
 	});

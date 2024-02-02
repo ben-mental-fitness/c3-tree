@@ -1,12 +1,18 @@
 
 const colors = ["#8C88BA", "#BF84AE", "#DB95AC", "#FBB9A6", "#F6A294", "#B0DBEA", "#B3E5BE", "#CFC69D"];
 
-export const buildHierarchy = ((parentLevel, data, presetsAvailable, presetsParent, visibleTeams, depth, maxDepth) => {
+export const buildHierarchy = ((parentLevel, data, presetsAvailable, presetsParent, visibleTeams, filterSpecifics, depth, maxDepth) => {
+
 	data.filter((d) => parentLevel.text !== "" && parentLevel.text !== undefined && d.text !== undefined && d.text !== "" && d.parent === parentLevel.text).forEach((d) => {
 
+		if(filterSpecifics && d.text === 'Team')
+			return;
+		else if(!filterSpecifics && d.text === 'Teams')
+			return;
 		const level = {
-			"id": `${parentLevel.id}${parentLevel.children.length}`,
+			"id": `${parentLevel.id}${parentLevel.children.length}${filterSpecifics ? 'filtered' : ''}`,
 			"text": d.text,
+			"youtubeId": d.youtubeId,
 			"color": depth === 1
 				? (parentLevel.children.length < colors.length ? colors[parentLevel.children.length] : "#808080")
 				: parentLevel.color,
@@ -15,7 +21,7 @@ export const buildHierarchy = ((parentLevel, data, presetsAvailable, presetsPare
 			"visible": true,
 			"props": {
 				"publication_link": d.publication_link,
-				"data_source": d.data_source,
+				"data_source": d.data_source ? d.data_source.split(',').map(item => item.trim()) : [],
 				"status": d.Status,
 				"info_main": {},
 				"info_collapsed": {
@@ -56,11 +62,13 @@ export const buildHierarchy = ((parentLevel, data, presetsAvailable, presetsPare
 			});
 		}
 
-		buildHierarchy(level, data, presetsAvailable, level.presets, visibleTeams, depth + 1, level.text === "Team" ? 2 : maxDepth);
+		let specificMaxDepth = filterSpecifics && (level.text === "Teams" || level.text === "Team" || level.text === "Data") ? 2 : maxDepth;
+
+		buildHierarchy(level, data, presetsAvailable, level.presets, visibleTeams, filterSpecifics, depth + 1, specificMaxDepth);
 	});
 });
 
-export const startBuildHierarchy = ((data, presets, visibleTeams, maxDepth = 15) => {
+export const startBuildHierarchy = ((data, presets, visibleTeams, filterSpecifics = false, maxDepth = 15) => {
 
 	const hierarchyRootLevel = {
 		"id": "r",
@@ -73,7 +81,7 @@ export const startBuildHierarchy = ((data, presets, visibleTeams, maxDepth = 15)
 		"children": [],
 	};
 
-	buildHierarchy(hierarchyRootLevel, data, presets, [], visibleTeams, 1, maxDepth);
+	buildHierarchy(hierarchyRootLevel, data, presets, [], visibleTeams, filterSpecifics, 1, maxDepth);
 
 	return hierarchyRootLevel;
 });
