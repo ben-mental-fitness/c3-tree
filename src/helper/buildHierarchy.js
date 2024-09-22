@@ -3,7 +3,12 @@ const colors = ["#8C88BA", "#BF84AE", "#DB95AC", "#FBB9A6", "#F6A294", "#B0DBEA"
 
 export const buildHierarchy = ((parentLevel, data, presetsAvailable, presetsParent, visibleTeams, filterSpecifics, depth, maxDepth) => {
 
+
+
 	data.filter((d) => parentLevel.text !== "" && parentLevel.text !== undefined && d.text !== undefined && d.text !== "" && d.parent === parentLevel.text).forEach((d) => {
+
+		if(d.parent === 'Team')
+			console.log(d);
 
 		if(filterSpecifics && d.text === 'Team')
 			return;
@@ -34,6 +39,8 @@ export const buildHierarchy = ((parentLevel, data, presetsAvailable, presetsPare
 			"children": [],
 		};
 
+		//console.log('-'.repeat(depth) + ' ' + d.text)
+
 		Object.keys(d).filter((key) => key.indexOf("[INFO_MAIN]") !== -1).forEach((key) => {
 			level.props.info_main[key.replace("[INFO_MAIN]", "")] = d[key];
 		});
@@ -63,6 +70,9 @@ export const buildHierarchy = ((parentLevel, data, presetsAvailable, presetsPare
 		}
 
 		let specificMaxDepth = filterSpecifics && (level.text === "Teams" || level.text === "Team" || level.text === "Data") ? 2 : maxDepth;
+		if(level.text === 'Team')
+			console.log(level.text);
+			//console.log(level.text)
 
 		buildHierarchy(level, data, presetsAvailable, level.presets, visibleTeams, filterSpecifics, depth + 1, specificMaxDepth);
 	});

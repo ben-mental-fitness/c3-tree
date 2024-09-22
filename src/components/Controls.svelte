@@ -86,6 +86,14 @@
 			checkboxesChecked["checkbox-leaf-titles"] = !checkboxesChecked["checkbox-leaf-titles"];
 			rerenderTreeTrigger = true;
 		});
+		d3.select("#checkbox-white-backgrounds").on("change", (event) => {
+			checkboxesChecked["checkbox-white-backgrounds"] = !checkboxesChecked["checkbox-white-backgrounds"];
+			rerenderTreeTrigger = true;
+		});
+		d3.select("#checkbox-text-size").on("change", (event) => {
+			checkboxesChecked["checkbox-text-size"] = !checkboxesChecked["checkbox-text-size"];
+			rerenderTreeTrigger = true;
+		});
 
 		d3.select("#checkbox-node-text").on("change", (event) => {
 			let checked = d3.select(event.target).property("checked")
@@ -201,6 +209,12 @@
 			<div style="clear: both;"></div>
 			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-leaf-titles" checked>
 			<span style="float:left;display:block">Show leaf titles</span>
+			<div style="clear: both;"></div>
+			<input style="float:left;display:none;margin-left:20px" type="checkbox" id="checkbox-white-backgrounds" checked>
+			<span style="float:left;display:none">Text has white background</span>
+			<div style="clear: both;"></div>
+			<input style="float:left;display:none;margin-left:20px" type="checkbox" id="checkbox-text-size" checked>
+			<span style="float:left;display:none">Smaller text size</span>
 			<div style="clear: both;"></div>
 		</div>
 		

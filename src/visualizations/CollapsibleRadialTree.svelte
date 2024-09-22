@@ -24,6 +24,7 @@
 	export let twist;
 
 	export let data;
+	export let rawData;
 	export let dataConnections;
 	export let dataSimplified;
 	export let root;
@@ -37,6 +38,7 @@
 	export let rerenderTreeTrigger;
 	export let mode;
 	export let prevMode;
+	export let categoryLegendVisible;
 	
 	let selectedNode = undefined;
 
@@ -83,6 +85,7 @@
 		//console.log(mode);
 		const filteredRoot = root;
 		
+		categoryLegendVisible = mode === "viz-select-1";
 
 		//console.log(root, filteredRoot);
 
@@ -93,7 +96,10 @@
 		twist = twist > Math.PI * 2.0 ? twist - Math.PI * 2.0 : twist;
 		twist = twist < 0 ? twist + Math.PI * 2.0 : twist;
 
-		const treeFunction = d3.cluster().size([2 * Math.PI, radius]);
+		d3.select("#twist-circle")
+			.attr("r", outerRadius + (mode === "viz-select-1" && !simplifiedMode ? 80 : 0))
+
+		const treeFunction = d3.cluster().size([2 * Math.PI, radius + (mode === "viz-select-1" && !simplifiedMode ? 80 : 0)]);
 		treeFunction.separation(separationFunction)(filteredRoot);
 		treeFunction.separation(separationFunction)(rootSimplified);
 
@@ -232,6 +238,7 @@
 
 		d3.selectAll(".node-text").transition(animation)
 			.attr("opacity", (d) => (d.data.depth > 2 || d.data.depth === d.data.maxDepth) && (d.data.visible || d.parent?.data.visible) && checkboxesChecked["checkbox-leaf-titles"] && !simplifiedMode && !d.children ? 1.0 : 0.0)
+			.attr("font-size", checkboxesChecked["checkbox-text-size"] && mode === "viz-select-1" ? "70%" : "100%")
 
 		update.selectAll(".text-leaf-interact-area")
 			.style("pointer-events", (d) => d.data.visible && !simplifiedMode ? "all" : "none");
@@ -280,6 +287,13 @@
 			.attr("opacity", (d) => simplifiedMode ? 1.0 : 0.0);
 
 
+		if(!simplifiedMode) {
+			d3.select("#category-legend")
+				.selectAll(".legend-entry")
+				.data(filteredRoot.descendants().filter((d) => d.depth === 1 && d.data.text !== "Data" && d.data.text !== "Team"))
+				.attr("transform", (d, i) => `translate(0,${i * 50})`)
+		}
+
 		d3.select("#category-labels-wrapper")
 			.selectAll(".category-labels")
 			.data(simplifiedMode ? rootSimplified.descendants().filter((d) => d.depth === 1) : filteredRoot.descendants().filter((d) => d.depth === 1))//, (d) => d.data.id)
@@ -299,8 +313,9 @@
 			.attr("dominant-baseline", "middle")
 			.attr("font-size", "20px")
 			.attr("font-weight", "bold")
-			.attr("opacity", (d) => d.data.visible ? 1.0 : 0.0)
-			.attr("fill", (d) => d.data.color)
+			.attr("opacity", (d) => d.data.visible && (!categoryLegendVisible || d.data.text === 'Data' || d.data.text === 'Team' || (mode === "viz-select-1" && d.data.text === 'Vaccination')) ? 1.0 : 0.0)
+			.attr("fill", (d) => mode === "viz-select-1" && d.data.text === 'Vaccination' ? 'rgb(160, 160, 160)' : d.data.color)
+			.text((d) => mode === "viz-select-1" && d.data.text === 'Vaccination' ? 'Publications' : d.data.text)
 
 		setMouseEvents();
 	};
@@ -339,7 +354,7 @@
 					if(mode === "viz-select-1") {
 						d3.selectAll('.node-text')
 							.attr('font-weight', null)
-							.attr('font-size', null)
+							//.attr('font-size', null)
 							.attr("fill", (d) => d.data.color)
 							.attr('stroke', null)
 							.attr('stroke-width', null);
@@ -381,6 +396,19 @@
 				rerenderTreeTrigger = true;
 			});
 
+
+		d3.select("#category-legend").selectAll("*").remove();
+		d3.select("#category-legend")
+			.selectAll(".legend-entry")
+			.data(root.descendants().filter((d) => d.depth === 1 && d.data.text !== "Data" && d.data.text !== "Team"))
+			.join("p")
+			.attr("class", (d) => "legend-entry")
+			.style("dominant-baseline", "middle")
+			.style("font-size", "20px")
+			.style("font-weight", "bold")
+			.style("color", (d) => d.data.color)
+			.text((d) => d.data.text)
+
 		// research questions text in the corners (currently only works with 4)
 		svg.append("g")
 			.attr("id", "category-labels-wrapper")
@@ -400,7 +428,7 @@
 			.attr("font-weight", "bold")
 			.attr("opacity", 1.0)
 			.attr("fill", (d) => d.data.color)
-			.text((d) => d.data.text)
+			.text((d) => d.data.text === 'Vaccination' ? 'Publications' : d.data.text)
 			.each(function(d) {
 				addSVGTextLineBreaks(d3.select(this), canvasWidth / 2 - radius - 80, 0, 1.0)
 			});
@@ -740,8 +768,8 @@
 					const stickyTooltip = d3.select("#hover-tooltip.tooltip").clone(true)
 						.attr("id", "sticky-tooltip")
 						.style("display", "block")
-						.style("left", `${left}px`)
-						.style("top", `${top}px`)
+						.style("left", `${boundingRect.left}px`)
+						.style("top", `${boundingRect.top}px`)
 						.style("pointer-events", "all")
 						.style("cursor", "move")
 						.style("z-index", "99")
@@ -838,7 +866,9 @@
 					}
 					selectedNode = d;
 
-					d3.select("#curves-wrapper-leaves").selectAll(".leaf-to-leaf-path").filter((d_) => d_[0].data.id === d.data.id || d_[1].data.id === d.data.id)
+					//d3.select("#curves-wrapper-leaves").selectAll(".leaf-to-leaf-path").filter((d_) => d_[0].data.id === d.data.id || d_[1].data.id === d.data.id)
+					d3.select("#curves-wrapper-leaves").selectAll(".leaf-to-leaf-path")
+						.filter((d_) => (["Data","Team"].includes(getParentWithDepth(d_[0], 1).data.text) || ["Data","Team"].includes(getParentWithDepth(d_[1], 1).data.text)) && (d_[0].data.id === d.data.id || d_[1].data.id === d.data.id))
 						.attr("stroke", "#0632E4")
 						.attr('stroke-width', 2)
 						.raise();
@@ -847,12 +877,66 @@
 						const connectedNodes = d3.selectAll('.node-group').filter((d_) => 
 							d_.data.props.data_source && d_.data.props.data_source.some(v => d.data.props.data_source.includes(v)) && d !== d_)
 
-						connectedNodes.selectAll('.node-text')
+						connectedNodes.filter((d_) => 
+								d_.data.props.data_source && d_.data.props.data_source.some(v => d.data.props.data_source.includes(v)) && (["Data","Team"].includes(getParentWithDepth(d_, 1).data.text) || d === d_)).selectAll('.node-text')
 							.attr('font-weight', 'bold')
-							.attr('font-size', '130%')
+							.attr('font-size', checkboxesChecked["checkbox-text-size"] ? "90%" : '150%')
 							.attr('fill', '#000000')
-							.attr('stroke', '#0632E4')
-							.attr('stroke-width', 1)
+							.attr('stroke', checkboxesChecked['checkbox-white-backgrounds'] ? '#ffffff' : '#0632E4')
+							.attr('stroke-width', checkboxesChecked['checkbox-white-backgrounds'] ? 10 : 1)
+
+
+						console.log(d3.selectAll('#sticky-tooltip .table-main .tooltip-tbody .papers-list-item'));
+						console.log(d3.selectAll('#sticky-tooltip .table-main .tooltip-tbody .papers-list-item').data());
+
+						if(["Data","Team"].includes(getParentWithDepth(d, 1).data.text)) {
+
+							const connectedPublications = connectedNodes.filter((d_) => d_ !== d).data();
+
+							d3.selectAll('#sticky-tooltip .table-main .tooltip-tbody .papers-list-item')
+								.data(connectedPublications)
+								.on("click", (event, d) => {
+
+									let i = connectedPublications.indexOf(d)
+
+									const entry = d3.select(`#sticky-tooltip #publications-list-tooltip-item-${i} .papers-list-item-content`);
+									const collapsed = entry.attr("data-collapsed")
+
+									if(collapsed === "true") {
+										entry.attr("data-collapsed", "false")
+											.style("display", "block")
+											.transition("appear")
+											.duration(750)
+											.ease(d3.easeQuadOut)
+											.style("height", "auto")
+
+										d3.select(`#publications-list-tooltip-item-${i} .collapse-icon-paper path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
+											.attr("transform", "translate(256,256) rotate(180) translate(-256,-256)");
+									} else {
+										entry.attr("data-collapsed", "true")
+										.style("display", "none")
+											.transition("appear")
+											.duration(400)
+											.ease(d3.easeQuadOut)
+											.style("height", "0")
+
+										entry.attr("data-collapsed", "true")
+											.transition("display")
+											.delay(400)
+											.style("display", "none");
+
+										d3.select(`#publications-list-tooltip-item-${i} .collapse-icon-paper path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
+											.attr("transform", "translate(256,256) rotate(90) translate(-256,-256)");
+									}
+								});
+
+							d3.selectAll('#sticky-tooltip .table-main .tooltip-tbody .papers-list-item .button-publication-link')
+								.data(connectedPublications)
+								.on("click", (event, d) => {
+									event.stopPropagation();
+									window.open(d.data.props.publication_link);
+								});
+						}
 					}
 				}
 
@@ -895,7 +979,6 @@
 					.text("Subquestion")
 					subquestionRow.append("td").append("p").text(subquestion.data.text);
 					}*/
-
 
 					
 					Object.entries(d.data.props.info_main).forEach(([key, value]) => {
@@ -960,28 +1043,118 @@
 						}
 					});
 					if(mode === "viz-select-1") {
-						const connectedNodes = d3.selectAll('.node-group').filter((d_) => 
-							d_.data.props.data_source && d_.data.props.data_source.some(v => d.data.props.data_source.includes(v)))
 
 						d3.select("#hover-tooltip .table-main .tooltip-tbody").append("tr").append("td").style("width", `${TOOLTIP_WIDTH * 0.2}px`)
 							.append("p")
 							.style("font-weight", "bold")
 							.text("Connections")
 
-						connectedNodes.filter((d_) => d_ !== d).each((d_) => {
-							const mainInfoRow = d3.select("#hover-tooltip .table-main .tooltip-tbody");
-							mainInfoRow.append("tr").append("td")
-								.style("padding-bottom", "3px")
+						let connectedNodes;
+
+						if(["Data","Team"].includes(getParentWithDepth(d, 1).data.text)) {
+							connectedNodes = d3.selectAll('.node-group').filter((d_) => 
+								d_.data.props.data_source && d_.data.props.data_source.some(v => d.data.props.data_source.includes(v)));
+
+							// accordion
+
+							const tooltipConnectionRow = d3.select("#hover-tooltip .table-main .tooltip-tbody");
+
+							tooltipConnectionRow.append("tr").append("td").style("width", `${TOOLTIP_WIDTH * 0.2}px`)
 								.append("p")
-								.text(d_.data.text);
-						});
+								.style("font-weight", "bold")
+								.text("Publications")
+
+							const publicationsList = tooltipConnectionRow.append("tr").append("td")
+								.selectAll(".papers-list-item")
+								.data(connectedNodes.filter((d_) => d_ !== d).data())
+								.join("div")
+								.attr("id", (d, i) => `publications-list-tooltip-item-${i}`)
+								.attr("class", "papers-list-item")
+								.style("cursor", "pointer")
+								.style("border", "1px solid #d0d0d0")
+								.style("padding", "0 10px")
+								.style("pointer-events", "all")
+
+							publicationsList.append("p")
+								.style("width", "80%")
+								.style("float", "left")
+								.style("margin", "10px 0")
+								.text((d) => d.data.text)
+
+							publicationsList.append("svg")
+								.attr("class", "collapse-icon-paper")
+								.style("float", "right")
+								.attr("viewBox", "0 0 512 512")
+								.style("margin", "12.5px 5px")
+								.attr("width", "15px")
+								.attr("height", "15px")
+								.attr("xmlns", "http://www.w3.org/2000/svg")
+								.append("path")
+								.attr("d", "M233.4 105.4c12.5-12.5 32.8-12.5 45.3 0l192 192c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L256 173.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l192-192z")
+								.attr("fill", "#404040")
+								.attr("transform", "translate(256,256) rotate(90) translate(-256,-256)")
+
+							publicationsList.append("div")
+								.style("clear", "both");
+
+							const publicationsListContent = publicationsList.append("div")
+								.attr("class", "papers-list-item-content")
+								.attr("data-collapsed", "true")
+								.style("display", "none");
+
+							publicationsListContent.each(function (d) {
+								let collapsibleInfo = false;
+								Object.keys(d.data.props.info_main).forEach((key) => {
+									if(d.data.props.info_main[key] && d.data.props.info_main[key] !== "") {
+										collapsibleInfo = true;
+										d3.select(this).append("p")
+											.style("font-weight", "bold")
+											.text(key.replace("[INFO_MAIN]", ""));
+										d3.select(this).append("p")
+											.style("padding-bottom", "5px")
+											.text(d.data.props.info_main[key]);
+									}
+								});
+
+								if(d.data.props.publication_link && d.data.props.publication_link !== "") {
+
+									collapsibleInfo = true;
+									d3.select(this).append("center").append("button")
+										.attr("class", "button-publication-link")
+										.attr("type", "button")
+										.style("margin-bottom", "10px")
+										.text("Go to publication")
+										
+									
+								}
+								if(!collapsibleInfo) {
+									d3.select(this).append("p")
+										.style("font-weight", "bold")
+										.text("No additional information.");
+								}
+							});
+
+							//
+						} else {
+							connectedNodes = d3.selectAll('.node-group').filter((d_) => 
+								d_.data.props.data_source && d_.data.props.data_source.some(v => d.data.props.data_source.includes(v)) && (["Data","Team"].includes(getParentWithDepth(d_, 1).data.text) || d === d_));
+
+							connectedNodes.filter((d_) => d_ !== d).each((d_) => {
+								const mainInfoRow = d3.select("#hover-tooltip .table-main .tooltip-tbody");
+								mainInfoRow.append("tr").append("td")
+									.style("padding-bottom", "3px")
+									.append("p")
+									.text(d_.data.text);
+							});
+						}
+						
 
 						connectedNodes.selectAll('.node-text')
 							.attr('font-weight', 'bold')
-							.attr('font-size', '130%')
+							.attr('font-size', checkboxesChecked["checkbox-text-size"] ? "90%" : '150%')
 							.attr('fill', '#000000')
-							.attr('stroke', '#0632E4')
-							.attr('stroke-width', 1)
+							.attr('stroke', checkboxesChecked['checkbox-white-backgrounds'] ? '#ffffff' : '#0632E4')
+							.attr('stroke-width', checkboxesChecked['checkbox-white-backgrounds'] ? 10 : 1)
 					}
 				} else {
 					const topic = d;
@@ -1018,16 +1191,20 @@
 							.text(value);
 					}
 				});
+
 				if(!collapsibleInfo)
 					d3.select("#hover-tooltip .tooltip-collapsible-button").style("display", "none").style("pointer-events", "none");
-				else
+				else {
+
+
 					d3.select("#hover-tooltip .tooltip-collapsible-button").style("display", "block").style("pointer-events", "all");
+				}
 
 				if(selectedNode === undefined) {
 					d3.selectAll(`#${d.data.id}-text,#${d.data.id}-text-2nd-line`).style("font-weight", "bold");
 
 					d3.select("#curves-wrapper-leaves").selectAll(".leaf-to-leaf-path")
-						.filter((d_) => d_[0].data.id === d.data.id || d_[1].data.id === d.data.id)
+						.filter((d_) => (["Data","Team"].includes(getParentWithDepth(d_[0], 1).data.text) || ["Data","Team"].includes(getParentWithDepth(d_[1], 1).data.text)) && (d_[0].data.id === d.data.id || d_[1].data.id === d.data.id))
 							.attr("stroke", "#0632E4")
 							.attr('stroke-width', 2)
 							.raise();
@@ -1106,7 +1283,7 @@
 				if(mode === "viz-select-1" && d3.select("#sticky-tooltip").empty()) {
 					d3.selectAll('.node-text')
 						.attr('font-weight', null)
-						.attr('font-size', null)
+						.attr('font-size', checkboxesChecked["checkbox-text-size"] ? "70%" : "100%")
 						.attr("fill", (d) => d.data.color)
 						.attr('stroke', null)
 						.attr('stroke-width', null);

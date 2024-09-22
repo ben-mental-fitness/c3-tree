@@ -14,6 +14,7 @@
     import MinWidthDialog from './components/MinWidthDialog.svelte';
     import Legend from './components/Legend.svelte';
     import DimensionsCalculator from './components/DimensionsCalculator.svelte';
+    import CategoryLegend from './components/CategoryLegend.svelte';
 
     import { updateLeafTextAppearence } from './helper/updateLeafTextAppearence';
     import { startBuildHierarchy, buildHierarchy } from './helper/buildHierarchy';
@@ -41,6 +42,7 @@
 	let data;
 	let dataConnections;
 	let dataSimplified;
+	let dataCategories;
 	let header;
 	let rawData;
 	let visibleTeams = [];
@@ -52,6 +54,7 @@
     let loaderVisible;
 
     let welcomeDialogVisible;
+    let categoryLegendVisible;
 
 	let introTourStartTrigger;
 	let introData;
@@ -146,13 +149,16 @@
 			if(xhr.readyState === 4) {
 				if(xhr.status === 200) {
 					const response = JSON.parse(xhr.responseText);
+					console.log(response.message)
 					header = response.mainData[0];
 					presets = header.filter((column) => column.includes("[PRESET]")).map((column) => column.replace("[PRESET]", ""));
 					rawData = parseNCSAndLHWData(response.mainData.slice(1), header);
 					parseMetaData(response.metaData.slice(1), response.metaData[0]);
 
 					data = startBuildHierarchy(rawData, presets, visibleTeams, true);
+					console.log('---------')
 					dataConnections = startBuildHierarchy(rawData, presets, visibleTeams, false);
+					console.log(dataConnections)
 					dataSimplified = startBuildHierarchy(rawData, presets, visibleTeams, false, 2);
 
 					introData = response.introData;
@@ -181,6 +187,8 @@
 		
 		//mode = d3.select("#viz-select").node().value === "0" ? "viz-select-0" : "viz-select-1";
 		mode = d3.select("#checkbox-viz-select-cluster").property("checked") ? "viz-select-0" : "viz-select-1";
+
+		categoryLegendVisible = mode === "viz-select-1";
 		
 		d3.select("#welcome-dialog .button.button-simplified").on("click", (event) => {
 			simplifiedMode = true;
@@ -214,16 +222,17 @@
 	<IntroTour bind:introTourStartTrigger bind:introData/>
 	<MinWidthDialog bind:checkShowDisplayCompatabilityTrigger/>
 	<DimensionsCalculator bind:width bind:height bind:canvasWidth bind:canvasHeight bind:radius bind:outerRadius bind:twist {BRAIN_SIZE} {BRAIN_ASPECT_RATIO}/>
+	<CategoryLegend  bind:visible={categoryLegendVisible} {ANIM_DURATION_OUT} {ANIM_DURATION_IN}/>
 
 	<CollapsibleRadialTree {BRAIN_SIZE} {BRAIN_ASPECT_RATIO} {TOOLTIP_WIDTH}
-		bind:data bind:dataSimplified bind:dataConnections bind:root bind:rootConnections bind:rootSimplified
+		bind:data bind:rawData bind:dataSimplified bind:dataConnections bind:root bind:rootConnections bind:rootSimplified
 		bind:simplifiedMode bind:twist
 		bind:width bind:height bind:canvasWidth bind:canvasHeight bind:radius bind:outerRadius
-		bind:controlsVisible bind:presets bind:checkboxesChecked bind:rerenderTreeTrigger bind:mode/>
+		bind:controlsVisible bind:presets bind:checkboxesChecked bind:rerenderTreeTrigger bind:mode bind:categoryLegendVisible/>
 
 	<TabView bind:data bind:rawData bind:showMainVizTrigger/>
 
-	<Legend bind:canvasWidth bind:canvasHeight/>
+	<Legend bind:canvasWidth bind:canvasHeight bind:welcomeDialogVisible bind:categoryLegendVisible/>
 	<Loader bind:visible={loaderVisible}/>
 
 </main>

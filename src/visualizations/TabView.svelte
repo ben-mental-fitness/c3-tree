@@ -73,6 +73,7 @@
 				.attr("class", "content")
 				.attr("id", (d) => `${d.id}-content`)
 				.style("display", (d, i) => i > -1 ? "none" : "default")
+				
 		}  else {
 
 			contents = d3.select("#tabs-wrapper .desktop-version .content-right")
