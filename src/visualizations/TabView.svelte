@@ -124,7 +124,7 @@
 			.style("margin", "0 auto")
 			.style('display', (d) => d.youtubeId !== undefined ? 'block' : 'none')
 			.append("iframe")
-			.attr("src", (d) => d.youtubeId !== undefined ? `https://www.youtube.com/embed/${d.youtubeId}?origin=https://c3tree.framed-mice.eu` : '')
+			.attr("src", (d) => d.youtubeId !== undefined ? `https://www.youtube-nocookie.com/embed/${d.youtubeId}?origin=https://c3tree.framed-mice.eu` : '')
 			.attr("width", "440")
 			.attr("height", "320")
 			.attr("frameborder", "0")
