@@ -116,6 +116,14 @@
 
 		welcomeDialogVisible = false;
 		checkShowDisplayCompatabilityTrigger = true;
+		d3.select("#yt-embed")
+			.append("iframe")
+			.attr("src", (d) => d.youtubeId !== undefined ? `https://www.youtube-nocookie.com/embed/${d.youtubeId}?origin=https://c3tree.framed-mice.eu` : '')
+			.attr("width", "440")
+			.attr("height", "320")
+			.attr("frameborder", "0")
+			//.attr("allow", "accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture")
+			.attr("allowfullscreen", true);
 
 		d3.select("#main-viz-wrapper")
 			.style("display", "none")
@@ -149,16 +157,13 @@
 			if(xhr.readyState === 4) {
 				if(xhr.status === 200) {
 					const response = JSON.parse(xhr.responseText);
-					console.log(response.message)
 					header = response.mainData[0];
 					presets = header.filter((column) => column.includes("[PRESET]")).map((column) => column.replace("[PRESET]", ""));
 					rawData = parseNCSAndLHWData(response.mainData.slice(1), header);
 					parseMetaData(response.metaData.slice(1), response.metaData[0]);
 
 					data = startBuildHierarchy(rawData, presets, visibleTeams, true);
-					console.log('---------')
 					dataConnections = startBuildHierarchy(rawData, presets, visibleTeams, false);
-					console.log(dataConnections)
 					dataSimplified = startBuildHierarchy(rawData, presets, visibleTeams, false, 2);
 
 					introData = response.introData;

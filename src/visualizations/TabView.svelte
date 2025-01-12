@@ -105,7 +105,7 @@
 			.attr("class", "content-text")
 			.style("padding", "0 30px 20px")
 			.style("white-space", "pre-wrap")
-			.text((d) => d.props.themeDescLong)
+			.text((d) => d.props.themeDescLong);
 
 		/*contents.append("div")
 			.style("width", "320px")
@@ -117,19 +117,13 @@
 			.attr("height", "240")
 			.attr("controls", true)
 			.text("Sorry, your browser doesn't support embedded videos.");*/
-
+			
 		contents.append("div")
 			.style("width", "440px")
 			.style("height", "320px")
 			.style("margin", "0 auto")
 			.style('display', (d) => d.youtubeId !== undefined ? 'block' : 'none')
-			.append("iframe")
-			.attr("src", (d) => d.youtubeId !== undefined ? `https://www.youtube-nocookie.com/embed/${d.youtubeId}?origin=https://c3tree.framed-mice.eu` : '')
-			.attr("width", "440")
-			.attr("height", "320")
-			.attr("frameborder", "0")
-			//.attr("allow", "accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture")
-			.attr("allowfullscreen", true);
+			.attr("id", "yt-embed");
 
 		const collapsibleContentToggler = contents.append("div")
 			.attr("class", "collapsible-content-toggler")
@@ -321,7 +315,7 @@
 		d3.select("#tabs-wrapper .button")
 			.style("margin", "20px 0")
 			.style("display", "inline-block")
-			.on("click", () => showMainVizTrigger = true)
+			.on("click", () => {document.getElementById("yt-embed").innerHTML = ""; showMainVizTrigger = true})
 
 		let selectedTab = data.children[0];
 
