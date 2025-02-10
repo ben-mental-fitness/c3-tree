@@ -886,8 +886,8 @@
 							.attr('stroke-width', checkboxesChecked['checkbox-white-backgrounds'] ? 10 : 1)
 
 
-						console.log(d3.selectAll('#sticky-tooltip .table-main .tooltip-tbody .papers-list-item'));
-						console.log(d3.selectAll('#sticky-tooltip .table-main .tooltip-tbody .papers-list-item').data());
+						// console.log(d3.selectAll('#sticky-tooltip .table-main .tooltip-tbody .papers-list-item'));
+						// console.log(d3.selectAll('#sticky-tooltip .table-main .tooltip-tbody .papers-list-item').data());
 
 						if(["Data","Team"].includes(getParentWithDepth(d, 1).data.text)) {
 

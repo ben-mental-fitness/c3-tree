@@ -7,8 +7,8 @@ export const buildHierarchy = ((parentLevel, data, presetsAvailable, presetsPare
 
 	data.filter((d) => parentLevel.text !== "" && parentLevel.text !== undefined && d.text !== undefined && d.text !== "" && d.parent === parentLevel.text).forEach((d) => {
 
-		if(d.parent === 'Team')
-			console.log(d);
+		// if(d.parent === 'Team')
+		// 	console.log(d);
 
 		if(filterSpecifics && d.text === 'Team')
 			return;
@@ -70,9 +70,8 @@ export const buildHierarchy = ((parentLevel, data, presetsAvailable, presetsPare
 		}
 
 		let specificMaxDepth = filterSpecifics && (level.text === "Teams" || level.text === "Team" || level.text === "Data") ? 2 : maxDepth;
-		if(level.text === 'Team')
-			console.log(level.text);
-			//console.log(level.text)
+		// if(level.text === 'Team')
+		// 	console.log(level.text);
 
 		buildHierarchy(level, data, presetsAvailable, level.presets, visibleTeams, filterSpecifics, depth + 1, specificMaxDepth);
 	});
