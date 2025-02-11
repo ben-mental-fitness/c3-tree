@@ -111,8 +111,7 @@
 
 		d3.select("#twist-circle")
 			.transition(animation)
-			.attr("opacity", checkboxesChecked["checkbox-twist-circle"] && !simplifiedMode ? 1.0 : 0.0)
-			
+			.attr("opacity", checkboxesChecked["checkbox-twist-circle"] && !simplifiedMode ? 1.0 : 0.0)		
 			.style("pointer-events", checkboxesChecked["checkbox-twist-circle"] && !simplifiedMode ? "visibleStroke" : "none")
 		d3.selectAll("#twist-circle-small-g *")
 			.transition(animation)
@@ -179,27 +178,10 @@
 
 		enter.append("text")
 			.attr("class", "node-text node-text-1st-line")
-			.attr("id", (d) => `${d.data.id}-text`)
-			//.attr("dy", mode === "viz-select-0" ? "0.32em" : "0em")
 			.attr("dy", "0em")
-			.attr("paint-order", "stroke")
-			.attr("stroke", "white")
-			.attr("stroke-width", 3)
-			//.attr("opacity", (d) => d.data.depth > 2 ? 1.0 : 0.0)
-			.attr("font-size", "10px")
-			.style("pointer-events", "none")
+			.attr("id", (d) => `${d.data.id}-text`)
 			.text((d) => mode === "viz-select-0" ? null : d.data.text.slice(0,10) + '...')
-		/*enter.append("text")
-			.attr("class", "node-text node-text-2nd-line")
-			.attr("id", (d) => `${d.data.id}-text-2nd-line`)
-			.attr("dy", "1em")
-			.attr("paint-order", "stroke")
-			.attr("stroke", "white")
-			.attr("stroke-width", 3)
-			//.attr("opacity", (d) => d.data.depth > 2 ? 1.0 : 0.0)
-			.attr("font-size", "10px")
-			.style("display", mode === "viz-select-0" ? null : "none")
-			.style("pointer-events", "none")*/
+		
 		enter.filter((d) => !d.children).append("rect")
 			.attr("class", "text-leaf-interact-area")
 			.attr("fill", "transparent")
@@ -221,18 +203,18 @@
 
 		update.selectAll(".node-text")
 			.attr("x", (d) => {
-				let angle = d.x + twist;
-				angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
+				const angle = (d.x + twist) % (Math.PI * 2.0);
+				// angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
 				return angle < Math.PI ? 12 : -12;
 			})
 			.attr("text-anchor", (d) => {
-				let angle = d.x + twist;
-				angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
+				const angle = (d.x + twist) % (Math.PI * 2.0);
+				// angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
 				return angle < Math.PI ? "start" : "end";
 			})
 			.attr("transform", (d) => {
-				let angle = d.x + twist;
-				angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
+				const angle = (d.x + twist) % (Math.PI * 2.0);
+				// angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
 				return `rotate(${angle >= Math.PI ? 180 : 0})`;
 			})
 
@@ -260,18 +242,18 @@
 
 				update.selectAll(".node-text")
 					.attr("x", (d) => {
-						let angle = d.x + twist;
-						angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
+						const angle = (d.x + twist) % (Math.PI * 2.0);
+						// angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
 						return angle < Math.PI ? 12 : -12;
 					})
 					.attr("text-anchor", (d) => {
-						let angle = d.x + twist;
-						angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
+						const angle = (d.x + twist) % (Math.PI * 2.0);
+						// angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
 						return angle < Math.PI ? "start" : "end";
 					})
 					.attr("transform", (d) => {
-						let angle = d.x + twist;
-						angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
+						const angle = (d.x + twist) % (Math.PI * 2.0);
+						// angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
 						return `rotate(${angle >= Math.PI ? 180 : 0})`;
 					})
 
@@ -306,13 +288,10 @@
 
 			})
 			.attr("text-anchor", (d, i) => {
-				let angle = twist + d.x;
-				angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
+				const angle = (d.x + twist) % (Math.PI * 2.0);
+				// angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
 				return angle < Math.PI ? "start" : "end"
 			})
-			.attr("dominant-baseline", "middle")
-			.attr("font-size", "20px")
-			.attr("font-weight", "bold")
 			.attr("opacity", (d) => d.data.visible && (!categoryLegendVisible || d.data.text === 'Data' || d.data.text === 'Team' || (mode === "viz-select-1" && d.data.text === 'Vaccination')) ? 1.0 : 0.0)
 			.attr("fill", (d) => mode === "viz-select-1" && d.data.text === 'Vaccination' ? 'rgb(160, 160, 160)' : d.data.color)
 			.text((d) => mode === "viz-select-1" && d.data.text === 'Vaccination' ? 'Publications' : d.data.text)
@@ -324,6 +303,7 @@
 
 		root = d3.hierarchy(data);
 		rootSimplified = d3.hierarchy(dataSimplified);
+		console.log(root);
 
 		const treeFunction = d3.cluster().size([2 * Math.PI, radius]);
 		
@@ -354,7 +334,6 @@
 					if(mode === "viz-select-1") {
 						d3.selectAll('.node-text')
 							.attr('font-weight', null)
-							//.attr('font-size', null)
 							.attr("fill", (d) => d.data.color)
 							.attr('stroke', null)
 							.attr('stroke-width', null);
@@ -365,12 +344,9 @@
 		//d3.select("#d3-canvas").selectAll("#main-transform").remove();
 		d3.select("#d3-canvas").selectAll("*").remove();
 		const svg = d3.select("#d3-canvas")
-			.attr("opacity", 1.0)
 			.attr("viewBox", [0, 0, canvasWidth, canvasHeight])
 			.attr("width", canvasWidth)
 			.attr("height", canvasHeight)
-			.attr("font-family", "sans-serif")
-			.attr("font-size", 10)
 			.append("g")
 			.attr("id", "main-transform")
 			//.attr("transform", `translate(${canvasWidth / 2.0},${canvasHeight / 2.0}) rotate(-70)`);
@@ -419,9 +395,6 @@
 			.attr("transform", (d) => `rotate(${d.x * 180 / Math.PI - 90}) 
 				translate(${radius + 100},0)
 				rotate(${-d.x * 180 / Math.PI + 90}) `)
-			/*.attr("transform", (d, i) => `translate(
-			${[0,3].includes(i) ? canvasWidth / 2.0 - radius : canvasWidth / 2.0 + radius},
-			${[0,1].includes(i) ? MARGIN.top : canvasHeight - MARGIN.bottom})`)*/
 			.attr("text-anchor", (d) => d.x < Math.PI ? "start" : "end")
 			.attr("dominant-baseline", "middle")
 			.attr("font-size", "20px")
@@ -478,10 +451,6 @@
 		twistCircleSmall.append("polygon")
 			.attr("id", "twist-circle-small-triangle")
 			.attr("points", "50 15, 100 100, 0 100")
-			.attr("fill", "transparent")
-			.attr("fill", "none")
-			.attr("stroke", "#e0e0e0")
-			.attr("stroke-width", 10)
 			.attr("transform", `
 				translate(${twistCircleSmallX},${twistCircleSmallY})
 				scale(0.7,0.7) translate(${- 50},${- 15 - 85 / 2.0 - 11})`);
@@ -489,11 +458,7 @@
 			.attr("id", "twist-circle-small")
 			.attr("transform", `translate(${twistCircleSmallX},${twistCircleSmallY})`)
 			.attr("r", 50)
-			.attr("fill", "none")
-			.attr("stroke", "#e0e0e0")
-			.attr("stroke-width", 10)
 			.style("pointer-events", "visibleStroke")
-			.style("cursor", "grab")
 			.on("mousedown.twistCircle", (event) => {
 				const startX = twistCircleSmallX - event.clientX;
 				const startY = twistCircleSmallY - event.clientY;
@@ -604,25 +569,11 @@
 			.attr("class", "node-text node-text-1st-line")
 			.attr("id", (d) => `${d.data.id}-text`)
 			.attr("dy", "0em")
-			.attr("paint-order", "stroke")
-			.attr("stroke", "white")
-			.attr("stroke-width", 3)
 			//.attr("opacity", (d) => d.data.depth > 2 ? 1.0 : 0.0)
 			.attr("fill", (d) => d.data.color)
-			.attr("font-size", "10px")
 			.style("pointer-events", "none")
 			.text((d) => mode === "viz-select-0" ? null : d.data.text.slice(0,10) + '...');
-		/*node.append("text")
-			.attr("class", "node-text node-text-2nd-line")
-			.attr("id", (d) => `${d.data.id}-text-2nd-line`)
-			.attr("dy", "1em")
-			.attr("paint-order", "stroke")
-			.attr("stroke", "white")
-			.attr("stroke-width", 3)
-			//.attr("opacity", (d) => d.data.depth > 2 ? 1.0 : 0.0)
-			.attr("fill", (d) => d.data.color)
-			.attr("font-size", "10px")
-			.style("pointer-events", "none");*/
+		
 		node.filter((d) => !d.children).append("rect")
 			.attr("class", "text-leaf-interact-area")
 			.attr("fill", "transparent")
@@ -646,12 +597,8 @@
 			.attr("class", "node-text node-text-1st-line")
 			.attr("id", (d) => `${d.data.id}-text`)
 			.attr("dy", "0em")
-			.attr("paint-order", "stroke")
-			.attr("stroke", "white")
-			.attr("stroke-width", 3)
 			.attr("opacity", (d) => d.data.depth === 2 ? 1.0 : 0.0)
 			.attr("fill", (d) => d.data.color)
-			.attr("font-size", "10px")
 			.style("pointer-events", "none");
 		nodeSimplified.filter((d) => !d.children).append("rect")
 			.attr("class", "text-leaf-interact-area")
@@ -1350,3 +1297,39 @@
 	</div>
 
 </div>
+
+
+<style>
+	.node-text {
+		paint-order: stroke;
+		stroke: white;
+		stroke-width: 3px;
+		font-size: 10px;
+	}
+
+	.category-labels {
+		dominant-baseline: middle;
+		font-size: 20px;
+		font-weight: bold;
+	}
+	
+	#d3-canvas {
+		opacity: 1.0;
+		font-family: sans-serif;
+		font-size: 10px;
+	}
+
+	#twist-circle-small-triangle {
+		fill: transparent;
+		fill: none;
+		stroke: #e0e0e0;
+		stroke-width: 10px;
+	}
+
+	#twist-circle-small {
+		fill: none;
+		stroke: #e0e0e0;
+		stroke-width: 10px;
+		cursor: grab;
+	}
+</style>
