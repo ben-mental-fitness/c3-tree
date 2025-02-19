@@ -418,6 +418,7 @@
 				const startX = canvasWidth / 2.0 - event.clientX;
 				const startY = canvasHeight / 2.0 - event.clientY;
 				let lastAngle = Math.atan2(startX, startY);
+				const startAngle = 2 * Math.PI - twist;
 
 				d3.select("body")
 					.on("mousemove.twistCircle", (event) => {
@@ -428,20 +429,38 @@
 						const deltaAngle = lastAngle - angle;
 						twist += deltaAngle;
 						lastAngle = angle;
+						
+						d3.select("#twist-circle-scalar").remove();
+						const arc = d3.arc()
+							.innerRadius(outerRadius - 5)
+							.outerRadius(outerRadius + 5)
+							.startAngle(0) 
+							.endAngle((startAngle + twist) % (2 * Math.PI)); 
 
-						rerenderTree(false);
+						svg.append("path")
+							.attr("d", arc)
+							.attr("transform", `rotate(${startAngle * (180/ Math.PI)})`)
+							.attr("id", "twist-circle-scalar")
+							.attr("fill", "none")
+							.attr("stroke", "#000000");
 					})
 					.on("mouseleave.twistCircle,mouseup.twistCircle", (event) => {
 						d3.select("body")
 							.on("mousemove.twistCircle", null)
 							.on("mouseleave.twistCircle", null)
 							.on("mouseup.twistCircle", null);
+
+						d3.select("#twist-circle-scalar").remove();
+						rerenderTree(false);
 					})
 					.on("mouseup", (event) => {
 						d3.select("body")
 							.on("mousemove.twistCircle", null)
 							.on("mouseleave.twistCircle", null)
 							.on("mouseup.twistCircle", null);
+						
+						d3.select("#twist-circle-scalar").remove();
+						rerenderTree(false);
 					});
 			});
 
