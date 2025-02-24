@@ -41,6 +41,16 @@
 	export let categoryLegendVisible;
 	
 	let selectedNode = undefined;
+	let highlightedPaths = {"_groups" : [[]]};
+	let visMode2Nodes = undefined; 
+	// TODO - Unmount elements when not used 
+	// let curvesWrapperCenter = undefined;
+	// let curvesWrapperSimplified = undefined;
+	// let curvesWrapperLeaves = undefined;
+
+	const updatedMountedElements = () => {
+		return;
+	}
 
 	const nodeOnClick = (d) => {
 		if("Members" in d.data.props.info_main) {
@@ -82,12 +92,9 @@
 				createCollapsableRadialTree(dataConnections, separationFunction, radius)
 			return;
 		}
-		//console.log(mode);
 		const filteredRoot = root;
 		
 		categoryLegendVisible = mode === "viz-select-1";
-
-		//console.log(root, filteredRoot);
 
 		simplifiedMode = checkboxesChecked["checkbox-simple-view"];
 
@@ -127,44 +134,63 @@
 		d3.select("#curves-wrapper-simplified")
 			.transition(animation)
 			.attr("opacity",  simplifiedMode ? 1.0 : 0.0)
+		
+		// TODO - Unmount instead of hiding elements
+		// curvesWrapperCenter = d3.select("#curves-wrapper-center");
+		// curvesWrapperSimplified = d3.select("#curves-wrapper-simplified");
+		// if (curvesWrapperCenter.attr("opacity") == 0.0) { 
+		// 	curvesWrapperCenter.remove();
+		// }
+		// if (curvesWrapperSimplified.attr("opacity") == 0.0) { 
+		// 	curvesWrapperSimplified.remove();
+		// }
 
-		const curvesCenterUpdate = d3.select("#curves-wrapper-center")
-			.selectAll(".center-to-leaf-path")
-			.data(filteredRoot.links())//, (d) => d.target.data.id)
-			.call((update) => {
-				update.transition(animation)
-					.attr("d", radialTreeLineFunction)
-					.attr("stroke", (d) => d.target.data.color)
-					.attr("stroke-width", 1.5)
-					.attr("opacity", (d) => d.source.data.visible/* && d.target.data.visible*/ ? 1.0 : 0.0)
-			});
+
+		if (!simplifiedMode && mode === "viz-select-0") { 
+			const curvesCenterUpdate = d3.select("#curves-wrapper-center")
+				.selectAll(".center-to-leaf-path")
+				.data(filteredRoot.links())//, (d) => d.target.data.id)
+				.call((update) => {
+					update.transition(animation)
+						.attr("d", radialTreeLineFunction)
+						.attr("stroke", (d) => d.target.data.color)
+						.attr("stroke-width", 1.5)
+						.attr("opacity", (d) => d.source.data.visible/* && d.target.data.visible*/ ? 1.0 : 0.0)
+				});
+		}
 
 		d3.select("#curves-wrapper-leaves")
 			.transition(animation)
 			.attr("opacity",  !simplifiedMode && mode === "viz-select-1" ? 1.0 : 0.0);
-		d3.select("#curves-wrapper-leaves")
-			.selectAll(".leaf-to-leaf-path")
-			.data(filteredRoot.leaves().flatMap((leaf) => {
-				return filteredRoot.leaves().filter(
-					(d) => d.data.props.data_source.some(v => leaf.data.props.data_source.includes(v)) && d !== leaf).map(
-					(d) => [leaf, d]);
-			}))//, (d) => `${d[0].data.id}-${d[1].data.id}`)
-			.call((update) => {
-				update.transition(animation).attr("d", ([i, o]) => connectedEdgesLineFunction(i.path(o)))
-					.attr("opacity", (d) => d[0].data.visible && d[1].data.visible ? 0.1 : 0.0);
-			});
+		
+		if (!simplifiedMode && mode === "viz-select-1") {
+			d3.select("#curves-wrapper-leaves")
+				.selectAll(".leaf-to-leaf-path")
+				.data(filteredRoot.leaves().flatMap((leaf) => {
+					return filteredRoot.leaves().filter(
+						(d) => d.data.props.data_source.some(v => leaf.data.props.data_source.includes(v)) && d !== leaf).map(
+						(d) => [leaf, d]);
+				}))
+				.call((update) => {
+					update.transition(animation).attr("d", ([i, o]) => connectedEdgesLineFunction(i.path(o)))
+						.attr("opacity", (d) => d[0].data.visible && d[1].data.visible ? 0.1 : 0.0);
+				});
+		}
 
 		d3.select("#outer-node-group-wrapper")
 			.transition(animation)
 			.attr("opacity",  !simplifiedMode ? 1.0 : 0.0)
-		d3.select("#outer-node-group-wrapper")
-			.selectAll(".outer-node-group")
-			.data(filteredRoot.descendants().filter((d) => d.children && d3.sum(d.children.map((child) => child.children !== undefined ? 1 : 0)) === 0))//, (d) => d.data.id)
-			.transition(animation)
-			.attr("class", "outer-node-group")
-			.attr("transform", (d) => `rotate(${d.x * 180 / Math.PI - 90}) translate(${radius + 130},0)`)
-			.attr("opacity", (d) => d.data.visible ? 1 : 0)
-			.style("pointer-events", (d) => d.data.visible && !simplifiedMode ? "all" : "none")
+		
+		if (!simplifiedMode) { 
+			d3.select("#outer-node-group-wrapper")
+				.selectAll(".outer-node-group")
+				.data(filteredRoot.descendants().filter((d) => d.children && d3.sum(d.children.map((child) => child.children !== undefined ? 1 : 0)) === 0))//, (d) => d.data.id)
+				.transition(animation)
+				.attr("class", "outer-node-group")
+				.attr("transform", (d) => `rotate(${d.x * 180 / Math.PI - 90}) translate(${radius + 130},0)`)
+				.attr("opacity", (d) => d.data.visible ? 1 : 0)
+				.style("pointer-events", (d) => d.data.visible && !simplifiedMode ? "all" : "none")
+		}
 
 		const nodes = d3.selectAll("#node-group-wrapper").selectAll(".node-group")
 			.data(filteredRoot.descendants());/*, (d) => {
@@ -296,6 +322,12 @@
 			.attr("fill", (d) => mode === "viz-select-1" && d.data.text === 'Vaccination' ? 'rgb(160, 160, 160)' : d.data.color)
 			.text((d) => mode === "viz-select-1" && d.data.text === 'Vaccination' ? 'Publications' : d.data.text)
 
+		// Get visible nodes in connected view
+		if (mode === "viz-select-1") {
+			visMode2Nodes = d3.selectAll(".node-text")
+				.filter((d) => (d.data.depth > 2 || d.data.depth === d.data.maxDepth) && (d.data.visible || d.parent?.data.visible) && checkboxesChecked["checkbox-leaf-titles"] && !simplifiedMode && !d.children)
+		}
+
 		setMouseEvents();
 	};
 
@@ -303,7 +335,6 @@
 
 		root = d3.hierarchy(data);
 		rootSimplified = d3.hierarchy(dataSimplified);
-		console.log(root);
 
 		const treeFunction = d3.cluster().size([2 * Math.PI, radius]);
 		
@@ -323,10 +354,12 @@
 			.on("click", (event) => {
 
 				if(!d3.select("#sticky-tooltip").empty()) {
-					d3.select("#curves-wrapper-leaves").selectAll(".leaf-to-leaf-path")
-						.attr("stroke", "#d0d0d0")
-						.attr('stroke-width', 1)
-						.raise();
+					if (highlightedPaths._groups[0].length > 0) {
+						highlightedPaths
+							.attr("stroke", "#d0d0d0")
+							.attr('stroke-width', 1)
+							.raise();
+					}
 					selectedNode = undefined;
 					d3.select("#sticky-tooltip").remove();
 					d3.select("#sticky-tooltip-overlay").remove();
@@ -588,12 +621,13 @@
 			.attr("class", "node-text node-text-1st-line")
 			.attr("id", (d) => `${d.data.id}-text`)
 			.attr("dy", "0em")
-			//.attr("opacity", (d) => d.data.depth > 2 ? 1.0 : 0.0)
 			.attr("fill", (d) => d.data.color)
 			.style("pointer-events", "none")
 			.text((d) => mode === "viz-select-0" ? null : d.data.text.slice(0,10) + '...');
 		
-		node.filter((d) => !d.children).append("rect")
+		node.filter((d) => !d.children)
+			// .attr("class", mode === "viz-select-0" ? "node-group mode-zero" : "node-group mode-one")
+			.append("rect")
 			.attr("class", "text-leaf-interact-area")
 			.attr("fill", "transparent")
 			.attr("opacity", 0.5)
@@ -637,7 +671,6 @@
 			.attr("class", "node-circle")
 			.attr("fill", (d) => d.data.color)
 			.attr("r", (d) => d.data.props.status === "Accepted" || d.data.props.status === "Published" ? 4 : d.data.props.status === "Manuscript" ? 0 : 2)
-			//.attr("opacity", (d) => d.children ? 0.0 : 1.0)
 			.attr("transform", "translate(4,0)")
 			.attr("opacity", (d) => d.depth === 0 ? 0.0 : 1.0);
 
@@ -646,7 +679,6 @@
 			.attr("fill", "transparent")
 			.attr("stroke", (d) => d.data.color)
 			.attr("stroke-width", 2)
-			//.attr("opacity", (d) => d.children ? 0.0 : 1.0)
 			.attr("opacity", (d) => d.depth === 0 ? 0.0 : 1.0)
 			.attr("transform", "translate(4,0)")
 			.attr("r", (d) => 4);
@@ -785,10 +817,12 @@
 						.style("display", "block")
 						.on("click", () => {
 							if(selectedNode !== undefined) {
-								d3.select("#curves-wrapper-leaves").selectAll(".leaf-to-leaf-path")
-									.attr("stroke", "#d0d0d0")
-									.attr('stroke-width', 1)
-									.raise();
+								if (highlightedPaths._groups[0].length > 0) {
+									highlightedPaths
+										.attr("stroke", "#d0d0d0")
+										.attr('stroke-width', 1)
+										.raise();
+								}
 								selectedNode = undefined;
 							}
 							d3.select("#sticky-tooltip").remove();
@@ -825,16 +859,19 @@
 						})
 
 					if(selectedNode !== undefined) {
-						d3.select("#curves-wrapper-leaves").selectAll(".leaf-to-leaf-path")
-							.attr("stroke", "#d0d0d0")
-							.attr('stroke-width', 1)
-							.raise();
+						if (highlightedPaths._groups[0].length > 0) {
+							highlightedPaths
+								.attr("stroke", "#d0d0d0")
+								.attr('stroke-width', 1)
+								.raise();
+						}
 					}
 					selectedNode = d;
 
-					//d3.select("#curves-wrapper-leaves").selectAll(".leaf-to-leaf-path").filter((d_) => d_[0].data.id === d.data.id || d_[1].data.id === d.data.id)
-					d3.select("#curves-wrapper-leaves").selectAll(".leaf-to-leaf-path")
+					highlightedPaths = d3.select("#curves-wrapper-leaves").selectAll(".leaf-to-leaf-path")
 						.filter((d_) => (["Data","Team"].includes(getParentWithDepth(d_[0], 1).data.text) || ["Data","Team"].includes(getParentWithDepth(d_[1], 1).data.text)) && (d_[0].data.id === d.data.id || d_[1].data.id === d.data.id))
+						
+					highlightedPaths
 						.attr("stroke", "#0632E4")
 						.attr('stroke-width', 2)
 						.raise();
@@ -928,24 +965,6 @@
 						.append("p")
 						.style("font-weight", "bold")
 						.text(d.data.text);
-
-					/*const researchQuestion = getParentWithDepth(d, 2);
-					const researchQuestionRow = d3.select("#hover-tooltip .tooltip-tbody").append("tr");
-					researchQuestionRow.append("td").style("width", `${TOOLTIP_WIDTH * 0.2}px`)
-					.append("p")
-					.style("font-weight", "bold")
-					.text("Research Question")
-					researchQuestionRow.append("td").append("p").text(researchQuestion.data.text);
-					const subquestion = getParentWithDepth(d, 3);
-					if(subquestion) {
-					const subquestionRow = d3.select("#hover-tooltip .tooltip-tbody").append("tr");
-					subquestionRow.append("td").style("width", `${TOOLTIP_WIDTH * 0.2}px`)
-					.append("p")
-					.style("font-weight", "bold")
-					.text("Subquestion")
-					subquestionRow.append("td").append("p").text(subquestion.data.text);
-					}*/
-
 					
 					Object.entries(d.data.props.info_main).forEach(([key, value]) => {
 						if(value && Array.isArray(value)) {
@@ -1016,11 +1035,11 @@
 							.text("Connections")
 
 						let connectedNodes;
-
+						
 						if(["Data","Team"].includes(getParentWithDepth(d, 1).data.text)) {
-							connectedNodes = d3.selectAll('.node-group').filter((d_) => 
+							connectedNodes = visMode2Nodes.filter((d_) => 
 								d_.data.props.data_source && d_.data.props.data_source.some(v => d.data.props.data_source.includes(v)));
-
+							
 							// accordion
 
 							const tooltipConnectionRow = d3.select("#hover-tooltip .table-main .tooltip-tbody");
@@ -1100,11 +1119,10 @@
 								}
 							});
 
-							//
 						} else {
-							connectedNodes = d3.selectAll('.node-group').filter((d_) => 
-								d_.data.props.data_source && d_.data.props.data_source.some(v => d.data.props.data_source.includes(v)) && (["Data","Team"].includes(getParentWithDepth(d_, 1).data.text) || d === d_));
-
+							connectedNodes = visMode2Nodes.filter((d_) => 
+								d_.data.props.data_source && d_.data.props.data_source.some(v => d.data.props.data_source.includes(v)));
+							
 							connectedNodes.filter((d_) => d_ !== d).each((d_) => {
 								const mainInfoRow = d3.select("#hover-tooltip .table-main .tooltip-tbody");
 								mainInfoRow.append("tr").append("td")
@@ -1112,8 +1130,7 @@
 									.append("p")
 									.text(d_.data.text);
 							});
-						}
-						
+						}					
 
 						connectedNodes.selectAll('.node-text')
 							.attr('font-weight', 'bold')
@@ -1161,22 +1178,22 @@
 				if(!collapsibleInfo)
 					d3.select("#hover-tooltip .tooltip-collapsible-button").style("display", "none").style("pointer-events", "none");
 				else {
-
-
 					d3.select("#hover-tooltip .tooltip-collapsible-button").style("display", "block").style("pointer-events", "all");
 				}
 
 				if(selectedNode === undefined) {
 					d3.selectAll(`#${d.data.id}-text,#${d.data.id}-text-2nd-line`).style("font-weight", "bold");
 
-					d3.select("#curves-wrapper-leaves").selectAll(".leaf-to-leaf-path")
-						.filter((d_) => (["Data","Team"].includes(getParentWithDepth(d_[0], 1).data.text) || ["Data","Team"].includes(getParentWithDepth(d_[1], 1).data.text)) && (d_[0].data.id === d.data.id || d_[1].data.id === d.data.id))
-							.attr("stroke", "#0632E4")
-							.attr('stroke-width', 2)
-							.raise();
+					// TODO
+					// d3.select("#curves-wrapper-leaves").selectAll(".leaf-to-leaf-path")
+					// 	.filter((d_) => (["Data","Team"].includes(getParentWithDepth(d_[0], 1).data.text) || ["Data","Team"].includes(getParentWithDepth(d_[1], 1).data.text)) && (d_[0].data.id === d.data.id || d_[1].data.id === d.data.id))
+					// 		.attr("stroke", "#0632E4")
+					// 		.attr('stroke-width', 2)
+					// 		.raise();
 				}
 			})
 			.on("mousemove", (event, d) => {
+
 				//if(d3.select("#sticky-tooltip").empty()) {
 				const boundingRect = d3.select("#hover-tooltip.tooltip").node().getBoundingClientRect();
 				const pointerPos = [event.pageX, event.pageY];
@@ -1217,16 +1234,6 @@
 					else
 						left = x + width / 2.0;
 
-
-					/*if(left + TOOLTIP_WIDTH >= width - 20)
-						left -= left + TOOLTIP_WIDTH - (width - 20);
-					if(left < 20)
-						left -= (left - 20);
-					if(top + boundingRect.height >= height - 20)
-						top -= top + boundingRect.height - (height - 20)
-					if(top < 20)
-						top -= (top - 20);*/
-
 					d3.select("#hover-tooltip.tooltip")
 						//.style("left", `${pointerPos[0] + xOffset + 10}px`)
 						.style("left", `${left}px`)
@@ -1237,13 +1244,16 @@
 				}
 			})
 			.on("mouseleave", (event, d) => {
+
 				d3.select("#hover-tooltip.tooltip").style("display", "none");
 				d3.selectAll(`#${d.data.id}-text,#${d.data.id}-text-2nd-line`).style("font-weight", null);
 				if(selectedNode === undefined) {
-					d3.select("#curves-wrapper-leaves").selectAll(".leaf-to-leaf-path")
-						.attr("stroke", "#d0d0d0")
-						.attr('stroke-width', 1)
-						.raise();
+					if (highlightedPaths._groups[0].length > 0) {
+						highlightedPaths
+							.attr("stroke", "#d0d0d0")
+							.attr('stroke-width', 1)
+							.raise();
+					}
 				}
 
 				if(mode === "viz-select-1" && d3.select("#sticky-tooltip").empty()) {
