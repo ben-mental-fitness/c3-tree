@@ -172,9 +172,66 @@
 						(d) => [leaf, d]);
 				}))
 				.call((update) => {
-					update.transition(animation).attr("d", ([i, o]) => connectedEdgesLineFunction(i.path(o)))
+					// update.transition(animation).attr("d", ([i, o]) => connectedEdgesLineFunction(i.path(o)))
+						// .attr("opacity", (d) => d[0].data.visible && d[1].data.visible ? 0.1 : 0.0);
+					update.attr("d", ([i, o]) => connectedEdgesLineFunction(i.path(o)))
 						.attr("opacity", (d) => d[0].data.visible && d[1].data.visible ? 0.1 : 0.0);
 				});
+
+			// TODO - Wait 1 secs & convert to PNG
+			setTimeout(() => {
+				const svgWrapper = document.querySelector("#d3-canvas");
+				const width = svgWrapper.getAttribute('width');
+				const height = svgWrapper.getAttribute('height');
+				const svgExport = document.querySelector("#curves-wrapper-leaves");
+											
+				const svgData = 
+					`<svg opacity="1.0" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0,0,${width},${height}" width="${width}" height="${height}">
+					<g id="main-transform" transform="translate(${width / 2},${height / 2}) rotate(0)">
+					${new XMLSerializer().serializeToString(svgExport)}
+					</g></svg>`;
+
+					// <g id="main-transform" transform="translate(610,365) rotate(0)">
+
+				const svgDataBase64 = btoa(unescape(encodeURIComponent(svgData)));
+				const svgDataUrl = `data:image/svg+xml;base64,${svgDataBase64}`;
+				
+				// const blob = new Blob([svgData], { type: "image/svg+xml" })
+				// const svgDataUrl = URL.createObjectURL(blob)
+				
+				// const svgDataUtf8 = unescape(encodeURIComponent(svgData));
+				// const svgDataUrl = `data:image/svg+xml;utf8,${svgDataUtf8}`;
+				
+				const image = new Image();
+
+				image.onload = (() => {
+					const width = svgWrapper.getAttribute('width');
+					const height = svgWrapper.getAttribute('height');
+					const canvas = document.createElement('canvas');
+
+					canvas.setAttribute('width', width);
+					canvas.setAttribute('height', height);
+					canvas.style.width = width;
+					canvas.style.height = height;
+
+					const context = canvas.getContext('2d');
+					context.beginPath();
+					context.drawImage(image, 0, 0, parseInt(width), parseInt(height));
+					context.fill();
+
+					document.getElementById("canvas-wrapper").append(canvas);
+
+					const dataUrl = canvas.toDataURL('image/png');
+					document.querySelector('#curves-wrapper-leaves-img').src = dataUrl;
+
+					d3.select("#curves-wrapper-leaves").remove();
+					canvas.remove();
+					document.getElementById("main-transform").appendChild(document.getElementById("curves-wrapper-leaves-img"));
+				})
+
+				image.setAttribute("src", svgDataUrl);
+				image.setAttribute("alt", "Something went wrong.");
+			}, 1000)
 		}
 
 		d3.select("#outer-node-group-wrapper")
@@ -1283,8 +1340,9 @@
 
 <div id="main-viz-wrapper" style="opacity: 0.0;display: none;">
 
-	<div class="canvas-wrapper" >
-		<svg id="d3-canvas" opacity="0.0"/>
+	<div class="canvas-wrapper" id="canvas-wrapper">
+		<svg id="d3-canvas" opacity="0.0" version="1.1" xmlns="http://www.w3.org/2000/svg"/>
+		<img alt="Connections view" id="curves-wrapper-leaves-img"/>
 	</div>
 
 	<!-- tooltip -->
