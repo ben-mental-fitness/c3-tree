@@ -226,7 +226,7 @@
 
 					d3.select("#curves-wrapper-leaves").remove();
 					canvas.remove();
-					document.getElementById("main-transform").appendChild(document.getElementById("curves-wrapper-leaves-img"));
+					// document.getElementById("main-transform").appendChild(document.getElementById("curves-wrapper-leaves-img"));
 				})
 
 				image.setAttribute("src", svgDataUrl);
@@ -1418,5 +1418,12 @@
 		stroke: #e0e0e0;
 		stroke-width: 10px;
 		cursor: grab;
+	}
+
+	#curves-wrapper-leaves-img {
+		position: absolute;
+		left: 0;
+		top: 0;
+		z-index: -1;
 	}
 </style>
