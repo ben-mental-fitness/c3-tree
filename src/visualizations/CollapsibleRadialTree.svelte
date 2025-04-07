@@ -43,14 +43,7 @@
 	let selectedNode = undefined;
 	let highlightedPaths = {"_groups" : [[]]};
 	let visMode2Nodes = undefined; 
-	// TODO - Unmount elements when not used 
-	// let curvesWrapperCenter = undefined;
-	// let curvesWrapperSimplified = undefined;
-	// let curvesWrapperLeaves = undefined;
 
-	const updatedMountedElements = () => {
-		return;
-	}
 
 	const nodeOnClick = (d) => {
 		if("Members" in d.data.props.info_main) {
@@ -77,12 +70,7 @@
 
 
 	const rerenderTree = async (animated = true) => {
-
 		if(!root || !rootSimplified) return;
-
-		//const condition = (d) => d.visible;
-		//console.log(mode === "viz-select-0");
-		//const filteredRoot = mode === "viz-select-0" ? d3.hierarchy(filterTree(root.data, condition)) : d3.hierarchy(filterTree(rootConnections.data, condition));
 
 		if(mode !== prevMode) {
 			prevMode = mode;
@@ -112,10 +100,6 @@
 
 		const animation = d3.transition().duration(animated ? 750 : 0).ease(d3.easeQuadOut);
 
-		// curves from center to leaves
-		//d3.selectAll(".center-to-leaf-path").remove();
-
-
 		d3.select("#twist-circle")
 			.transition(animation)
 			.attr("opacity", checkboxesChecked["checkbox-twist-circle"] && !simplifiedMode ? 1.0 : 0.0)		
@@ -134,17 +118,6 @@
 		d3.select("#curves-wrapper-simplified")
 			.transition(animation)
 			.attr("opacity",  simplifiedMode ? 1.0 : 0.0)
-		
-		// TODO - Unmount instead of hiding elements
-		// curvesWrapperCenter = d3.select("#curves-wrapper-center");
-		// curvesWrapperSimplified = d3.select("#curves-wrapper-simplified");
-		// if (curvesWrapperCenter.attr("opacity") == 0.0) { 
-		// 	curvesWrapperCenter.remove();
-		// }
-		// if (curvesWrapperSimplified.attr("opacity") == 0.0) { 
-		// 	curvesWrapperSimplified.remove();
-		// }
-
 
 		if (!simplifiedMode && mode === "viz-select-0") { 
 			const curvesCenterUpdate = d3.select("#curves-wrapper-center")
@@ -176,7 +149,7 @@
 						.attr("opacity", (d) => d[0].data.visible && d[1].data.visible ? 0.1 : 0.0);
 				});
 
-			// TODO - Wait 1 secs & convert to PNG
+			// Wait 1 secs & convert to PNG
 			setTimeout(() => {
 				const svgWrapper = document.querySelector("#d3-canvas");
 				const width = svgWrapper.getAttribute('width');
@@ -239,10 +212,7 @@
 		}
 
 		const nodes = d3.selectAll("#node-group-wrapper").selectAll(".node-group")
-			.data(filteredRoot.descendants());/*, (d) => {
-				//console.log(d.data.id)
-				return d.data.id
-			});*/
+			.data(filteredRoot.descendants());
 
 		const enter = nodes.enter()
 			.append('g')
@@ -264,8 +234,6 @@
 			.style("cursor", "pointer")
 
 		const exit = nodes.exit().remove();
-
-		//updateLeafTextAppearence();
 
 		const update = enter.merge(nodes);
 
@@ -934,10 +902,6 @@
 							.attr('stroke', checkboxesChecked['checkbox-white-backgrounds'] ? '#ffffff' : '#0632E4')
 							.attr('stroke-width', checkboxesChecked['checkbox-white-backgrounds'] ? 10 : 1)
 
-
-						// console.log(d3.selectAll('#sticky-tooltip .table-main .tooltip-tbody .papers-list-item'));
-						// console.log(d3.selectAll('#sticky-tooltip .table-main .tooltip-tbody .papers-list-item').data());
-
 						if(["Data","Team"].includes(getParentWithDepth(d, 1).data.text)) {
 
 							const connectedPublications = connectedNodes.filter((d_) => d_ !== d).data();
@@ -1230,7 +1194,7 @@
 				if(selectedNode === undefined) {
 					d3.selectAll(`#${d.data.id}-text,#${d.data.id}-text-2nd-line`).style("font-weight", "bold");
 
-					// TODO
+					// TODO - Update with new connections image
 					// d3.select("#curves-wrapper-leaves").selectAll(".leaf-to-leaf-path")
 					// 	.filter((d_) => (["Data","Team"].includes(getParentWithDepth(d_[0], 1).data.text) || ["Data","Team"].includes(getParentWithDepth(d_[1], 1).data.text)) && (d_[0].data.id === d.data.id || d_[1].data.id === d.data.id))
 					// 		.attr("stroke", "#0632E4")
