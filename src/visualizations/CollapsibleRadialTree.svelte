@@ -889,12 +889,11 @@
 						}
 					}
 					selectedNode = d;
-					console.log(selectedNode);
 
-					// TODO Recreate leaf-to-leaf paths if non-existent
+					// Create leaf-to-leaf paths to be highlighted
 					if (d3.select("#curves-wrapper-leaves").selectChildren()["_groups"][0].length == 0) {
 						const leaves = root.leaves();
-						d3.select("#curves-wrapper-leaves")
+						highlightedPaths = d3.select("#curves-wrapper-leaves")
 							.selectAll("path")
 							.data(() => {
 								return leaves.filter(
@@ -910,8 +909,6 @@
 							.attr("d", ([i, o]) => connectedEdgesLineFunction(i.path(o)))
 							.raise();
 					}
-
-					highlightedPaths = d3.select("#curves-wrapper-leaves").selectAll(".leaf-to-leaf-path");
 
 					if(mode === "viz-select-1") {
 						const connectedNodes = d3.selectAll('.node-group').filter((d_) => 
@@ -1061,6 +1058,26 @@
 						}
 					});
 					if(mode === "viz-select-1") {
+
+						// Create leaf-to-leaf paths to be highlighted
+						if (d3.select("#curves-wrapper-leaves").selectChildren()["_groups"][0].length == 0) {
+							const leaves = root.leaves();
+							highlightedPaths = d3.select("#curves-wrapper-leaves")
+								.selectAll("path")
+								.data(() => {
+								return leaves.filter(
+									(d_) => d_.data.props.data_source.some(v => d.data.props.data_source.includes(v)) && d_ !== d
+									).map((d_) => [d, d_]);
+								})
+								.join("path")
+								.attr("class", "leaf-to-leaf-path")
+								.attr("fill", "tansparent")
+								.attr("stroke", "#0632E4")
+								.attr("stroke-width", 2.0)
+								.attr("opacity", 0.5)
+								.attr("d", ([i, o]) => connectedEdgesLineFunction(i.path(o)))
+								.raise();
+						}
 
 						d3.select("#hover-tooltip .table-main .tooltip-tbody").append("tr").append("td").style("width", `${TOOLTIP_WIDTH * 0.2}px`)
 							.append("p")
@@ -1216,13 +1233,6 @@
 
 				if(selectedNode === undefined) {
 					d3.selectAll(`#${d.data.id}-text,#${d.data.id}-text-2nd-line`).style("font-weight", "bold");
-
-					// TODO - Update with new connections image
-					// d3.select("#curves-wrapper-leaves").selectAll(".leaf-to-leaf-path")
-					// 	.filter((d_) => (["Data","Team"].includes(getParentWithDepth(d_[0], 1).data.text) || ["Data","Team"].includes(getParentWithDepth(d_[1], 1).data.text)) && (d_[0].data.id === d.data.id || d_[1].data.id === d.data.id))
-					// 		.attr("stroke", "#0632E4")
-					// 		.attr('stroke-width', 2)
-					// 		.raise();
 				}
 			})
 			.on("mousemove", (event, d) => {
