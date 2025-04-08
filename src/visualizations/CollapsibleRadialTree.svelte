@@ -44,7 +44,6 @@
 	let highlightedPaths = {"_groups" : [[]]};
 	let visMode2Nodes = undefined; 
 
-
 	const nodeOnClick = (d) => {
 		if("Members" in d.data.props.info_main) {
 			if(visibleTeams.indexOf(d.data.text) !== -1) {
@@ -137,6 +136,26 @@
 			.attr("opacity",  !simplifiedMode && mode === "viz-select-1" ? 1.0 : 0.0);
 		
 		if (!simplifiedMode && mode === "viz-select-1") {
+
+			// Recreate leaf-to-leaf paths if non-existent
+			if (d3.select("#curves-wrapper-leaves").selectChildren()["_groups"][0].length == 0) {
+				const leaves = root.leaves();
+				const svg = d3.select("#curves-wrapper-leaves")
+					.selectAll("path")
+					.data(leaves.flatMap((leaf) => {
+						return leaves.filter(
+							(d) => d.data.props.data_source.some(v => leaf.data.props.data_source.includes(v)) && d !== leaf).map(
+							(d) => [leaf, d]);
+						}))
+					.join("path")
+					.attr("class", "leaf-to-leaf-path")
+					.attr("fill", "tansparent")
+					.attr("stroke", "#d0d0d0")
+					.attr("stroke-width", 1.0)
+					.attr("opacity", 0.5)
+					.attr("d", ([i, o]) => connectedEdgesLineFunction(i.path(o)));
+			}
+
 			d3.select("#curves-wrapper-leaves")
 				.selectAll(".leaf-to-leaf-path")
 				.data(filteredRoot.leaves().flatMap((leaf) => {
@@ -152,8 +171,8 @@
 			// Wait 1 secs & convert to PNG
 			setTimeout(() => {
 				const svgWrapper = document.querySelector("#d3-canvas");
-				const width = svgWrapper.getAttribute('width');
-				const height = svgWrapper.getAttribute('height');
+				const width = parseInt(svgWrapper.getAttribute('width'));
+				const height = parseInt(svgWrapper.getAttribute('height'));
 				const svgExport = document.querySelector("#curves-wrapper-leaves");
 											
 				const svgData = 
@@ -186,7 +205,7 @@
 					const dataUrl = canvas.toDataURL('image/png');
 					document.getElementById('curves-wrapper-leaves-img').src = dataUrl;
 
-					d3.select("#curves-wrapper-leaves").remove();
+					d3.select("#curves-wrapper-leaves").selectAll("*").remove();
 					canvas.remove();
 					document.getElementById('curves-wrapper-leaves-img').style.opacity = "1.0";
 				})
@@ -346,7 +365,7 @@
 	};
 
 	const createCollapsableRadialTree = (data, separationFunction, radius) => {
-
+		console.log("Creating tree...");
 		root = d3.hierarchy(data);
 		rootSimplified = d3.hierarchy(dataSimplified);
 
@@ -364,29 +383,24 @@
 				setTreeVisibility(d.data, checkboxesChecked["checkbox-detailed-view-team"]);
 		});
 
-		d3.select("body")
-			.on("click", (event) => {
-
-				if(!d3.select("#sticky-tooltip").empty()) {
-					if (highlightedPaths._groups[0].length > 0) {
-						highlightedPaths
-							.attr("stroke", "#d0d0d0")
-							.attr('stroke-width', 1)
-							.raise();
-					}
-					selectedNode = undefined;
-					d3.select("#sticky-tooltip").remove();
-					d3.select("#sticky-tooltip-overlay").remove();
-
-					if(mode === "viz-select-1") {
-						d3.selectAll('.node-text')
-							.attr('font-weight', null)
-							.attr("fill", (d) => d.data.color)
-							.attr('stroke', null)
-							.attr('stroke-width', null);
-					}
+		d3.select("body").on("click", (event) => {
+			if(!d3.select("#sticky-tooltip").empty()) {
+				if (highlightedPaths._groups[0].length > 0) {
+					highlightedPaths.remove();
 				}
-			});
+				selectedNode = undefined;
+				d3.select("#sticky-tooltip").remove();
+				d3.select("#sticky-tooltip-overlay").remove();
+
+				if(mode === "viz-select-1") {
+					d3.selectAll('.node-text')
+						.attr('font-weight', null)
+						.attr("fill", (d) => d.data.color)
+						.attr('stroke', null)
+						.attr('stroke-width', null);
+				}
+			}
+		});
 
 		//d3.select("#d3-canvas").selectAll("#main-transform").remove();
 		d3.select("#d3-canvas").selectAll("*").remove();
@@ -832,10 +846,7 @@
 						.on("click", () => {
 							if(selectedNode !== undefined) {
 								if (highlightedPaths._groups[0].length > 0) {
-									highlightedPaths
-										.attr("stroke", "#d0d0d0")
-										.attr('stroke-width', 1)
-										.raise();
+									highlightedPaths.remove();
 								}
 								selectedNode = undefined;
 							}
@@ -874,21 +885,33 @@
 
 					if(selectedNode !== undefined) {
 						if (highlightedPaths._groups[0].length > 0) {
-							highlightedPaths
-								.attr("stroke", "#d0d0d0")
-								.attr('stroke-width', 1)
-								.raise();
+							highlightedPaths.remove();
 						}
 					}
 					selectedNode = d;
+					console.log(selectedNode);
 
-					highlightedPaths = d3.select("#curves-wrapper-leaves").selectAll(".leaf-to-leaf-path")
-						.filter((d_) => (["Data","Team"].includes(getParentWithDepth(d_[0], 1).data.text) || ["Data","Team"].includes(getParentWithDepth(d_[1], 1).data.text)) && (d_[0].data.id === d.data.id || d_[1].data.id === d.data.id))
-						
-					highlightedPaths
-						.attr("stroke", "#0632E4")
-						.attr('stroke-width', 2)
-						.raise();
+					// TODO Recreate leaf-to-leaf paths if non-existent
+					if (d3.select("#curves-wrapper-leaves").selectChildren()["_groups"][0].length == 0) {
+						const leaves = root.leaves();
+						d3.select("#curves-wrapper-leaves")
+							.selectAll("path")
+							.data(() => {
+								return leaves.filter(
+									(d_) => d_.data.props.data_source.some(v => selectedNode.data.props.data_source.includes(v)) && d_ !== selectedNode
+									).map((d_) => [selectedNode, d_]);
+								})
+							.join("path")
+							.attr("class", "leaf-to-leaf-path")
+							.attr("fill", "tansparent")
+							.attr("stroke", "#0632E4")
+							.attr("stroke-width", 2.0)
+							.attr("opacity", 0.5)
+							.attr("d", ([i, o]) => connectedEdgesLineFunction(i.path(o)))
+							.raise();
+					}
+
+					highlightedPaths = d3.select("#curves-wrapper-leaves").selectAll(".leaf-to-leaf-path");
 
 					if(mode === "viz-select-1") {
 						const connectedNodes = d3.selectAll('.node-group').filter((d_) => 
@@ -1259,10 +1282,7 @@
 				d3.selectAll(`#${d.data.id}-text,#${d.data.id}-text-2nd-line`).style("font-weight", null);
 				if(selectedNode === undefined) {
 					if (highlightedPaths._groups[0].length > 0) {
-						highlightedPaths
-							.attr("stroke", "#d0d0d0")
-							.attr('stroke-width', 1)
-							.raise();
+						highlightedPaths.remove();
 					}
 				}
 
