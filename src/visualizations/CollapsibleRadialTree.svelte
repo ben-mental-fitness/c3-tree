@@ -44,6 +44,7 @@
 	let highlightedPaths = {"_groups" : [[]]};
 	let visMode2Nodes = undefined; 
 
+	// Update visible teams array & refresh the view 
 	const nodeOnClick = (d) => {
 		if("Members" in d.data.props.info_main) {
 			if(visibleTeams.indexOf(d.data.text) !== -1) {
@@ -58,8 +59,8 @@
 		}
 	}
 
-	function filterTree(node, condition) {
-	    // clone the node
+	// Clone the node & return a new, filtered object
+	const filterTree = (node, condition)=> {
 	    let newNode = {...node};
 	    if (node.children) {
 	        newNode.children = node.children.filter(condition).map(child => filterTree(child, condition));
@@ -82,9 +83,7 @@
 		const filteredRoot = root;
 		
 		categoryLegendVisible = mode === "viz-select-1";
-
 		simplifiedMode = checkboxesChecked["checkbox-simple-view"];
-
 		controlsVisible = !simplifiedMode;
 
 		twist = twist > Math.PI * 2.0 ? twist - Math.PI * 2.0 : twist;
@@ -109,7 +108,10 @@
 			.style("pointer-events", checkboxesChecked["checkbox-twist-circle"] ? "none" : "visibleStroke")
 
 		d3.select("#main-transform")
-			.attr("transform", `translate(${canvasWidth / 2.0},${canvasHeight / 2.0}) rotate(${(twist) * 180 / Math.PI})`);
+			.attr("transform", `translate(${canvasWidth / 2.0},${canvasHeight / 2.0}) rotate(${twist * 180 / Math.PI})`);
+		
+		document.getElementById('curves-wrapper-leaves-img').style.opacity = !simplifiedMode && mode === "viz-select-1" ? "1.0" : "0.0";
+		document.getElementById('curves-wrapper-leaves-img').style.transform = `rotate(${twist * 180 / Math.PI}deg)`;
 
 		d3.select("#curves-wrapper-center")
 			.transition(animation)
@@ -137,6 +139,7 @@
 		
 		if (!simplifiedMode && mode === "viz-select-1") {
 
+			// TODO - Combine this and set visibility lines
 			// Recreate leaf-to-leaf paths if non-existent
 			if (d3.select("#curves-wrapper-leaves").selectChildren()["_groups"][0].length == 0) {
 				const leaves = root.leaves();
@@ -156,6 +159,7 @@
 					.attr("d", ([i, o]) => connectedEdgesLineFunction(i.path(o)));
 			}
 
+			// Set visibility
 			d3.select("#curves-wrapper-leaves")
 				.selectAll(".leaf-to-leaf-path")
 				.data(filteredRoot.leaves().flatMap((leaf) => {
@@ -207,7 +211,7 @@
 
 					d3.select("#curves-wrapper-leaves").selectAll("*").remove();
 					canvas.remove();
-					document.getElementById('curves-wrapper-leaves-img').style.opacity = "1.0";
+					// document.getElementById('curves-wrapper-leaves-img').style.opacity = "1.0";
 				})
 
 				image.setAttribute("src", svgDataUrl);
@@ -493,8 +497,8 @@
 						
 						d3.select("#twist-circle-scalar").remove();
 						const arc = d3.arc()
-							.innerRadius(outerRadius - 5)
-							.outerRadius(outerRadius + 5)
+							.innerRadius(outerRadius + (mode === "viz-select-1" && !simplifiedMode ? 80 : 0) - 5)
+							.outerRadius(outerRadius + (mode === "viz-select-1" && !simplifiedMode ? 80 : 0) + 5)
 							.startAngle(0) 
 							.endAngle((startAngle + twist) % (2 * Math.PI)); 
 
@@ -1137,7 +1141,7 @@
 								.attr("data-collapsed", "true")
 								.style("display", "none");
 
-							publicationsListContent.each(function (d) {
+							publicationsListContent.each((d) => {
 								let collapsibleInfo = false;
 								Object.keys(d.data.props.info_main).forEach((key) => {
 									if(d.data.props.info_main[key] && d.data.props.info_main[key] !== "") {
