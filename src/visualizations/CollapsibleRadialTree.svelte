@@ -37,7 +37,7 @@
 	export let checkboxesChecked;
 	export let rerenderTreeTrigger;
 	export let mode;
-	export let prevMode;
+	let prevMode;
 	export let categoryLegendVisible;
 	
 	let selectedNode = undefined;
@@ -1159,7 +1159,7 @@
 
 									collapsibleInfo = true;
 									d3.select(this).append("center").append("button")
-										.attr("class", "button-publication-link")
+										.attr("class", "button button-simplified button-publication-link")
 										.attr("type", "button")
 										.style("margin-bottom", "10px")
 										.text("Go to publication")
@@ -1344,7 +1344,7 @@
 				<tbody class="tooltip-tbody"></tbody>
 			</table>
 			<center>
-				<button type="button" class="button-publication-link">Go to publication</button>
+				<button type="button" class="button button-simplified button-publication-link">Go to publication</button>
 			</center>
 			<svg class="tooltip-collapsible-button" style="margin-left:25px; cursor:pointer" width="15px" height="15px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
 				<path d="M233.4 105.4c12.5-12.5 32.8-12.5 45.3 0l192 192c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L256 173.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l192-192z"
