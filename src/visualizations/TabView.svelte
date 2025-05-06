@@ -8,6 +8,8 @@
 	export let data;
 	export let rawData;
 	export let showMainVizTrigger;
+	export let ANIM_DURATION_IN;
+	export let ANIM_DURATION_OUT;
 
 	let menuOpen;
 
@@ -127,6 +129,7 @@
 
 		const collapsibleContentToggler = contents.append("div")
 			.attr("class", "collapsible-content-toggler")
+			.attr("id", "collapsible-content-toggler")
 			.style("cursor", "pointer")
 			.style("margin", "40px 30px 10px")
 			.style("color", "#404040")
@@ -161,6 +164,9 @@
 					d3.select(`#${d.id}-content .collapsible-content-toggler .collapse-icon-toggler path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
 						.attr("transform", "translate(256,256) rotate(90) translate(-256,-256)");
 				}
+
+				console.log("Here");
+				document.getElementById("collapsible-content-toggler").scrollIntoView({ behavior: "smooth", block: "start" });
 			});
 
 		collapsibleContentToggler.append("p")
@@ -238,6 +244,8 @@
 					d3.select(`#papers-list-item-${d.parentIndex}-${d.rIndex} .collapse-icon-paper path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
 						.attr("transform", "translate(256,256) rotate(90) translate(-256,-256)");
 				}
+
+				document.getElementById(`papers-list-item-${d.parentIndex}-${d.rIndex}`).scrollIntoView({ behavior: "smooth", block: "start" });
 			});
 
 		papersList.append("p")
@@ -409,9 +417,9 @@
 	}
 
 	#tabs-wrapper {
-		 position: absolute;
-		 left:0;
-		 top:0;
+		position: absolute;
+		left:0;
+		top:0;
 	}
 	#tabs-wrapper #tab-view-title {
 		display: initial;

@@ -1048,6 +1048,11 @@
   resolved "https://registry.npmjs.org/@next/swc-linux-x64-gnu/-/swc-linux-x64-gnu-15.2.4.tgz"
   integrity sha512-yb5WTRaHdkgOqFOZiu6rHV1fAEK0flVpaIN2HB6kxHVSy/dIajWbThS7qON3W9/SNOH2JWkVCyulgGYekMePuw==
 
+"@next/swc-linux-x64-musl@15.2.4":
+  version "15.2.4"
+  resolved "https://registry.npmjs.org/@next/swc-linux-x64-musl/-/swc-linux-x64-musl-15.2.4.tgz"
+  integrity sha512-Dcdv/ix6srhkM25fgXiyOieFUkz+fOYkHlydWCtB0xMST6X9XYI3yPDKBZt1xuhOytONsIFJFB08xXYsxUwJLw==
+
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
   resolved "https://registry.npmjs.org/@nodelib/fs.scandir/-/fs.scandir-2.1.5.tgz"
@@ -2943,9 +2948,9 @@ http-proxy-agent@^7.0.0:
     debug "^4.3.4"
 
 http-proxy-middleware@^2.0.6:
-  version "2.0.7"
-  resolved "https://registry.npmjs.org/http-proxy-middleware/-/http-proxy-middleware-2.0.7.tgz"
-  integrity sha512-fgVY8AV7qU7z/MmXJ/rxwbrtQH4jBQ9m7kp3llF0liB7glmFeVZFBepQb32T3y8n8k2+AEYuMPCpinYW+/CuRA==
+  version "2.0.9"
+  resolved "https://registry.npmjs.org/http-proxy-middleware/-/http-proxy-middleware-2.0.9.tgz"
+  integrity sha512-c1IyJYLYppU574+YI7R4QyX2ystMtVXZwIdzazUIPIJsHuWNd+mho2j+bKoHftndicGj9yh+xjd+l0yj7VeT1Q==
   dependencies:
     "@types/http-proxy" "^1.17.8"
     http-proxy "^1.18.1"
@@ -4679,9 +4684,9 @@ vite-plugin-node@^3.1.0:
     debug "^4.3.2"
 
 "vite@^3.0.0 || ^4.0.0 || ^5.0.0", vite@^4.0.0, vite@^4.4.5:
-  version "4.5.12"
-  resolved "https://registry.npmjs.org/vite/-/vite-4.5.12.tgz"
-  integrity sha512-qrMwavANtSz91nDy3zEiUHMtL09x0mniQsSMvDkNxuCBM1W5vriJ22hEmwTth6DhLSWsZnHBT0yHFAQXt6efGA==
+  version "4.5.14"
+  resolved "https://registry.npmjs.org/vite/-/vite-4.5.14.tgz"
+  integrity sha512-+v57oAaoYNnO3hIu5Z/tJRZjq5aHM2zDve9YZ8HngVHbhk66RStobhb1sqPMIPEleV6cNKYK4eGrAbE9Ulbl2g==
   dependencies:
     esbuild "^0.18.10"
     postcss "^8.4.27"
@@ -4690,9 +4695,9 @@ vite-plugin-node@^3.1.0:
     fsevents "~2.3.2"
 
 vite@^5.0.6:
-  version "5.4.17"
-  resolved "https://registry.npmjs.org/vite/-/vite-5.4.17.tgz"
-  integrity sha512-5+VqZryDj4wgCs55o9Lp+p8GE78TLVg0lasCH5xFZ4jacZjtqZa6JUw9/p0WeAojaOfncSM6v77InkFPGnvPvg==
+  version "5.4.19"
+  resolved "https://registry.npmjs.org/vite/-/vite-5.4.19.tgz"
+  integrity sha512-qO3aKv3HoQC8QKiNSTuUM1l9o/XX3+c+VTgLHbJWHZGeTPVAg2XwazI9UWzoxjIJCGCV2zU60uqMzjeLZuULqA==
   dependencies:
     esbuild "^0.21.3"
     postcss "^8.4.43"

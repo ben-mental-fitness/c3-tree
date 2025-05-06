@@ -3,7 +3,6 @@
 
 	export let visible;
 	export let ANIM_DURATION_OUT;
-	export let ANIM_DURATION_IN;
 
 	const showCategoryLegend = () => {
 		d3.select("#category-legend-wrapper")

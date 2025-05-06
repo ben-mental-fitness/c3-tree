@@ -223,11 +223,11 @@
 <main>
 	
 	<DraftNotice/>
-	<WelcomeDialog bind:visible={welcomeDialogVisible} {ANIM_DURATION_OUT} {ANIM_DURATION_IN}/>
+	<WelcomeDialog bind:visible={welcomeDialogVisible} {ANIM_DURATION_OUT}/>
 	<IntroTour bind:introTourStartTrigger bind:introData/>
 	<MinWidthDialog bind:checkShowDisplayCompatabilityTrigger/>
 	<DimensionsCalculator bind:width bind:height bind:canvasWidth bind:canvasHeight bind:radius bind:outerRadius bind:twist {BRAIN_SIZE} {BRAIN_ASPECT_RATIO}/>
-	<CategoryLegend  bind:visible={categoryLegendVisible} {ANIM_DURATION_OUT} {ANIM_DURATION_IN}/>
+	<CategoryLegend  bind:visible={categoryLegendVisible} {ANIM_DURATION_OUT}/>
 
 	<CollapsibleRadialTree {BRAIN_SIZE} {BRAIN_ASPECT_RATIO} {TOOLTIP_WIDTH}
 		bind:data bind:rawData bind:dataSimplified bind:dataConnections bind:root bind:rootConnections bind:rootSimplified
@@ -235,7 +235,7 @@
 		bind:width bind:height bind:canvasWidth bind:canvasHeight bind:radius bind:outerRadius
 		bind:controlsVisible bind:presets bind:checkboxesChecked bind:rerenderTreeTrigger bind:mode bind:categoryLegendVisible/>
 
-	<TabView bind:data bind:rawData bind:showMainVizTrigger/>
+	<TabView bind:data bind:rawData bind:showMainVizTrigger {ANIM_DURATION_IN} {ANIM_DURATION_OUT}/>
 
 	<Legend bind:canvasWidth bind:canvasHeight bind:welcomeDialogVisible bind:categoryLegendVisible/>
 	<Loader bind:visible={loaderVisible}/>

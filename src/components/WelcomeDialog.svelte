@@ -3,7 +3,6 @@
 
 	export let visible = false;
 	export let ANIM_DURATION_OUT;
-	export let ANIM_DURATION_IN;
 
 	const showWelcomeDialog = () => {
 		d3.select("#welcome-dialog")
