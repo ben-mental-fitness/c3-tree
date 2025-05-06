@@ -144,7 +144,7 @@
 						.transition("appear")
 						.duration(ANIM_DURATION_IN)
 						.ease(d3.easeQuadOut)
-						.style("height", "auto")
+						.style("height", "auto");
 
 					d3.select(`#${d.id}-content .collapsible-content-toggler .collapse-icon-toggler path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
 						.attr("transform", "translate(256,256) rotate(180) translate(-256,-256)");
@@ -165,7 +165,6 @@
 						.attr("transform", "translate(256,256) rotate(90) translate(-256,-256)");
 				}
 
-				console.log("Here");
 				document.getElementById("collapsible-content-toggler").scrollIntoView({ behavior: "smooth", block: "start" });
 			});
 
@@ -224,7 +223,7 @@
 						.transition("appear")
 						.duration(ANIM_DURATION_IN)
 						.ease(d3.easeQuadOut)
-						.style("height", "auto")
+						.style("height", "auto");
 
 					d3.select(`#papers-list-item-${d.parentIndex}-${d.rIndex} .collapse-icon-paper path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
 						.attr("transform", "translate(256,256) rotate(180) translate(-256,-256)");
@@ -275,6 +274,7 @@
 			.style("display", "none");
 
 		papersListContent.each(function (d) {
+			console.log(d);
 			let collapsibleInfo = false;
 			Object.keys(d).filter((key) => key.indexOf("[INFO_MAIN]") !== -1).forEach((key) => {
 				if(d[key] && d[key] !== "") {
@@ -288,7 +288,7 @@
 				}
 			});
 			Object.keys(d).filter((key) => key.indexOf("[INFO_COLLAPSED]") !== -1).forEach((key) => {
-				if(d[key] && d[key] !== "") {
+				if(d[key] && d[key] !== "" && key !== "[INFO_COLLAPSED]Impact") {
 					collapsibleInfo = true;
 					d3.select(this).append("p")
 						.style("font-weight", "bold")
@@ -298,25 +298,51 @@
 						.text(d[key]);
 				}
 			});
+			if (d["[INFO_COLLAPSED]Impact"] && d["[INFO_COLLAPSED]Impact"] !== "") {
+				collapsibleInfo = true;
+				d3.select(this).append("p")
+					.style("font-weight", "bold")
+					.text("Impact");
+				d3.select(this).append("a")
+					.style("width", "auto")
+					.style("text-decoration", "none")
+					.style("font-weight", "normal")
+					.text("Go to Altmetric")
+					.attr("href", d["[INFO_COLLAPSED]Impact"])
+					.attr("target", "_blank")
+					.attr("class", "button button-simplified")
+					.attr("z-index", "5");
+			}
+			if (d["publication_link"] && d["publication_link"] !== "") {
+				collapsibleInfo = true;
+				d3.select(this).append("p")
+					.style("font-weight", "bold")
+					.text("Publication");
+				
+				if (d["publication_link"].indexOf("http") !== -1) {
+					d3.select(this).append("a")
+						.style("width", "auto")
+						.style("text-decoration", "none")
+						.style("font-weight", "normal")
+						.text("Go to publication")
+						.attr("href", d["publication_link"])
+						.attr("target", "_blank")
+						.attr("class", "button button-simplified")
+						.attr("z-index", "5");
+					d3.select(this).append("p")
+						.style("padding-bottom", "5px");
+				} else {
+					d3.select(this).append("p")
+						.style("padding-bottom", "5px")
+						.text(d["publication_link"]);
+				}
+			}
 			if(!collapsibleInfo) {
 				d3.select(this).append("p")
 					.style("font-weight", "bold")
 					.text("No additional information.");
 			}
 			return;
-			Object.keys(d).filter((key) => key.indexOf("[INFO_COLLAPSED]") !== -1).forEach((key) => {
-				level.props.info_collapsed[key.replace("[INFO_COLLAPSED]", "")] = d[key];
-			});
-			Object.entries(d.info_collapsed).forEach(([key, value]) => {
-				if(value && value !== "") {
-					papersListContent.append("p")
-						.style("font-weight", "bold")
-						.text(key);
-					papersListContent.append("p")
-						.style("padding-bottom", "5px")
-						.text(value);
-				}
-			});
 		});
 
 
