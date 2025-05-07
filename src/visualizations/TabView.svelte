@@ -53,7 +53,7 @@
 
 		tabs.append("p")
 			.attr("class", "title")
-			.style("border", (d) => `1px solid ${d.color}`)
+			.style("border", (d) => `2px solid ${d.color}`)
 			.style("padding", "0 20px")
 			.style("margin", "6px")
 			.text((d) => d.text);
@@ -376,6 +376,12 @@
 				.transition("textVanish")
 				.delay(animated ? 750 : 0)
 				.style("display", "none")
+			d3.selectAll(`.title`)
+				.transition()
+				.duration(animated ? 750 : 0)
+				.style("border-color", (d) => `${d.color}`)
+				.style("background-color", (d) => `${d.color}00`)
+				.style("font-weight", "normal")
 
 			if(selectedTab) {
 				d3.select(`#${selectedTab.id}-tab`)
@@ -391,7 +397,12 @@
 					.transition(animation)
 					.delay(animated ? 750 : 0)
 					.style("opacity", 1.0)
-
+				d3.select(`#${selectedTab.id}-tab .title`)
+					.transition()
+					.duration(animated ? 750 : 0)
+					.style("border-color", (d) => `${d.color} rgb(255, 255, 255) ${d.color} ${d.color}`)
+					.style("background-color", (d) => `${d.color}33`)
+					.style("font-weight", "bold")
 			}
 		}
 
