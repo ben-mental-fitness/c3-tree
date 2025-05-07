@@ -211,7 +211,9 @@
 			.attr("class", ".papers-list-item")
 			.style("cursor", "pointer")
 			.style("border", "1px solid #d0d0d0")
+			.style("background-color", "#ffffff")
 			.style("padding", "0 10px")
+			.style("position", "relative")
 			.on("click", (event, d, i) => {
 
 				const entry = d3.select(`#papers-list-item-${d.parentIndex}-${d.rIndex} .papers-list-item-content`);
@@ -227,9 +229,13 @@
 
 					d3.select(`#papers-list-item-${d.parentIndex}-${d.rIndex} .collapse-icon-paper path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
 						.attr("transform", "translate(256,256) rotate(180) translate(-256,-256)");
+
+					document.getElementById(`papers-list-item-${d.parentIndex}-${d.rIndex}`).style.zIndex = "40";
+					document.getElementById("full-page-fade").style.display = "block";
+					d3.select("#full-page-fade").transition().duration(ANIM_DURATION_IN).ease(d3.easeQuadOut).style("opacity", 0.5);
 				} else {
 					entry.attr("data-collapsed", "true")
-					.style("display", "none")
+						.style("display", "none")
 						.transition("appear")
 						.duration(ANIM_DURATION_OUT)
 						.ease(d3.easeQuadOut)
@@ -242,9 +248,13 @@
 
 					d3.select(`#papers-list-item-${d.parentIndex}-${d.rIndex} .collapse-icon-paper path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
 						.attr("transform", "translate(256,256) rotate(90) translate(-256,-256)");
+
+					d3.select("#full-page-fade").transition().duration(ANIM_DURATION_OUT).ease(d3.easeQuadOut).style("opacity", 0.0);
+					d3.select("#full-page-fade").transition().delay(ANIM_DURATION_OUT).style("display", "none");
+					d3.select(`#papers-list-item-${d.parentIndex}-${d.rIndex}`).transition().delay(ANIM_DURATION_OUT).style("z-index", "auto");
 				}
 
-				document.getElementById(`papers-list-item-${d.parentIndex}-${d.rIndex}`).scrollIntoView({ behavior: "smooth", block: "start" });
+				document.getElementById(`papers-list-item-${d.parentIndex}-${d.rIndex}`).scrollIntoView({ behavior: "smooth", block: "start" });	
 			});
 
 		papersList.append("p")
@@ -274,7 +284,6 @@
 			.style("display", "none");
 
 		papersListContent.each(function (d) {
-			console.log(d);
 			let collapsibleInfo = false;
 			Object.keys(d).filter((key) => key.indexOf("[INFO_MAIN]") !== -1).forEach((key) => {
 				if(d[key] && d[key] !== "") {
@@ -311,7 +320,7 @@
 					.attr("href", d["[INFO_COLLAPSED]Impact"])
 					.attr("target", "_blank")
 					.attr("class", "button button-simplified")
-					.attr("z-index", "5");
+					.attr("z-index", "50");
 			}
 			if (d["publication_link"] && d["publication_link"] !== "") {
 				collapsibleInfo = true;
@@ -328,7 +337,7 @@
 						.attr("href", d["publication_link"])
 						.attr("target", "_blank")
 						.attr("class", "button button-simplified")
-						.attr("z-index", "5");
+						.attr("z-index", "50");
 					d3.select(this).append("p")
 						.style("padding-bottom", "5px");
 				} else {
@@ -346,7 +355,7 @@
 		});
 
 
-		d3.select("#tabs-wrapper .button")
+		d3.select("#go-to-main-vis")
 			.style("margin", "20px 0")
 			.style("display", "inline-block")
 			.on("click", () => {document.getElementById("yt-embed").innerHTML = ""; showMainVizTrigger = true})
@@ -413,6 +422,8 @@
 
 </script>
 
+<div id="full-page-fade" style="display:none;"></div>
+
 <div id="tabs-wrapper" style="opacity: 0.0;display: none;">
 	<Hamburger bind:open={menuOpen} color="white"/>
 	<div class="tab-view-header">
@@ -424,7 +435,7 @@
 		<div class="tabs-left"></div>
 		<div class="content-right"></div>
 		<center>
-			<button class="button button-default" style="display:none">Go to visualization</button>
+			<button class="button button-default" id="go-to-main-vis" style="display:none;">Go to visualization</button>
 		</center>
 	</div>
 	<div class="mobile-version">
@@ -440,6 +451,17 @@
 
 	body {
 		overflow: hidden;
+	}
+
+	#full-page-fade {
+		position: absolute;
+		left: 0;
+		top: 0;
+		width: 100vw;
+		height: 100vh;
+		background-color: #000000;
+		opacity: 0;
+		z-index: 30;
 	}
 
 	#tabs-wrapper {
