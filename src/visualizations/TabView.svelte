@@ -446,7 +446,7 @@
 		<div class="tabs-left"></div>
 		<div class="content-right"></div>
 		<center>
-			<button class="button button-default" id="go-to-main-vis" style="display:none;">Go to visualization</button>
+			<button class="button button-default" id="go-to-main-vis" style="display:none;">Go to visualisation</button>
 		</center>
 	</div>
 	<div class="mobile-version">

@@ -369,7 +369,6 @@
 	};
 
 	const createCollapsableRadialTree = (data, separationFunction, radius) => {
-		console.log("Creating tree...");
 		root = d3.hierarchy(data);
 		rootSimplified = d3.hierarchy(dataSimplified);
 
@@ -1364,7 +1363,7 @@
 	<!-- additional controls -->
 
 	<div id="back-button" style="display: none;position: absolute;color:#808080;font-size:80%;cursor:pointer;">
-		&lt; back to simplified version (TabView)
+		&lt; switch to List View
 	</div>
 	<div id="help-button" style="display: none;position: absolute;color:#808080;font-size:400%;font-weight: bold;cursor:pointer;">
 		?

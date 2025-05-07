@@ -48,11 +48,11 @@
 	</center>
 	<span></span>
 	<br/><br/>
-	<span id="mobile-availability-note">Note: The main visualization is currently only available on a desktop PC.</span>
+	<span id="mobile-availability-note">Note: The main visualisation is currently only available on a desktop PC.</span>
 	<br/>
 	<div class="button-row">
-		<button class="button button-simplified" style="margin-right:10px">Simplified version</button>
-		<button class="button button-default">Default version</button>
+		<button class="button button-simplified" style="margin-right:10px">List View</button>
+		<button class="button button-default">Visualisation</button>
 	</div>
 </div>
 

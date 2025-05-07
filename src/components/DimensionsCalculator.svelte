@@ -42,14 +42,14 @@
 			//d3.select("#controls-wrapper").style("left", "50%").style("top", `${(height - width) / 2.0 - 20}px`).style("margin-left", "-100px");
 			d3.select("#controls-wrapper").style("left", "50%").style("top", `${(height - width) / 2.0 - 20}px`).style("margin-left", "-100px");
 			d3.selectAll(".canvas-wrapper").style("margin-top", `${(height - width) / 2.0}px`)
-			d3.select("#back-button")
-				.style("display", "block")
-				.style("left", "20px")
-				.style("top", `${(height - width) / 2.0}px`);
 			d3.select("#help-button")
 				.style("display", "block")
-				.style("right", "20px")
-				.style("top", `${(height - width) / 2.0}px`);
+				.style("right", "10px")
+				.style("top", "20px"); // `${(height - width) / 2.0}px`);
+			d3.select("#back-button")
+				.style("display", "block")
+				.style("left", "10px")
+				.style("top", "45px"); // `${(height - width) / 2.0}px`);
 		} else {
 			//d3.select("#controls-wrapper").style("left", `${(width - height) / 2.0 - 220}px`).style("top", `35%`);
 			//d3.select("#controls-wrapper").style("left", `${(width - height) / 2.0 - 220}px`).style("top", `100px`);
@@ -60,14 +60,14 @@
 				//.style("margin-top", `-${366 / 2}px`)
 				.style("margin-top", `-${550 / 2}px`)
 				.style("margin-left", null);
-			d3.select("#back-button")
-				.style("display", "block")
-				.style("left", `${(width - height) / 2.0 + 20}px`)
-				.style("top", "20px");
 			d3.select("#help-button")
 				.style("display", "block")
-				.style("right", `${(width - height) / 2.0 + 20}px`)
+				.style("right", "10px") // `${(width - height) / 2.0 + 20}px`)
 				.style("top", "20px");
+			d3.select("#back-button")
+				.style("display", "block")
+				.style("left", "10px") // `${(width - height) / 2.0 + 20}px`)
+				.style("top", "45px");
 		}
 
 		d3.selectAll(".canvas-wrapper").style("width", `${canvasWidth}px`).style("height", `${canvasHeight}px`)
