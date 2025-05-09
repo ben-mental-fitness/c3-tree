@@ -8,6 +8,7 @@
 	import { getParentWithDepth } from '../helper/getParentWithDepth';
     import { setTreeVisibility } from '../helper/setTreeVisibility';
     import { radialTreeLineFunction, connectedEdgesLineFunction, separationFunction } from '../helper/d3Functions';
+	import { renderLegend } from "../helper/renderLegend";
 
 	export let BRAIN_SIZE;
 	export let BRAIN_ASPECT_RATIO;
@@ -38,6 +39,7 @@
 	export let rerenderTreeTrigger;
 	export let mode;
 	let prevMode;
+	let prevShowLeafTitles;
 	export let categoryLegendVisible;
 	
 	let selectedNode = undefined;
@@ -77,11 +79,11 @@
 			if(mode === "viz-select-0")
 				createCollapsableRadialTree(data, separationFunction, radius)
 			else
-				createCollapsableRadialTree(dataConnections, separationFunction, radius)
+				createCollapsableRadialTree(dataConnections, separationFunction, checkboxesChecked["checkbox-leaf-titles"] ? radius : outerRadius - 25)
 			return;
 		}
-		const filteredRoot = root;
 		
+		const filteredRoot = root;
 		categoryLegendVisible = mode === "viz-select-1";
 		simplifiedMode = checkboxesChecked["checkbox-simple-view"];
 		controlsVisible = !simplifiedMode;
@@ -92,7 +94,7 @@
 		d3.select("#twist-circle")
 			.attr("r", outerRadius + (mode === "viz-select-1" && !simplifiedMode ? 80 : 0))
 
-		const treeFunction = d3.cluster().size([2 * Math.PI, radius + (mode === "viz-select-1" && !simplifiedMode ? 80 : 0)]);
+		const treeFunction = d3.cluster().size([2 * Math.PI, (checkboxesChecked["checkbox-leaf-titles"] ? radius : outerRadius - 25) + (mode === "viz-select-1" && !simplifiedMode ? 80 : 0)]);
 		treeFunction.separation(separationFunction)(filteredRoot);
 		treeFunction.separation(separationFunction)(rootSimplified);
 
@@ -366,6 +368,7 @@
 		}
 
 		setMouseEvents();
+		if (mode === "viz-select-0") renderLegend(canvasWidth, canvasHeight);
 	};
 
 	const createCollapsableRadialTree = (data, separationFunction, radius) => {
@@ -415,7 +418,7 @@
 			.attr("id", "main-transform")
 			//.attr("transform", `translate(${canvasWidth / 2.0},${canvasHeight / 2.0}) rotate(-70)`);
 			.attr("transform", `translate(${canvasWidth / 2.0},${canvasHeight / 2.0})`);
-
+		
 		// center image
 		d3.select("#d3-canvas")
 			.append("image")
@@ -1361,7 +1364,6 @@
 	<Controls bind:visible={controlsVisible} bind:presets bind:checkboxesChecked bind:rerenderTreeTrigger bind:mode bind:root/>
 
 	<!-- additional controls -->
-
 	<div id="back-button" style="display: none;position: absolute;color:#808080;font-size:80%;cursor:pointer;">
 		&lt; switch to List View
 	</div>

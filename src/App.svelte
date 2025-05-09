@@ -237,7 +237,7 @@
 
 	<TabView bind:data bind:rawData bind:showMainVizTrigger {ANIM_DURATION_IN} {ANIM_DURATION_OUT}/>
 
-	<Legend bind:canvasWidth bind:canvasHeight bind:welcomeDialogVisible bind:categoryLegendVisible/>
+	<Legend bind:canvasWidth bind:canvasHeight bind:welcomeDialogVisible/>
 	<Loader bind:visible={loaderVisible}/>
 
 </main>
