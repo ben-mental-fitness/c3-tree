@@ -1373,6 +1373,10 @@
 
 
 <style>
+	#main-viz-wrapper {
+		overflow: hidden;
+	}
+
 	.node-text {
 		paint-order: stroke;
 		stroke: white;

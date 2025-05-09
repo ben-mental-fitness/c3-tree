@@ -58,8 +58,8 @@
 				.style("top", `50%`)
 				.style("height", "366px")
 				//.style("margin-top", `-${366 / 2}px`)
-				.style("margin-top", `-${550 / 2}px`)
-				.style("margin-left", null);
+				.style("top", `-${550 / 2}px`)
+				.style("left", null);
 			d3.select("#help-button")
 				.style("display", "block")
 				.style("right", "10px") // `${(width - height) / 2.0 + 20}px`)
