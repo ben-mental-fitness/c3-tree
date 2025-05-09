@@ -1247,50 +1247,21 @@
 				const boundingRect = d3.select("#hover-tooltip.tooltip").node().getBoundingClientRect();
 				const pointerPos = [event.pageX, event.pageY];
 
+				let left = event.pageX < canvasWidth / 2.0 ? canvasWidth / 2.0 + 10 : 20; 
+				let top = event.pageY;
 
-				if(mode === "viz-select-0") {
-					//const left = event.pageX + TOOLTIP_WIDTH >= width - 20 ? event.pageX - TOOLTIP_WIDTH - 10 : event.pageX + 10;
-					//const top = event.pageY + boundingRect.height >= height - 20 ? event.pageY - boundingRect.height - 10 : event.pageY + 10;
-					let left = event.pageX;
-					let top = event.pageY;
+				// left = left + TOOLTIP_WIDTH >= width - 20 ? width - 20 - TOOLTIP_WIDTH : left;
+				// left = left < 20 ? 20 : left;
 
-					if(left + TOOLTIP_WIDTH >= width - 20)
-						left -= left + TOOLTIP_WIDTH - (width - 20)
-					if(left < 20)
-						left -= (left - 20);
-					if(top + boundingRect.height >= height - 20)
-						top -= top + boundingRect.height - (height - 20)
-					if(top < 20)
-						top -= (top - 20);
+				// top = top + boundingRect.height >= height - 20 ? height - 20 - boundingRect.height : top;
+				// top = top < 20 ? 20 : top;
 
-					d3.select("#hover-tooltip.tooltip")
-						.style("left", `${left}px`)
-						.style("top", `${top}px`)
-						.style("width", `${TOOLTIP_WIDTH}px`)
-						.style("display", checkboxesChecked["checkbox-second-tooltip"] || d3.select("#sticky-tooltip").empty() ? "block" : "none")
-						.raise();
-				} else {
-					let left = event.pageX + 10;
-					let top = event.pageY + 10;
-					const xOffset = pointerPos[0] < width / 2.0 
-						? (radius - pointerPos[0]) - TOOLTIP_WIDTH * 0.7 
-						: pointerPos[0] - radius;
-					const y = (top - height / 2.0) / (outerRadius);
-					let x = Math.sqrt(1 - Math.pow(y, 2)) * outerRadius;
-
-					if(pointerPos[0] < width / 2.0)
-						left = x * -1.0 + width / 2.0 - TOOLTIP_WIDTH * 0.7;
-					else
-						left = x + width / 2.0;
-
-					d3.select("#hover-tooltip.tooltip")
-						//.style("left", `${pointerPos[0] + xOffset + 10}px`)
-						.style("left", `${left}px`)
-						.style("top", `${pointerPos[1] + 10}px`)
-						.style("width", `${TOOLTIP_WIDTH * 0.7}px`)
-						.style("display", checkboxesChecked["checkbox-second-tooltip"] || d3.select("#sticky-tooltip").empty() ? "block" : "none")
-						.raise();
-				}
+				d3.select("#hover-tooltip.tooltip")
+					.style("left", `${left}px`) // `${left}px`)
+					.style("top", "20px") // `${top}px`)
+					.style("width", `${canvasWidth / 2.0 - 30}px`)
+					.style("display", checkboxesChecked["checkbox-second-tooltip"] || d3.select("#sticky-tooltip").empty() ? "block" : "none")
+					.raise();
 			})
 			.on("mouseleave", (event, d) => {
 
