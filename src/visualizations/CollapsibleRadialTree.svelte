@@ -804,17 +804,30 @@
 						.style("top", `${boundingRect.top}px`)
 						.style("pointer-events", "all")
 						.style("cursor", "move")
+						.style("resize", "both")
 						.style("z-index", "99")
 						.on("mousedown", (event) => {
 							event.stopPropagation();
-							event.preventDefault();
+							
 							let startPointerPos = [event.pageX, event.pageY];
 							let startPos = [
 								parseInt(d3.select("#sticky-tooltip").style("left")),
 								parseInt(d3.select("#sticky-tooltip").style("top"))
 							];
+							
 							const boundingRect = d3.select("#sticky-tooltip").node().getBoundingClientRect();
 							const tooltipHeight = boundingRect.height;
+
+							// Resizing so don't drag
+							if (startPointerPos[0] < boundingRect.right + 5
+								&& startPointerPos[0] > boundingRect.right - 25
+								&& startPointerPos[1] < boundingRect.bottom + 5
+								&& startPointerPos[1] > boundingRect.bottom - 25) {
+								return;
+							}
+
+							event.preventDefault();
+
 							d3.select("body")
 								.on("mousemove.dragTooltip", (event) => {
 									let pointerPos = [event.pageX, event.pageY];
