@@ -1,9 +1,9 @@
 import * as d3 from 'd3';
 
-export const renderLegend = (canvasWidth, canvasHeight) => {
-    console.log(`Rendering legend`);
-
+export const renderLegend = (canvasWidth, canvasHeight, visible = true, mode = "viz-select-0") => {
     d3.select("#d3-canvas").selectAll('.legend-wrapper').remove();
+    if (!visible || mode == "viz-select-1") return;
+
     const legendWrapper = d3.select("#d3-canvas").append("g")
         .attr("class", "legend-wrapper")
 

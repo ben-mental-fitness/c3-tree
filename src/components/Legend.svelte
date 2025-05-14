@@ -5,7 +5,7 @@
 	export let canvasHeight;
 	export let welcomeDialogVisible;
 	
-	$:if(canvasWidth && canvasHeight && !welcomeDialogVisible) {
+	$:if(canvasWidth && canvasHeight && !welcomeDialogVisible, true) {
 		renderLegend(canvasWidth, canvasHeight);
 	}
 

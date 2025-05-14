@@ -6,6 +6,7 @@
 	import Search from './Search.svelte';
 
 	import { setTreeVisibility } from '../helper/setTreeVisibility';
+	import { renderLegend } from "../helper/renderLegend";
 
     export let visible;
     export let presets;
@@ -13,6 +14,9 @@
     export let rerenderTreeTrigger;
     export let mode;
     export let root;
+	export let categoryLegendVisible;
+	export let canvasWidth;
+	export let canvasHeight;
 
     const initializePresetsDropdown = (presets) => {
 		d3.select("#preset-select")
@@ -85,6 +89,11 @@
 		d3.select("#checkbox-leaf-titles").on("change", (event) => {
 			checkboxesChecked["checkbox-leaf-titles"] = !checkboxesChecked["checkbox-leaf-titles"];
 			rerenderTreeTrigger = true;
+		});
+		d3.select("#checkbox-legend").on("change", (event) => {
+			checkboxesChecked["checkbox-legend"] = !checkboxesChecked["checkbox-legend"];
+			categoryLegendVisible =  checkboxesChecked["checkbox-legend"];
+			renderLegend(canvasWidth, canvasHeight, checkboxesChecked["checkbox-legend"], mode);
 		});
 		d3.select("#checkbox-white-backgrounds").on("change", (event) => {
 			checkboxesChecked["checkbox-white-backgrounds"] = !checkboxesChecked["checkbox-white-backgrounds"];
@@ -209,6 +218,9 @@
 			<div style="clear: both;"></div>
 			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-leaf-titles" checked>
 			<span style="float:left;display:block">Show leaf titles</span>
+			<div style="clear: both;"></div>
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-legend" checked>
+			<span style="float:left;display:block">Show legend</span>
 			<div style="clear: both;"></div>
 			<input style="float:left;display:none;margin-left:20px" type="checkbox" id="checkbox-white-backgrounds" checked>
 			<span style="float:left;display:none">Text has white background</span>

@@ -3,6 +3,8 @@
 
 	export let visible;
 	export let ANIM_DURATION_OUT;
+	export let mode;
+	export let simplifiedMode;
 
 	const showCategoryLegend = () => {
 		d3.select("#category-legend-wrapper")
@@ -13,6 +15,9 @@
 			.duration(ANIM_DURATION_OUT)
 			.ease(d3.easeQuadOut)
 			.style("opacity", 1.0);
+		d3.select("#category-labels-wrapper")
+			.selectAll(".category-labels")
+			.attr("opacity", "0.0");
 	}
 
 	const hideCategoryLegend = () => {
@@ -25,13 +30,16 @@
 			.transition("display")
 			.delay(ANIM_DURATION_OUT)
 			.style("display", "none");
+		d3.select("#category-labels-wrapper")
+			.selectAll(".category-labels")
+			.attr("opacity", (d) => d.data.visible ? 1.0 : 0.0);
 	};
 
-	$: if (visible) {
+	$: if (visible && mode == "viz-select-1" && !simplifiedMode) {
 	    showCategoryLegend();
 	}
 
-	$: if (!visible) {
+	$: if (!visible || mode == "viz-select-0" || simplifiedMode) {
 	    hideCategoryLegend();
 	}
 

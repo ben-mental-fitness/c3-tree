@@ -84,7 +84,8 @@
 		}
 		
 		const filteredRoot = root;
-		categoryLegendVisible = mode === "viz-select-1";
+		console.log(`${simplifiedMode} || ${mode}`);
+		categoryLegendVisible = !simplifiedMode && checkboxesChecked["checkbox-legend"];
 		simplifiedMode = checkboxesChecked["checkbox-simple-view"];
 		controlsVisible = !simplifiedMode;
 
@@ -357,9 +358,10 @@
 				// angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
 				return angle < Math.PI ? "start" : "end"
 			})
-			.attr("opacity", (d) => d.data.visible && (!categoryLegendVisible || d.data.text === 'Data' || d.data.text === 'Team' || (mode === "viz-select-1" && d.data.text === 'Vaccination')) ? 1.0 : 0.0)
-			.attr("fill", (d) => mode === "viz-select-1" && d.data.text === 'Vaccination' ? 'rgb(160, 160, 160)' : d.data.color)
-			.text((d) => mode === "viz-select-1" && d.data.text === 'Vaccination' ? 'Publications' : d.data.text)
+			.attr("opacity", (d) => d.data.visible && (mode === "viz-select-0" || (mode === "viz-select-1" && !categoryLegendVisible)) ? 1.0 : 0.0)
+			// .attr("opacity", (d) => d.data.visible && (mode === "viz-select-0" || d.data.text === 'Data' || d.data.text === 'Team' || (mode === "viz-select-1" && !categoryLegendVisible && d.data.text === 'Vaccination')) ? 1.0 : 0.0)
+			.attr("fill", (d) => d.data.color) // mode === "viz-select-1" && d.data.text === 'Vaccination' ? 'rgb(160, 160, 160)' : d.data.color)
+			.text((d) => d.data.text); // mode === "viz-select-1" && d.data.text === 'Vaccination' ? 'Publications' : d.data.text)
 
 		// Get visible nodes in connected view
 		if (mode === "viz-select-1") {
@@ -368,7 +370,7 @@
 		}
 
 		setMouseEvents();
-		if (mode === "viz-select-0") renderLegend(canvasWidth, canvasHeight);
+		if (mode === "viz-select-0") renderLegend(canvasWidth, canvasHeight, checkboxesChecked["checkbox-legend"]);
 	};
 
 	const createCollapsableRadialTree = (data, separationFunction, radius) => {
@@ -439,7 +441,6 @@
 				rerenderTreeTrigger = true;
 			});
 
-
 		d3.select("#category-legend").selectAll("*").remove();
 		d3.select("#category-legend")
 			.selectAll(".legend-entry")
@@ -468,7 +469,7 @@
 			.attr("font-weight", "bold")
 			.attr("opacity", 1.0)
 			.attr("fill", (d) => d.data.color)
-			.text((d) => d.data.text === 'Vaccination' ? 'Publications' : d.data.text)
+			.text((d) => d.data.text) // d.data.text === 'Vaccination' ? 'Publications' : d.data.text)
 			.each(function(d) {
 				addSVGTextLineBreaks(d3.select(this), canvasWidth / 2 - radius - 80, 0, 1.0)
 			});
@@ -750,7 +751,7 @@
 	};
 
 	const setMouseEvents = () => {
-		d3.selectAll(".text-leaf-interact-area,.outer-node-group,.category-labels")
+		d3.selectAll(".text-leaf-interact-area,.outer-node-group,.category-labels,.legend-entry")
 			.on("click", (event, d) => {
 				event.stopPropagation();
 				if(!d3.select("#sticky-tooltip").empty()) {
@@ -1345,7 +1346,7 @@
 	</div>
 
 	<!-- controls -->
-	<Controls bind:visible={controlsVisible} bind:presets bind:checkboxesChecked bind:rerenderTreeTrigger bind:mode bind:root/>
+	<Controls bind:visible={controlsVisible} bind:presets bind:checkboxesChecked bind:rerenderTreeTrigger bind:mode bind:root bind:categoryLegendVisible bind:canvasWidth bind:canvasHeight/>
 
 	<!-- additional controls -->
 	<div id="back-button" style="display: none;position: absolute;color:#808080;font-size:80%;cursor:pointer;">
