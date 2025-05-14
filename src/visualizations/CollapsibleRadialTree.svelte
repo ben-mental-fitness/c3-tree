@@ -294,7 +294,8 @@
 
 		d3.selectAll("#node-group-wrapper .node-circle")
 			.transition(animation)
-			.attr("opacity", (d) => mode === "viz-select-0" && !simplifiedMode && (d.data.visible || d.parent?.data.visible || d.parent?.data.id === "r") ? 1.0 : 0.0);
+			.attr("opacity", (d) => !simplifiedMode && (d.data.visible || d.parent?.data.visible || d.parent?.data.id === "r") && (!d.children || mode == "viz-select-0") ? 1.0 : 0.0);
+			// .attr("opacity", (d) => mode === "viz-select-0" && !simplifiedMode && (d.data.visible || d.parent?.data.visible || d.parent?.data.id === "r") ? 1.0 : 0.0);
 
 		d3.selectAll("#node-group-wrapper .node-interact-area")
 			.style("pointer-events", (d) => /* d.data.visible && */ !simplifiedMode && mode === "viz-select-0" ? "all" : "none")
