@@ -827,9 +827,9 @@
 							const tooltipHeight = boundingRect.height;
 
 							// Resizing so don't drag
-							if (startPointerPos[0] < boundingRect.right + 5
+							if (startPointerPos[0] < boundingRect.right + 15
 								&& startPointerPos[0] > boundingRect.right - 25
-								&& startPointerPos[1] < boundingRect.bottom + 5
+								&& startPointerPos[1] < boundingRect.bottom + 15
 								&& startPointerPos[1] > boundingRect.bottom - 25) {
 								return;
 							}
