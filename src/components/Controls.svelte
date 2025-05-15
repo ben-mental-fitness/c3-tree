@@ -1,6 +1,5 @@
 <script>
 	import * as d3 from 'd3';
-
 	import { onMount } from 'svelte';
 
 	import Search from './Search.svelte';
@@ -8,6 +7,7 @@
 	import { setTreeVisibility } from '../helper/setTreeVisibility';
 	import { renderLegend } from "../helper/renderLegend";
 
+	// Bound to CollapsibleRadialTree.svelte
     export let visible;
     export let presets;
     export let checkboxesChecked;

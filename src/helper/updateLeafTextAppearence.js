@@ -1,5 +1,6 @@
 import * as d3 from 'd3';
 
+// Trim leaf text width to fit within bounds
 export const updateLeafTextAppearence = async () => {
 
 	d3.selectAll("#node-group-wrapper .node-text-1st-line")

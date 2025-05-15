@@ -1,6 +1,7 @@
 <script>
 	import * as d3 from 'd3';
 
+	// Bound to App.svelte
 	export let visible = false;
 	export let ANIM_DURATION_OUT;
 

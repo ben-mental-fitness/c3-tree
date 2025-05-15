@@ -1,10 +1,10 @@
 <script type="text/javascript">
 	import * as d3 from 'd3';
-
 	import { onMount } from 'svelte';
 
 	import { addSVGTextLineBreaks } from '../helper/addSVGTextLineBreaks';
 
+	// Bound to App.svelte
 	export let BRAIN_SIZE;
 	export let BRAIN_ASPECT_RATIO;
 	const MARGIN = {
@@ -22,24 +22,23 @@
 	export let outerRadius;
 	export let twist;
 	
+	// TODO: Connections image alignment
 	const calculateDimensions = () => {
 		width  = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
 		height = (window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight);
 		canvasWidth = width;
 		canvasHeight = height;
 
-		if(width < 768) { // mobile version
-			//d3.select("#welcome-dialog .button-default").attr("disabled", "true");
-		} else {
-			//d3.select("#welcome-dialog .button-default").attr("disabled", null);
-		}
+		// if(width < 768) { // mobile version
+		// 	//d3.select("#welcome-dialog .button-default").attr("disabled", "true");
+		// } else {
+		// 	//d3.select("#welcome-dialog .button-default").attr("disabled", null);
+		// }
 
 		radius = d3.min([canvasWidth - MARGIN.left - MARGIN.right, canvasHeight - MARGIN.top - MARGIN.bottom]) / 2 - 150;
 		outerRadius = radius + 90;
 
 		if(width < height) {
-			//d3.select("#controls-wrapper").style("left", "50%").style("top", `${(height - width) / 2.0 - 20}px`).style("margin-left", "-100px");
-			//d3.select("#controls-wrapper").style("left", "50%").style("top", `${(height - width) / 2.0 - 20}px`).style("margin-left", "-100px");
 			d3.select("#controls-wrapper").style("left", "50%").style("top", `${(height - width) / 2.0 - 20}px`).style("margin-left", "-100px");
 			d3.selectAll(".canvas-wrapper").style("margin-top", `${(height - width) / 2.0}px`)
 			d3.select("#help-button")
@@ -51,8 +50,6 @@
 				.style("left", "10px")
 				.style("top", "45px"); // `${(height - width) / 2.0}px`);
 		} else {
-			//d3.select("#controls-wrapper").style("left", `${(width - height) / 2.0 - 220}px`).style("top", `35%`);
-			//d3.select("#controls-wrapper").style("left", `${(width - height) / 2.0 - 220}px`).style("top", `100px`);
 			d3.select("#controls-wrapper")
 				.style("left", `${(width - height) / 2.0 - 220}px`)
 				.style("top", `50%`)
@@ -71,8 +68,6 @@
 		}
 
 		d3.selectAll(".canvas-wrapper").style("width", `${canvasWidth}px`).style("height", `${canvasHeight}px`)
-
-		// d3 things
 
 		d3.select("#main-transform")
 			.attr("transform", `translate(${canvasWidth / 2.0},${canvasHeight / 2.0}) rotate(${(twist) * 180 / Math.PI})`);

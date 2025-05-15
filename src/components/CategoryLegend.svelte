@@ -1,6 +1,7 @@
 <script type="text/javascript">
 	import * as d3 from 'd3';
 
+	// Bound to App.svelte
 	export let visible;
 	export let ANIM_DURATION_OUT;
 	export let mode;
@@ -35,6 +36,7 @@
 			.attr("opacity", (d) => d.data.visible ? 1.0 : 0.0);
 	};
 
+	// Evaluates if any of these variables changes (only show on connected view)
 	$: if (visible && mode == "viz-select-1" && !simplifiedMode) {
 	    showCategoryLegend();
 	}

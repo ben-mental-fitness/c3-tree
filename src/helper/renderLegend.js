@@ -1,5 +1,6 @@
 import * as d3 from 'd3';
 
+// Render legend on cluster group visualisation
 export const renderLegend = (canvasWidth, canvasHeight, visible = true, mode = "viz-select-0") => {
     d3.select("#d3-canvas").selectAll('.legend-wrapper').remove();
     if (!visible || mode == "viz-select-1") return;

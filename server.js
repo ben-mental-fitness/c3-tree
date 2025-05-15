@@ -1,4 +1,3 @@
-
 import dotenv from 'dotenv';
 dotenv.config({path: '.env'});
 
@@ -82,17 +81,16 @@ async function authorize() {
 
 
 // create express app
-
 const app = express();
 app.use(cors());
 
 app.use(express.static('dist'));
-//app.use(express.static('../frontend/static'));
-//app.use(express.static('./node_modules'));
 
 const port = process.env.PORT || 5000;
 const protocol = process.env.USE_HTTPS === "TRUE" ? https : http;
 
+// TODO: Use offline mode as fallback if Google Sheet is unreachable
+// TODO: Fix this to use BW1-DEV to load the Google Sheet
 app.post('/fetch_c3tree_data_from_google_sheet', (req, res) => {
 
   if(process.env.OFFLINE_MODE === 'TRUE') { // TODO: change to csv
@@ -114,6 +112,7 @@ app.post('/fetch_c3tree_data_from_google_sheet', (req, res) => {
       mainData: mainData,
       metaData: metaData,
     });
+
   } else {
     authorize()
       .then((auth) => {
@@ -175,12 +174,6 @@ app.post('/fetch_c3tree_data_from_google_sheet', (req, res) => {
 app.get('*', (req, res) => {
    res.sendFile(path.resolve(__dirname, 'dist', 'index.html'));
 });
-
-/*app.get("*", (req, res) => {
-  console.log("serving /");
-  res.writeHead(200, { "content-type": "text/html" })
-  fs.createReadStream("public/templates/index.html").pipe(res)
-});*/
 
 const options = {};
 

@@ -2,6 +2,7 @@
     import { fly, scale } from 'svelte/transition';
     import { quadOut } from 'svelte/easing';
 
+    // Bound to TabView.svelte
     export let open;
 </script>
 

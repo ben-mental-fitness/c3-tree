@@ -59,8 +59,6 @@ export const parseNCSAndLHWData = (responseData, header) => {
 		rawData.push(d);
 	});
 
-	//console.log(rawData);
-
 	return rawData;
 };
 

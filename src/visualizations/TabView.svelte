@@ -1,10 +1,10 @@
 <script type="text/javascript">
 	import * as d3 from 'd3';
-
 	import { Hamburger } from 'svelte-hamburgers';
-
+	
 	import Menu from '../components/Menu.svelte';
 
+	// Bound to App.svelte variables
 	export let data;
 	export let rawData;
 	export let showMainVizTrigger;
@@ -30,10 +30,6 @@
 			.style("margin", `${marginTop}px 0 ${marginBottom}px 0`)
 			.style("width", isMobile ? "100%" : `${tabWidth + contentWidth + 3}px`)
 			.style("left", isMobile ? "0" : `calc(50% - ${(tabWidth + contentWidth) / 2.0}px)`)
-			/*.style("display", "flex")
-			.style("flex-direction", "column")
-			.style("align-items", "center")
-			.style("justify-content", "center");*/
 
 		const tabs = d3.select("#tabs-wrapper .tabs-left")
 			.style("width", `${tabWidth + 2}px`)
@@ -108,17 +104,6 @@
 			.style("padding", "0 30px 20px")
 			.style("white-space", "pre-wrap")
 			.text((d) => d.props.themeDescLong);
-
-		/*contents.append("div")
-			.style("width", "320px")
-			.style("height", "240px")
-			.style("margin", "0 auto")
-			.append("video")
-			.attr("src", "vid/The VRGeo Palm Rejection Solution.mp4")
-			.attr("width", "320")
-			.attr("height", "240")
-			.attr("controls", true)
-			.text("Sorry, your browser doesn't support embedded videos.");*/
 			
 		contents.append("div")
 			.style("width", "440px")
@@ -354,7 +339,6 @@
 			return;
 		});
 
-
 		d3.select("#go-to-main-vis")
 			.style("margin", "20px 0")
 			.style("display", "inline-block")
@@ -423,9 +407,7 @@
 		
 
 		showContentOfSelectedTab(false);
-
 	};
-
 
 	$:if(data) {
 		createTabView(data);

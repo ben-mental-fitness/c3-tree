@@ -21,7 +21,6 @@
     import { parseMetaData, parseNCSAndLHWData, parseDefaultData } from './helper/dataPreProcessing';
     
 	// config
-
 	const TOOLTIP_WIDTH = 800;
 	const ANIM_DURATION_IN = 750;
 	const ANIM_DURATION_OUT = 400;
@@ -29,7 +28,6 @@
 	const BRAIN_SIZE = 0.5;
 
     // states
-
     let mode = null;
     let rerenderTreeTrigger = null;
     let root;
@@ -48,7 +46,6 @@
 	let visibleTeams = [];
 
     // child component states
-
 	let showMainVizTrigger;
 
     let loaderVisible;
@@ -72,10 +69,7 @@
 	let radius = null;
 	let outerRadius = null;	
 
-	//
 	// switch visualizations
-	//
-
 	const showMainViz = () => {
 
 		loaderVisible = true;
@@ -148,9 +142,11 @@
 
 		loaderVisible = true;
 
+		// TODO: Switch to using bw1-dev to read data from
 		var xhr = new XMLHttpRequest();
+		// xhr.open("POST", "https://c3tree.bw1-dev.com/fetch_c3tree_data_from_google_sheet", true);
 		xhr.open("POST", "https://c3tree.framed-mice.eu/fetch_c3tree_data_from_google_sheet", true);
-		//xhr.open("POST", "http://localhost:8001/fetch_c3tree_data_from_google_sheet", true);
+		// xhr.open("POST", "http://localhost:8001/fetch_c3tree_data_from_google_sheet", true);
 		xhr.send(null);
 		xhr.onload = () => {
 
@@ -188,11 +184,8 @@
 		showMainVizTrigger = false;
 	}
 
-	onMount(() => {
-		
-		//mode = d3.select("#viz-select").node().value === "0" ? "viz-select-0" : "viz-select-1";
+	onMount(() => {		
 		mode = d3.select("#checkbox-viz-select-cluster").property("checked") ? "viz-select-0" : "viz-select-1";
-
 		categoryLegendVisible = mode === "viz-select-1";
 		
 		d3.select("#welcome-dialog .button.button-simplified").on("click", (event) => {
@@ -202,7 +195,6 @@
 
 		d3.select("#welcome-dialog .button.button-default").on("click", async (event) => {
 			simplifiedMode = false;
-			//await rerenderTree(false); // TODO: await?
 			rerenderTreeTrigger = false;
 			showMainViz();
 		});		
@@ -213,7 +205,6 @@
 		d3.select("#hover-tooltip").style("width", `${TOOLTIP_WIDTH}px`).style("height", "auto")
 
 		fetchGDriveAPIData();
-		
 	});
 
 	// skip welcome dialog

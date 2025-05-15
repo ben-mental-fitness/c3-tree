@@ -1,4 +1,5 @@
 <script>
+    // Bound to App.svelte
     export let visible;
 </script>
 

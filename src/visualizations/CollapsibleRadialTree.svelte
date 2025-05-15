@@ -10,6 +10,7 @@
     import { radialTreeLineFunction, connectedEdgesLineFunction, separationFunction } from '../helper/d3Functions';
 	import { renderLegend } from "../helper/renderLegend";
 
+	// Bound to App.svelte
 	export let BRAIN_SIZE;
 	export let BRAIN_ASPECT_RATIO;
 	export let TOOLTIP_WIDTH;
@@ -38,7 +39,7 @@
 	export let checkboxesChecked;
 	export let rerenderTreeTrigger;
 	export let mode;
-	let prevMode;
+	let prevMode = "viz-select-0";
 	let prevShowLeafTitles;
 	export let categoryLegendVisible;
 	
@@ -83,18 +84,20 @@
 			return;
 		}
 		
+		// Define visible elements
 		const filteredRoot = root;
-		console.log(`${simplifiedMode} || ${mode}`);
 		categoryLegendVisible = !simplifiedMode && checkboxesChecked["checkbox-legend"];
 		simplifiedMode = checkboxesChecked["checkbox-simple-view"];
 		controlsVisible = !simplifiedMode;
 
+		// Visualisation rotation
 		twist = twist > Math.PI * 2.0 ? twist - Math.PI * 2.0 : twist;
 		twist = twist < 0 ? twist + Math.PI * 2.0 : twist;
 
 		d3.select("#twist-circle")
 			.attr("r", outerRadius + (mode === "viz-select-1" && !simplifiedMode ? 80 : 0))
 
+		// Increase visualisation radius when leaf titles are not visible
 		const treeFunction = d3.cluster().size([2 * Math.PI, (checkboxesChecked["checkbox-leaf-titles"] ? radius : outerRadius - 25) + (mode === "viz-select-1" && !simplifiedMode ? 80 : 0)]);
 		treeFunction.separation(separationFunction)(filteredRoot);
 		treeFunction.separation(separationFunction)(rootSimplified);
@@ -123,6 +126,7 @@
 			.transition(animation)
 			.attr("opacity",  simplifiedMode ? 1.0 : 0.0)
 
+		// Add leaf paths from center for cluster view
 		if (!simplifiedMode && mode === "viz-select-0") { 
 			const curvesCenterUpdate = d3.select("#curves-wrapper-center")
 				.selectAll(".center-to-leaf-path")
@@ -140,8 +144,8 @@
 			.transition(animation)
 			.attr("opacity",  !simplifiedMode && mode === "viz-select-1" ? 1.0 : 0.0);
 		
+		// Create connected view and display as PNG
 		if (!simplifiedMode && mode === "viz-select-1") {
-
 			// TODO - Combine this and set visibility lines
 			// Recreate leaf-to-leaf paths if non-existent
 			if (d3.select("#curves-wrapper-leaves").selectChildren()["_groups"][0].length == 0) {
@@ -214,7 +218,6 @@
 
 					d3.select("#curves-wrapper-leaves").selectAll("*").remove();
 					canvas.remove();
-					// document.getElementById('curves-wrapper-leaves-img').style.opacity = "1.0";
 				})
 
 				image.setAttribute("src", svgDataUrl);
@@ -222,6 +225,7 @@
 			}, 1000)
 		}
 
+		// Outer large circles on cluster visualisation
 		d3.select("#outer-node-group-wrapper")
 			.transition(animation)
 			.attr("opacity",  !simplifiedMode ? 1.0 : 0.0)
@@ -237,6 +241,7 @@
 				.style("pointer-events", (d) => d.data.visible && !simplifiedMode ? "all" : "none")
 		}
 
+		// Cluster group visualisation elements
 		const nodes = d3.selectAll("#node-group-wrapper").selectAll(".node-group")
 			.data(filteredRoot.descendants());
 
@@ -270,17 +275,14 @@
 		update.selectAll(".node-text")
 			.attr("x", (d) => {
 				const angle = (d.x + twist) % (Math.PI * 2.0);
-				// angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
 				return angle < Math.PI ? 12 : -12;
 			})
 			.attr("text-anchor", (d) => {
 				const angle = (d.x + twist) % (Math.PI * 2.0);
-				// angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
 				return angle < Math.PI ? "start" : "end";
 			})
 			.attr("transform", (d) => {
 				const angle = (d.x + twist) % (Math.PI * 2.0);
-				// angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
 				return `rotate(${angle >= Math.PI ? 180 : 0})`;
 			})
 
@@ -291,15 +293,14 @@
 		update.selectAll(".text-leaf-interact-area")
 			.style("pointer-events", (d) => d.data.visible && !simplifiedMode ? "all" : "none");
 
-
 		d3.selectAll("#node-group-wrapper .node-circle")
 			.transition(animation)
 			.attr("opacity", (d) => !simplifiedMode && (d.data.visible || d.parent?.data.visible || d.parent?.data.id === "r") && (!d.children || mode == "viz-select-0") ? 1.0 : 0.0);
-			// .attr("opacity", (d) => mode === "viz-select-0" && !simplifiedMode && (d.data.visible || d.parent?.data.visible || d.parent?.data.id === "r") ? 1.0 : 0.0);
-
+			
 		d3.selectAll("#node-group-wrapper .node-interact-area")
 			.style("pointer-events", (d) => /* d.data.visible && */ !simplifiedMode && mode === "viz-select-0" ? "all" : "none")
 
+		// Simplified cluster view
 		d3.selectAll("#node-group-simplified-wrapper .node-group-simplified")
 			.data(rootSimplified.descendants())//, (d) => d.data.id)
 			.call((update) => {
@@ -310,17 +311,14 @@
 				update.selectAll(".node-text")
 					.attr("x", (d) => {
 						const angle = (d.x + twist) % (Math.PI * 2.0);
-						// angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
 						return angle < Math.PI ? 12 : -12;
 					})
 					.attr("text-anchor", (d) => {
 						const angle = (d.x + twist) % (Math.PI * 2.0);
-						// angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
 						return angle < Math.PI ? "start" : "end";
 					})
 					.attr("transform", (d) => {
 						const angle = (d.x + twist) % (Math.PI * 2.0);
-						// angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
 						return `rotate(${angle >= Math.PI ? 180 : 0})`;
 					})
 
@@ -336,6 +334,7 @@
 			.attr("opacity", (d) => simplifiedMode ? 1.0 : 0.0);
 
 
+		// Legend and outer labels - Publication Themes
 		if(!simplifiedMode) {
 			d3.select("#category-legend")
 				.selectAll(".legend-entry")
@@ -356,7 +355,6 @@
 			})
 			.attr("text-anchor", (d, i) => {
 				const angle = (d.x + twist) % (Math.PI * 2.0);
-				// angle = angle > Math.PI * 2.0 ? angle - Math.PI * 2.0 : angle < 0 ? angle + Math.PI * 2.0 : angle;
 				return angle < Math.PI ? "start" : "end"
 			})
 			.attr("opacity", (d) => d.data.visible && (mode === "viz-select-0" || (mode === "viz-select-1" && !categoryLegendVisible)) ? 1.0 : 0.0)
@@ -383,6 +381,7 @@
 		treeFunction.separation(separationFunction)(root);
 		treeFunction.separation(separationFunction)(rootSimplified);
 
+		// Set data visibility based on checkboxes
 		root.descendants().forEach((d) => {
 			if(['Mental Health ','Healthcare disruption','Society & Health ','Serology ','Long Covid ','OpenSAFELY','Other ','Treatment '].includes(d.data.text))
 				setTreeVisibility(d.data, checkboxesChecked["checkbox-detailed-view-themes-publications"]);
@@ -392,6 +391,7 @@
 				setTreeVisibility(d.data, checkboxesChecked["checkbox-detailed-view-team"]);
 		});
 
+		// Remove highlighted paths if body is clicked
 		d3.select("body").on("click", (event) => {
 			if(!d3.select("#sticky-tooltip").empty()) {
 				if (highlightedPaths._groups[0].length > 0) {
@@ -411,6 +411,7 @@
 			}
 		});
 
+		// Empty the canvas, ready to rebuild
 		//d3.select("#d3-canvas").selectAll("#main-transform").remove();
 		d3.select("#d3-canvas").selectAll("*").remove();
 		const svg = d3.select("#d3-canvas")
@@ -419,7 +420,6 @@
 			.attr("height", canvasHeight)
 			.append("g")
 			.attr("id", "main-transform")
-			//.attr("transform", `translate(${canvasWidth / 2.0},${canvasHeight / 2.0}) rotate(-70)`);
 			.attr("transform", `translate(${canvasWidth / 2.0},${canvasHeight / 2.0})`);
 		
 		// center image
@@ -442,6 +442,7 @@
 				rerenderTreeTrigger = true;
 			});
 
+		// Repopulate legend
 		d3.select("#category-legend").selectAll("*").remove();
 		d3.select("#category-legend")
 			.selectAll(".legend-entry")
@@ -475,6 +476,8 @@
 				addSVGTextLineBreaks(d3.select(this), canvasWidth / 2 - radius - 80, 0, 1.0)
 			});
 
+		// Outer, grey rotation circle
+		// TODO: Make rotation instant again
 		svg.append("circle")
 			.attr("id", "twist-circle")
 			.attr("r", outerRadius)
@@ -533,6 +536,7 @@
 					});
 			});
 
+		// Small hidden twistcircle
 		const twistCircleSmallX = canvasWidth / 2.0 + outerRadius;
 		const twistCircleSmallY = canvasHeight / 2.0 + outerRadius;
 		const twistCircleSmall = d3.select("#d3-canvas").append("g").attr("id", "twist-circle-small-g")
@@ -739,6 +743,7 @@
 					nodeOnClick(d)
 			});
 
+		// Toggle between cluster group & connected views
 		if(mode === "viz-select-0") {
 			d3.selectAll("#curves-wrapper-center").attr("opacity", 1.0);
 			d3.selectAll("#curves-wrapper-leaves").attr("opacity", 0.0);
@@ -751,6 +756,7 @@
 		rerenderTree(false);
 	};
 
+	// Show tooltip on hover & fix on click
 	const setMouseEvents = () => {
 		d3.selectAll(".text-leaf-interact-area,.outer-node-group,.category-labels,.legend-entry")
 			.on("click", (event, d) => {
@@ -830,6 +836,7 @@
 
 							event.preventDefault();
 
+							// Drag tooltip
 							d3.select("body")
 								.on("mousemove.dragTooltip", (event) => {
 									let pointerPos = [event.pageX, event.pageY];
@@ -860,6 +867,7 @@
 							event.stopPropagation();
 						});
 
+					// Close tooltip on 'X' button click
 					d3.select("#hover-tooltip.tooltip").style("display", "none")
 					stickyTooltip.style("pointer-events", "all");
 					stickyTooltip.select(".tooltip-close-button")
@@ -876,6 +884,7 @@
 						});
 					stickyTooltip.select(".tooltip-bottom-note").remove();
 
+					// Expand tooltip content on arrow click
 					let collapsed = true;
 					d3.select("#sticky-tooltip .tooltip-collapsible-button").on("click", (event) => {
 						event.stopPropagation();
@@ -898,12 +907,14 @@
 						collapsed = !collapsed;
 					});
 
+					// Go to publication link
 					d3.select("#sticky-tooltip .button-publication-link")
 						.on("click", (event) => {
 							event.stopPropagation();
 							window.open(d.data.props.publication_link);
 						})
 
+					// Remove highlighted paths
 					if(selectedNode !== undefined) {
 						if (highlightedPaths._groups[0].length > 0) {
 							highlightedPaths.remove();
@@ -931,6 +942,7 @@
 							.raise();
 					}
 
+					// Highlight connected publication text on connected view & show on tooltip
 					if(mode === "viz-select-1") {
 						const connectedNodes = d3.selectAll('.node-group').filter((d_) => 
 							d_.data.props.data_source && d_.data.props.data_source.some(v => d.data.props.data_source.includes(v)) && d !== d_)
@@ -983,7 +995,8 @@
 											.attr("transform", "translate(256,256) rotate(90) translate(-256,-256)");
 									}
 								});
-
+							
+							// TODO: Fix to show the connected publication tooltip when clicked or the publication link
 							d3.selectAll('#sticky-tooltip .table-main .tooltip-tbody .papers-list-item .button-publication-link')
 								.data(connectedPublications)
 								.on("click", (event, d) => {
@@ -996,6 +1009,7 @@
 
 
 			})
+			// Create hover tooltip
 			.on("mouseover", (event, d) => {
 
 				const pointerPos = [event.pageX, event.pageY];
@@ -1003,15 +1017,10 @@
 				if(d.depth > 1) {
 					const topic = getParentWithDepth(d, 1);
 					d3.select("#hover-tooltip .tooltip-title")
-						//.text(d.data.text)
 						.text(`TOPIC: ${topic.data.text}`);
 
 
 					const topicRow = d3.select("#hover-tooltip .table-main .tooltip-tbody").append("tr");
-					/*topicRow.append("td").style("width", `${TOOLTIP_WIDTH * 0.2}px`)
-						.append("p")
-						.style("font-weight", "bold")
-						.text("")*/
 					topicRow.append("td").style("text-align", "left")
 						.append("p")
 						.style("font-weight", "bold")
@@ -1112,7 +1121,6 @@
 								d_.data.props.data_source && d_.data.props.data_source.some(v => d.data.props.data_source.includes(v)));
 							
 							// accordion
-
 							const tooltipConnectionRow = d3.select("#hover-tooltip .table-main .tooltip-tbody");
 
 							tooltipConnectionRow.append("tr").append("td").style("width", `${TOOLTIP_WIDTH * 0.2}px`)
@@ -1210,12 +1218,11 @@
 							.attr('stroke', checkboxesChecked['checkbox-white-backgrounds'] ? '#ffffff' : '#0632E4')
 							.attr('stroke-width', checkboxesChecked['checkbox-white-backgrounds'] ? 10 : 1)
 					}
+				// Topic rather than publication
 				} else {
 					const topic = d;
 					d3.select("#hover-tooltip .tooltip-title")
-						//.text(d.data.text)
 						.text(`TOPIC: ${topic.data.text}`);
-
 
 					const themeDescRow = d3.select("#hover-tooltip .table-main .tooltip-tbody");
 					themeDescRow.append("tr").append("td")
@@ -1256,24 +1263,17 @@
 					d3.selectAll(`#${d.data.id}-text,#${d.data.id}-text-2nd-line`).style("font-weight", "bold");
 				}
 			})
+			// Fix tooltip to left or right depending on hovered element 
 			.on("mousemove", (event, d) => {
-
-				//if(d3.select("#sticky-tooltip").empty()) {
 				const boundingRect = d3.select("#hover-tooltip.tooltip").node().getBoundingClientRect();
 				const pointerPos = [event.pageX, event.pageY];
 
 				let left = event.pageX < canvasWidth / 2.0 ? canvasWidth / 2.0 + 10 : 20; 
 				let top = event.pageY;
 
-				// left = left + TOOLTIP_WIDTH >= width - 20 ? width - 20 - TOOLTIP_WIDTH : left;
-				// left = left < 20 ? 20 : left;
-
-				// top = top + boundingRect.height >= height - 20 ? height - 20 - boundingRect.height : top;
-				// top = top < 20 ? 20 : top;
-
 				d3.select("#hover-tooltip.tooltip")
-					.style("left", `${left}px`) // `${left}px`)
-					.style("top", "20px") // `${top}px`)
+					.style("left", `${left}px`) 
+					.style("top", "20px") 
 					.style("width", `${canvasWidth / 2.0 - 30}px`)
 					.style("display", checkboxesChecked["checkbox-second-tooltip"] || d3.select("#sticky-tooltip").empty() ? "block" : "none")
 					.raise();
@@ -1315,13 +1315,13 @@
 
 <div id="main-viz-wrapper" style="opacity: 0.0;display: none;">
 
+	<!-- Main visualisation -->
 	<div class="canvas-wrapper" id="canvas-wrapper">
 		<svg id="d3-canvas" opacity="0.0" version="1.1" xmlns="http://www.w3.org/2000/svg"/>
 		<img alt="Connections view" style="opacity:0.0" id="curves-wrapper-leaves-img"/>
 	</div>
 
 	<!-- tooltip -->
-
 	<div id="tooltip-wrapper">
 		<div id="hover-tooltip" class="tooltip" style="display:none;z-index:99;">
 			<div class="tooltip-close-button" style="display:none">x</div>
