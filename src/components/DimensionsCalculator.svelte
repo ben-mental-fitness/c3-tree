@@ -61,11 +61,11 @@
 				.style("margin-left", null);
 			d3.select("#help-button")
 				.style("display", "block")
-				.style("right", "10px") // `${(width - height) / 2.0 + 20}px`)
+				.style("right", `${(width - height) * 0.2 + 20}px`) 
 				.style("top", "20px");
 			d3.select("#back-button")
 				.style("display", "block")
-				.style("left", "10px") // `${(width - height) / 2.0 + 20}px`)
+				.style("left", `${(width - height) * 0.2 + 20}px`) 
 				.style("top", "45px");
 		}
 
