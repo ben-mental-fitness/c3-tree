@@ -26,8 +26,8 @@
 	
 	// TODO: Connections image alignment
 	const calculateDimensions = () => {
-		width  = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-		height = (window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight);
+		width  = Math.floor(window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth) - 1;
+		height = Math.floor(window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight) - 1;
 		canvasWidth = width;
 		canvasHeight = height;
 

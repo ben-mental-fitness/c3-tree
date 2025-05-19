@@ -770,9 +770,10 @@
 					.attr('id', 'sticky-tooltip-overlay')
 					.style('position', 'fixed')
 					.style('left', '0')
-					.style('top', '0')
+					.style('top', '100px')
 					.style('width', '100%')
 					.style('height', '100%')
+					.style('max-height', `${window.innerHeight - 120}px`)
 					.style('opacity', '0.6')
 					.style('background', '#ffffff')
 
@@ -1273,7 +1274,8 @@
 
 				d3.select("#hover-tooltip.tooltip")
 					.style("left", `${left}px`) 
-					.style("top", "20px") 
+					.style("top", "100px") 
+					.style('max-height', `${window.innerHeight - 120}px`)
 					.style("width", `${canvasWidth / 2.0 - 30}px`)
 					.style("display", checkboxesChecked["checkbox-second-tooltip"] || d3.select("#sticky-tooltip").empty() ? "block" : "none")
 					.raise();
