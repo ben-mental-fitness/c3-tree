@@ -12,6 +12,7 @@
 	export let ANIM_DURATION_OUT;
 
 	let menuOpen;
+	let activeDropdownElement;
 
 	const createTabView = (data) => {
 
@@ -150,7 +151,7 @@
 						.attr("transform", "translate(256,256) rotate(90) translate(-256,-256)");
 				}
 
-				document.getElementById("collapsible-content-toggler").scrollIntoView({ behavior: "smooth", block: "start" });
+				event.target.scrollIntoView({ behavior: "smooth", block: "start" });
 			});
 
 		collapsibleContentToggler.append("p")
@@ -205,19 +206,29 @@
 				const collapsed = entry.attr("data-collapsed")
 
 				if(collapsed === "true") {
-					entry.attr("data-collapsed", "false")
-						.style("display", "block")
-						.transition("appear")
-						.duration(ANIM_DURATION_IN)
-						.ease(d3.easeQuadOut)
-						.style("height", "auto");
+					const waitForCollapse = () => {
+						if (activeDropdownElement == null) {
+							entry.attr("data-collapsed", "false")
+								.style("display", "block")
+								.transition("appear")
+								.duration(ANIM_DURATION_IN)
+								.ease(d3.easeQuadOut)
+								.style("height", "auto");
 
-					d3.select(`#papers-list-item-${d.parentIndex}-${d.rIndex} .collapse-icon-paper path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
-						.attr("transform", "translate(256,256) rotate(180) translate(-256,-256)");
+							d3.select(`#papers-list-item-${d.parentIndex}-${d.rIndex} .collapse-icon-paper path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
+								.attr("transform", "translate(256,256) rotate(180) translate(-256,-256)");
 
-					document.getElementById(`papers-list-item-${d.parentIndex}-${d.rIndex}`).style.zIndex = "40";
-					document.getElementById("full-page-fade").style.display = "block";
-					d3.select("#full-page-fade").transition().duration(ANIM_DURATION_IN).ease(d3.easeQuadOut).style("opacity", 0.5);
+							document.getElementById(`papers-list-item-${d.parentIndex}-${d.rIndex}`).style.zIndex = "40";
+							document.getElementById("full-page-fade").style.display = "block";
+							d3.select("#full-page-fade").transition().duration(ANIM_DURATION_IN).ease(d3.easeQuadOut).style("opacity", 0.6);
+							document.body.addEventListener("click", overlayClickEvent);
+							activeDropdownElement = document.getElementById(`papers-list-item-${d.parentIndex}-${d.rIndex}`);
+							document.getElementById(`papers-list-item-${d.parentIndex}-${d.rIndex}`).scrollIntoView({ behavior: "smooth", block: "start" });
+						} else {
+							setTimeout(waitForCollapse, 250);
+						}
+					}
+					waitForCollapse();
 				} else {
 					entry.attr("data-collapsed", "true")
 						.style("display", "none")
@@ -235,11 +246,13 @@
 						.attr("transform", "translate(256,256) rotate(90) translate(-256,-256)");
 
 					d3.select("#full-page-fade").transition().duration(ANIM_DURATION_OUT).ease(d3.easeQuadOut).style("opacity", 0.0);
-					d3.select("#full-page-fade").transition().delay(ANIM_DURATION_OUT).style("display", "none");
-					d3.select(`#papers-list-item-${d.parentIndex}-${d.rIndex}`).transition().delay(ANIM_DURATION_OUT).style("z-index", "auto");
-				}
-
-				document.getElementById(`papers-list-item-${d.parentIndex}-${d.rIndex}`).scrollIntoView({ behavior: "smooth", block: "start" });	
+					setTimeout(() => {
+						d3.select("#full-page-fade").style("display", "none");
+						d3.select(`#papers-list-item-${d.parentIndex}-${d.rIndex}`).style("z-index", "auto");
+						document.body.removeEventListener("click", overlayClickEvent);
+						activeDropdownElement = null;
+					}, ANIM_DURATION_OUT);
+				}	
 			});
 
 		papersList.append("p")
@@ -409,6 +422,11 @@
 		showContentOfSelectedTab(false);
 	};
 
+	const overlayClickEvent = (event) => {
+		if (activeDropdownElement.contains(event.target)) return;
+		activeDropdownElement.click();
+	};
+
 	$:if(data) {
 		createTabView(data);
 	}
@@ -452,9 +470,10 @@
 		top: 0;
 		width: 100vw;
 		height: 100vh;
-		background-color: #000000;
+		background-color: #ffffff;
 		opacity: 0;
 		z-index: 30;
+		pointer-events: none;
 	}
 
 	#tabs-wrapper {

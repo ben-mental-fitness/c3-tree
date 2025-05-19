@@ -217,7 +217,7 @@
 	<WelcomeDialog bind:visible={welcomeDialogVisible} {ANIM_DURATION_OUT}/>
 	<IntroTour bind:introTourStartTrigger bind:introData/>
 	<MinWidthDialog bind:checkShowDisplayCompatabilityTrigger/>
-	<DimensionsCalculator bind:width bind:height bind:canvasWidth bind:canvasHeight bind:radius bind:outerRadius bind:twist {BRAIN_SIZE} {BRAIN_ASPECT_RATIO}/>
+	<DimensionsCalculator bind:width bind:height bind:canvasWidth bind:canvasHeight bind:radius bind:outerRadius bind:twist {BRAIN_SIZE} {BRAIN_ASPECT_RATIO} bind:mode bind:rerenderTreeTrigger/>
 	<CategoryLegend  bind:visible={categoryLegendVisible} {ANIM_DURATION_OUT} bind:mode bind:simplifiedMode/>
 
 	<CollapsibleRadialTree {BRAIN_SIZE} {BRAIN_ASPECT_RATIO} {TOOLTIP_WIDTH}

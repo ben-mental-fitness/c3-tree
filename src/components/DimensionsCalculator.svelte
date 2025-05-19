@@ -21,6 +21,8 @@
 	export let radius;
 	export let outerRadius;
 	export let twist;
+	export let mode;
+	export let rerenderTreeTrigger;
 	
 	// TODO: Connections image alignment
 	const calculateDimensions = () => {
