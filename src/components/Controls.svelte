@@ -129,20 +129,38 @@
 			rerenderTreeTrigger = false;
 		});
 
-		d3.select("#checkbox-viz-select-cluster").on("click", (event) => {
+		const vizSelectCluster = () => {
 			mode = "viz-select-0";
 			d3.selectAll("#curves-wrapper-center").attr("opacity", 1.0);
 			d3.selectAll("#curves-wrapper-leaves").attr("opacity", 0.0);
 			rerenderTreeTrigger = false;
 			d3.select("#checkbox-viz-select-connections").property("checked", false);
-		});
+		}
 
-		d3.select("#checkbox-viz-select-connections").on("click", (event) => {
+		const vizSelectConnections = () => {
 			mode = "viz-select-1";
 			d3.selectAll("#curves-wrapper-center").attr("opacity", 0.0);
 			d3.selectAll("#curves-wrapper-leaves").attr("opacity", 1.0);
 			rerenderTreeTrigger = false;
 			d3.select("#checkbox-viz-select-cluster").property("checked", false);
+		}
+
+		d3.select("#checkbox-viz-select-cluster").on("click", (event) => {
+			if (document.getElementById("checkbox-viz-select-cluster").checked) {
+				vizSelectCluster();
+			} else {
+				d3.select("#checkbox-viz-select-connections").property("checked", true);
+				vizSelectConnections();
+			}
+		});
+
+		d3.select("#checkbox-viz-select-connections").on("click", (event) => {
+			if (document.getElementById("checkbox-viz-select-connections").checked) {
+				vizSelectConnections();
+			} else {
+				d3.select("#checkbox-viz-select-cluster").property("checked", true);
+				vizSelectCluster();
+			}
 		});
 
 		d3.select('#checkbox-detailed-view-themes-publications').on("click", (event) => {
@@ -196,6 +214,15 @@
 		<div style="clear: both;"></div>
 
 		<div style="display:{visible ? 'block' : 'none'}"> 
+			<span style="float:left;display:block">&nbsp;&nbsp;Layout:</span>
+			<div style="clear: both;"></div>
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-viz-select-cluster" checked>
+			<span style="float:left;display:block">Cluster by theme</span>
+			<div style="clear: both;"></div>
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-viz-select-connections">
+			<span style="float:left;display:block">Connections</span>
+			<div style="clear: both;"></div>
+
 			<span style="float:left;display:block">&nbsp;&nbsp;Show information about:</span>
 			<div style="clear: both;"></div>
 			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-themes-publications" checked>
@@ -208,13 +235,7 @@
 			<span style="float:left;display:block">Data Sources</span>
 			<div style="clear: both;"></div>
 
-			<span style="float:left;display:block">&nbsp;&nbsp;Layout:</span>
-			<div style="clear: both;"></div>
-			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-viz-select-cluster" checked>
-			<span style="float:left;display:block">Cluster by theme</span>
-			<div style="clear: both;"></div>
-			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-viz-select-connections">
-			<span style="float:left;display:block">Connections</span>
+			<span style="float:left;display:block">&nbsp;&nbsp;Labels:</span>
 			<div style="clear: both;"></div>
 			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-leaf-titles" checked>
 			<span style="float:left;display:block">Show leaf titles</span>
