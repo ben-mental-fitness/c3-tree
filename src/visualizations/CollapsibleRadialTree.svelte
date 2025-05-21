@@ -770,12 +770,12 @@
 					.attr('id', 'sticky-tooltip-overlay')
 					.style('position', 'fixed')
 					.style('left', '0')
-					.style('top', '100px')
+					.style('top', '0')
 					.style('width', '100%')
 					.style('height', '100%')
-					.style('max-height', `${window.innerHeight - 120}px`)
-					.style('opacity', '0.6')
-					.style('background', '#ffffff')
+					.style('max-height', `${window.innerHeight}px`)
+					.style('opacity', '0.4')
+					.style('background', '#ffffff');
 
 				let createSticky = true;
 
@@ -913,7 +913,14 @@
 						.on("click", (event) => {
 							event.stopPropagation();
 							window.open(d.data.props.publication_link);
-						})
+						});
+					
+					// Go to altmetric link
+					d3.select("#sticky-tooltip .button-altmetric-link")
+						.on("click", (event) => {
+							event.stopPropagation();
+							window.open(d.data.props.info_collapsed.Impact);
+						});
 
 					// Remove highlighted paths
 					if(selectedNode !== undefined) {
@@ -997,12 +1004,20 @@
 									}
 								});
 							
-							// TODO: Fix to show the connected publication tooltip when clicked or the publication link
+							// Go to publication link
 							d3.selectAll('#sticky-tooltip .table-main .tooltip-tbody .papers-list-item .button-publication-link')
 								.data(connectedPublications)
 								.on("click", (event, d) => {
 									event.stopPropagation();
 									window.open(d.data.props.publication_link);
+								});
+							
+							// Go to altmetric link
+							d3.selectAll("#sticky-tooltip .table-main .tooltip-tbody .papers-list-item .button-altmetric-link")
+								.data(connectedPublications)
+								.on("click", (event) => {
+									event.stopPropagation();
+									window.open(d.data.props.info_collapsed.Impact);
 								});
 						}
 					}
@@ -1182,16 +1197,28 @@
 								});
 
 								if(d.data.props.publication_link && d.data.props.publication_link !== "") {
-
 									collapsibleInfo = true;
 									d3.select(this).append("center").append("button")
 										.attr("class", "button button-simplified button-publication-link")
 										.attr("type", "button")
-										.style("margin-bottom", "10px")
 										.text("Go to publication")
-										
-									
+
+									if(d.data.props.info_collapsed.Impact && d.data.props.info_collapsed.Impact !== "") {
+										d3.select(this).select(".button-publication-link")
+											.append("button")
+											.attr("class", "button button-simplified button-altmetric-link")
+											.attr("type", "button")
+											.text("Go to altmetric")
+									}
+								
+								} else if(d.data.props.info_collapsed.Impact && d.data.props.info_collapsed.Impact !== "") {
+									collapsibleInfo = true;
+									d3.select(this).append("center").append("button")
+										.attr("class", "button button-simplified button-altmetric-link")
+										.attr("type", "button")
+										.text("Go to altmetric")
 								}
+
 								if(!collapsibleInfo) {
 									d3.select(this).append("p")
 										.style("font-weight", "bold")
@@ -1237,10 +1264,15 @@
 				else 
 					d3.select("#hover-tooltip .button-publication-link").style("pointer-events", "none").style("display", "none");
 
+				if(d.data.props.info_collapsed.Impact)
+					d3.select("#hover-tooltip .button-altmetric-link").style("display", null).style("pointer-events", "all");
+				else 
+					d3.select("#hover-tooltip .button-altmetric-link").style("pointer-events", "none").style("display", "none");
+
 				d3.select("#hover-tooltip .table-collapsed .tooltip-tbody").style("display", "none").selectAll("*").remove();
 				let collapsibleInfo = false;
 				Object.entries(d.data.props.info_collapsed).forEach(([key, value]) => {
-					if(value && value !== "") {
+					if(value && value !== "" && key !== "Impact") {
 						collapsibleInfo = true;
 						const collapsedInfoRow = d3.select("#hover-tooltip .table-collapsed .tooltip-tbody");
 						collapsedInfoRow.append("tr").append("td").style("width", `${TOOLTIP_WIDTH * 0.2}px`)
@@ -1279,10 +1311,25 @@
 					.style("width", `${canvasWidth / 2.0 - 30}px`)
 					.style("display", checkboxesChecked["checkbox-second-tooltip"] || d3.select("#sticky-tooltip").empty() ? "block" : "none")
 					.raise();
+
+				// if (!document.getElementById("sticky-tooltip-overlay")) {
+				// 	d3.select(".canvas-wrapper")
+				// 		.append('div')
+				// 		.attr('id', 'sticky-tooltip-overlay')
+				// 		.style('position', 'fixed')
+				// 		.style('left', '0')
+				// 		.style('top', '0')
+				// 		.style('width', '100%')
+				// 		.style('height', '100%')
+				// 		.style('max-height', `${window.innerHeight}px`)
+				// 		.style('opacity', '0.6')
+				// 		.style('background', '#ffffff');
+				// }
 			})
 			.on("mouseleave", (event, d) => {
 
 				d3.select("#hover-tooltip.tooltip").style("display", "none");
+				// d3.select("#sticky-tooltip-overlay").remove();
 				d3.selectAll(`#${d.data.id}-text,#${d.data.id}-text-2nd-line`).style("font-weight", null);
 				if(selectedNode === undefined) {
 					if (highlightedPaths._groups[0].length > 0) {
@@ -1335,6 +1382,7 @@
 			</table>
 			<center>
 				<button type="button" class="button button-simplified button-publication-link">Go to publication</button>
+				<button type="button" class="button button-simplified button-altmetric-link">Go to altmetric</button>
 			</center>
 			<svg class="tooltip-collapsible-button" style="margin-left:25px; cursor:pointer" width="15px" height="15px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
 				<path d="M233.4 105.4c12.5-12.5 32.8-12.5 45.3 0l192 192c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L256 173.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l192-192z"
@@ -1405,5 +1453,11 @@
 		left: 0;
 		top: 0;
 		z-index: -1;
+	}
+
+	.button-publication-link, .button-altmetric-link {
+		min-width: 150px;
+		margin: 10px;
+		width: calc(50% - 25px);
 	}
 </style>
