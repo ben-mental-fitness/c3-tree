@@ -825,6 +825,7 @@
 							];
 							
 							const boundingRect = d3.select("#sticky-tooltip").node().getBoundingClientRect();
+							const tooltipWidth = boundingRect.width;
 							const tooltipHeight = boundingRect.height;
 
 							// Resizing so don't drag
@@ -836,6 +837,7 @@
 							}
 
 							event.preventDefault();
+							console.log(canvasWidth);
 
 							// Drag tooltip
 							d3.select("body")
@@ -843,20 +845,25 @@
 									let pointerPos = [event.pageX, event.pageY];
 									let deltaX = pointerPos[0] - startPointerPos[0];
 									let deltaY = pointerPos[1] - startPointerPos[1];
-									if(startPos[0] + deltaX > width - TOOLTIP_WIDTH) {
-										deltaX = (width - TOOLTIP_WIDTH) - startPos[0];
-									} else if(startPos[0] + deltaX < 0) {
-										deltaX = - startPos[0];
+									let newX = startPos[0] + deltaX
+									let newY = startPos[1] + deltaY
+									
+									if(startPos[0] + deltaX > width - tooltipWidth) {
+										newX = width - tooltipWidth;
+									} else if(startPos[0] + deltaX < 10) {
+										newX = 10;
 									}
 									if(startPos[1] + deltaY > height - tooltipHeight) {
-										deltaY = (height - tooltipHeight) - startPos[1];
-									} else if(startPos[1] + deltaY < 0) {
-										deltaY = - startPos[1];
+										newY = height - tooltipHeight;
+									} else if(startPos[1] + deltaY < 10) {
+										newY = 10;
 									}
 
 									d3.select("#sticky-tooltip")
-									.style("left", `${startPos[0] + deltaX}px`)
-									.style("top", `${startPos[1] + deltaY}px`)
+									.style("left", `${newX}px`)
+									.style("top", `${newY}px`)
+									.style("max-width", `${canvasWidth - newX - 10}px`)
+									.style("max-height", `${canvasHeight - newY - 10}px`)
 								})
 								.on("mouseup.dragTooltip,mouseleave.dragTooltip", (event) => {
 									d3.select("body")
