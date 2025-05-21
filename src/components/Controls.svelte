@@ -135,6 +135,7 @@
 			d3.selectAll("#curves-wrapper-leaves").attr("opacity", 0.0);
 			rerenderTreeTrigger = false;
 			d3.select("#checkbox-viz-select-connections").property("checked", false);
+			renderLegend(canvasWidth, canvasHeight, checkboxesChecked["checkbox-legend"], mode);
 		}
 
 		const vizSelectConnections = () => {
@@ -143,6 +144,7 @@
 			d3.selectAll("#curves-wrapper-leaves").attr("opacity", 1.0);
 			rerenderTreeTrigger = false;
 			d3.select("#checkbox-viz-select-cluster").property("checked", false);
+			renderLegend(canvasWidth, canvasHeight, checkboxesChecked["checkbox-legend"], mode);
 		}
 
 		d3.select("#checkbox-viz-select-cluster").on("click", (event) => {

@@ -51,6 +51,8 @@
 				.style("display", "block")
 				.style("left", "10px")
 				.style("top", "45px"); // `${(height - width) / 2.0}px`);
+			d3.select("#category-legend-wrapper")
+				.style("right", "10px")
 		} else {
 			d3.select("#controls-wrapper")
 				.style("left", `${(width - height) / 2.0 - 220}px`)
@@ -67,6 +69,8 @@
 				.style("display", "block")
 				.style("left", width > 1500 ? `${(width - height) * 0.2 + 20}px` : "10px") 
 				.style("top", "45px");
+			d3.select("#category-legend-wrapper")
+				.style("right", width > 1500 ? `${(width - height) * 0.2 + 20}px` : "10px")
 		}
 
 		d3.selectAll(".canvas-wrapper").style("width", `${canvasWidth}px`).style("height", `${canvasHeight}px`)

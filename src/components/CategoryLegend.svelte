@@ -59,7 +59,7 @@
 
 	#category-legend-wrapper {
 		position: absolute;
-		right:20px;
+		right:10px;
 		top:50%;
 		width: 200px;
 		margin-left:-200px;
