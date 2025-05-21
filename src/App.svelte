@@ -104,6 +104,8 @@
 
 		}, ANIM_DURATION_OUT);
 		
+		simplifiedMode = false;
+		rerenderTreeTrigger = true;
 	};
 
 	const showTabsView = () => {
@@ -199,7 +201,7 @@
 			showMainViz();
 		});		
 
-		d3.select("#back-button").on("click", (event) => showTabsView());
+		d3.select("#back-button").on("click", (event) => {simplifiedMode = true; showTabsView()});
 		d3.select("#help-button").on("click", (event) => introTourStartTrigger = true);
 
 		d3.select("#hover-tooltip").style("width", `${TOOLTIP_WIDTH}px`).style("height", "auto")

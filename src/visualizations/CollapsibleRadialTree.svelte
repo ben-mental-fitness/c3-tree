@@ -1357,8 +1357,16 @@
 		createCollapsableRadialTree(data, separationFunction, radius)
 	}
 
-	$:if(mode) {
-	}
+	let resizeTimeout;
+	window.onresize = () => {
+		if (simplifiedMode || mode !== "viz-select-1") return;
+		
+		clearTimeout(resizeTimeout);
+		resizeTimeout = setTimeout( () => {
+			console.log("Resizing...");
+			rerenderTreeTrigger = true;
+		}, 500);
+	};
 
 </script>
 
