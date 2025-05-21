@@ -226,7 +226,7 @@
 		bind:data bind:rawData bind:dataSimplified bind:dataConnections bind:root bind:rootConnections bind:rootSimplified
 		bind:simplifiedMode bind:twist
 		bind:width bind:height bind:canvasWidth bind:canvasHeight bind:radius bind:outerRadius
-		bind:controlsVisible bind:presets bind:checkboxesChecked bind:rerenderTreeTrigger bind:mode bind:categoryLegendVisible/>
+		bind:controlsVisible bind:presets bind:checkboxesChecked bind:rerenderTreeTrigger bind:mode bind:categoryLegendVisible bind:loaderVisible/>
 
 	<TabView bind:data bind:rawData bind:showMainVizTrigger {ANIM_DURATION_IN} {ANIM_DURATION_OUT}/>
 

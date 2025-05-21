@@ -21,10 +21,7 @@
 	export let radius;
 	export let outerRadius;
 	export let twist;
-	export let mode;
-	export let rerenderTreeTrigger;
 	
-	// TODO: Connections image alignment
 	const calculateDimensions = () => {
 		width  = Math.floor(window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth) - 1;
 		height = Math.floor(window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight) - 1;

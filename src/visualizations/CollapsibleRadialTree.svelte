@@ -42,6 +42,7 @@
 	let prevMode = "viz-select-0";
 	let prevShowLeafTitles;
 	export let categoryLegendVisible;
+	export let loaderVisible;
 	
 	let selectedNode = undefined;
 	let highlightedPaths = {"_groups" : [[]]};
@@ -835,9 +836,7 @@
 								&& startPointerPos[1] > boundingRect.bottom - 25) {
 								return;
 							}
-
 							event.preventDefault();
-							console.log(canvasWidth);
 
 							// Drag tooltip
 							d3.select("body")
@@ -1356,8 +1355,33 @@
 	}
 
 	$:if(rerenderTreeTrigger !== null) {
-		rerenderTree(rerenderTreeTrigger);
-		rerenderTreeTrigger = null;
+		if (mode == "viz-select-0") {
+			rerenderTree(rerenderTreeTrigger);
+			rerenderTreeTrigger = null;
+
+		} else {
+			loaderVisible =  true;
+			d3.select("#main-viz-wrapper")
+				.transition("opacity")
+				.duration(500)
+				.ease(d3.easeQuadOut)
+				.style("opacity", 0.0);
+
+			setTimeout(async () => {
+				await rerenderTree(rerenderTreeTrigger).then(() => {
+					rerenderTreeTrigger = null;
+
+					setTimeout(() => {
+						loaderVisible = false;
+						d3.select("#main-viz-wrapper")
+							.transition("opacity")
+							.duration(500)
+							.ease(d3.easeQuadOut)
+							.style("opacity", 1.0);
+					}, 1250) // Wait for connections image to load, which takes ~1 second
+				});
+			}, 500);
+		}
 	}
 
 	$:if(data && radius) {
@@ -1370,7 +1394,6 @@
 		
 		clearTimeout(resizeTimeout);
 		resizeTimeout = setTimeout( () => {
-			console.log("Resizing...");
 			rerenderTreeTrigger = true;
 		}, 500);
 	};
