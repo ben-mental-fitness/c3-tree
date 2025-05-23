@@ -355,7 +355,7 @@
 		d3.select("#go-to-main-vis")
 			.style("margin", "20px 0")
 			.style("display", "inline-block")
-			.on("click", () => {document.getElementById("yt-embed").innerHTML = ""; showMainVizTrigger = true})
+			.on("click", () => {d3.selectAll("#yt-embed").html(""); showMainVizTrigger = true})
 
 		let selectedTab = data.children[0];
 

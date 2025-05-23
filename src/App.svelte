@@ -112,9 +112,14 @@
 
 		welcomeDialogVisible = false;
 		checkShowDisplayCompatabilityTrigger = true;
-		d3.select("#yt-embed")
+
+		console.log(d3.selectAll("#yt-embed"));
+		d3.selectAll("#yt-embed")
+			.style("height", "0px")
+			.filter(d => d.youtubeId !== undefined && d.youtubeId !== "")
+			.style("height", "320px")
 			.append("iframe")
-			.attr("src", (d) => d.youtubeId !== undefined ? `https://www.youtube-nocookie.com/embed/${d.youtubeId}?origin=https://c3tree.framed-mice.eu` : '')
+			.attr("src", d => `https://www.youtube-nocookie.com/embed/${d.youtubeId}?origin=https://c3tree.bw1-dev.com`)
 			.attr("width", "440")
 			.attr("height", "320")
 			.attr("frameborder", "0")
