@@ -1033,6 +1033,21 @@
 			})
 			// Create hover tooltip
 			.on("mouseover", (event, d) => {
+				if (!document.getElementById("sticky-tooltip-overlay")) {
+					d3.select(".canvas-wrapper")
+						.append('div')
+						.attr('id', 'sticky-tooltip-overlay')
+						.style('position', 'fixed')
+						.style('pointer-events', 'none')
+						.style('left', '0')
+						.style('top', '0')
+						.style('width', '100%')
+						.style('height', '100%')
+						.style('max-height', `${window.innerHeight}px`)
+						.style('opacity', '0.3')
+						.style('background', '#ffffff');
+				}
+
 
 				const pointerPos = [event.pageX, event.pageY];
 				d3.select("#hover-tooltip .table-main .tooltip-tbody").selectAll("*").remove();
@@ -1317,25 +1332,11 @@
 					.style("width", `${canvasWidth / 2.0 - 30}px`)
 					.style("display", checkboxesChecked["checkbox-second-tooltip"] || d3.select("#sticky-tooltip").empty() ? "block" : "none")
 					.raise();
-
-				// if (!document.getElementById("sticky-tooltip-overlay")) {
-				// 	d3.select(".canvas-wrapper")
-				// 		.append('div')
-				// 		.attr('id', 'sticky-tooltip-overlay')
-				// 		.style('position', 'fixed')
-				// 		.style('left', '0')
-				// 		.style('top', '0')
-				// 		.style('width', '100%')
-				// 		.style('height', '100%')
-				// 		.style('max-height', `${window.innerHeight}px`)
-				// 		.style('opacity', '0.6')
-				// 		.style('background', '#ffffff');
-				// }
 			})
 			.on("mouseleave", (event, d) => {
 
 				d3.select("#hover-tooltip.tooltip").style("display", "none");
-				// d3.select("#sticky-tooltip-overlay").remove();
+				d3.select("#sticky-tooltip-overlay").remove();
 				d3.selectAll(`#${d.data.id}-text,#${d.data.id}-text-2nd-line`).style("font-weight", null);
 				if(selectedNode === undefined) {
 					if (highlightedPaths._groups[0].length > 0) {
