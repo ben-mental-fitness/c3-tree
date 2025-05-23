@@ -939,11 +939,12 @@
 					// Create leaf-to-leaf paths to be highlighted
 					if (d3.select("#curves-wrapper-leaves").selectChildren()["_groups"][0].length == 0) {
 						const leaves = root.leaves();
+						
 						highlightedPaths = d3.select("#curves-wrapper-leaves")
 							.selectAll("path")
 							.data(() => {
 								return leaves.filter(
-									(d_) => d_.data.props.data_source.some(v => selectedNode.data.props.data_source.includes(v)) && d_ !== selectedNode
+									(d_) => d_.data.props.data_source.some(v => selectedNode.data.props.data_source.includes(v)) && d_ !== selectedNode && d_.data.visible
 									).map((d_) => [selectedNode, d_]);
 								})
 							.join("path")
@@ -959,10 +960,9 @@
 					// Highlight connected publication text on connected view & show on tooltip
 					if(mode === "viz-select-1") {
 						const connectedNodes = d3.selectAll('.node-group').filter((d_) => 
-							d_.data.props.data_source && d_.data.props.data_source.some(v => d.data.props.data_source.includes(v)) && d !== d_)
+							d_.data.props.data_source && d_.data.props.data_source.some(v => d.data.props.data_source.includes(v)) && d_.data.visible)
 
-						connectedNodes.filter((d_) => 
-								d_.data.props.data_source && d_.data.props.data_source.some(v => d.data.props.data_source.includes(v)) && (["Data","Team"].includes(getParentWithDepth(d_, 1).data.text) || d === d_)).selectAll('.node-text')
+						connectedNodes.selectAll('.node-text')
 							.attr('font-weight', 'bold')
 							.attr('font-size', checkboxesChecked["checkbox-text-size"] ? "90%" : '150%')
 							.attr('fill', '#000000')
@@ -1118,7 +1118,7 @@
 								.selectAll("path")
 								.data(() => {
 								return leaves.filter(
-									(d_) => d_.data.props.data_source.some(v => d.data.props.data_source.includes(v)) && d_ !== d
+									(d_) => d_.data.props.data_source.some(v => d.data.props.data_source.includes(v)) && d_ !== d && d_.data.visible
 									).map((d_) => [d, d_]);
 								})
 								.join("path")
@@ -1245,7 +1245,7 @@
 							});
 						}					
 
-						connectedNodes.selectAll('.node-text')
+						connectedNodes
 							.attr('font-weight', 'bold')
 							.attr('font-size', checkboxesChecked["checkbox-text-size"] ? "90%" : '150%')
 							.attr('fill', '#000000')
