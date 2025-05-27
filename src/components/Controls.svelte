@@ -104,6 +104,71 @@
 			rerenderTreeTrigger = true;
 		});
 
+		d3.select("#increase-text-size").on("click", (event) => {
+			let allText = d3.selectAll("text")["_groups"][0];
+			
+            allText.forEach((d) => {
+				let currFontSize = d.getAttribute("font-size");
+				
+				if (currFontSize.includes("px")) {
+					currFontSize = currFontSize.trim(0, -2);
+					d3.select(d).attr("font-size", `${parseInt(currFontSize) + 2}px`);
+
+				} else if (currFontSize.includes("%")) {
+					currFontSize = currFontSize.trim(0, -1);
+					d3.select(d).attr("font-size", `${parseInt(currFontSize) + 5}%`);
+				}
+            });
+
+			allText = d3.selectAll("p, span, #back-button, input, button")["_groups"][0];
+			
+            allText.forEach((d) => {
+				let currNode = d3.select(d);
+				let currFontSize = currNode.style("font-size");
+				
+				if (currFontSize.includes("px")) {
+					currFontSize = currFontSize.trim(0, -2);
+					currNode.style("font-size", `${parseInt(currFontSize) + 2}px`);
+
+				} else if (currFontSize.includes("%")) {
+					currFontSize = currFontSize.trim(0, -1);
+					currNode.style("font-size", `${parseInt(currFontSize) + 5}%`);
+				}
+            }); 
+		});
+		d3.select("#decrease-text-size").on("click", (event) => {
+			let allText = d3.selectAll("text")["_groups"][0];
+			
+            allText.forEach((d) => {
+				let currFontSize = d.getAttribute("font-size");
+				
+				if (currFontSize.includes("px")) {
+					currFontSize = currFontSize.trim(0, -2);
+					d3.select(d).attr("font-size", `${parseInt(currFontSize) - 2}px`);
+
+				} else if (currFontSize.includes("%")) {
+					currFontSize = currFontSize.trim(0, -1);
+					d3.select(d).attr("font-size", `${parseInt(currFontSize) - 5}%`);
+				}
+            });
+
+			allText = d3.selectAll("p, span, #back-button, input, button")["_groups"][0];
+			
+            allText.forEach((d) => {
+				let currNode = d3.select(d);
+				let currFontSize = currNode.style("font-size");
+			
+				if (currFontSize.includes("px")) {
+					currFontSize = currFontSize.trim(0, -2);
+					currNode.style("font-size", `${parseInt(currFontSize) - 2}px`);
+
+				} else if (currFontSize.includes("%")) {
+					currFontSize = currFontSize.trim(0, -1);
+					currNode.style("font-size", `${parseInt(currFontSize) - 5}%`);
+				}
+            }); 
+		});
+
 		d3.select("#checkbox-node-text").on("change", (event) => {
 			let checked = d3.select(event.target).property("checked")
 			if(checked) {
@@ -244,6 +309,12 @@
 			<div style="clear: both;"></div>
 			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-legend" checked>
 			<span style="float:left;display:block">Show legend</span>
+			<div style="clear: both;"></div>
+			<input style="float:left;display:block;margin-left:20px" type="button" id="increase-text-size">
+			<span style="float:left;display:block">Increase text size</span>
+			<div style="clear: both;"></div>
+			<input style="float:left;display:block;margin-left:20px" type="button" id="decrease-text-size">
+			<span style="float:left;display:block">Decrease text size</span>
 			<div style="clear: both;"></div>
 			<input style="float:left;display:none;margin-left:20px" type="checkbox" id="checkbox-white-backgrounds" checked>
 			<span style="float:left;display:none">Text has white background</span>
