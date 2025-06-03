@@ -9,8 +9,7 @@
     import { setTreeVisibility } from '../helper/setTreeVisibility';
     import { radialTreeLineFunction, connectedEdgesLineFunction, separationFunction } from '../helper/d3Functions';
 	import { renderLegend } from "../helper/renderLegend";
-	import { updateTextSize } from "../helper/updateTextSize";
-
+	
 	// Bound to App.svelte
 	export let BRAIN_SIZE;
 	export let BRAIN_ASPECT_RATIO;
@@ -924,14 +923,14 @@
 					});
 
 					// Go to publication link
-					d3.select("#sticky-tooltip .button-publication-link")
+					d3.select("#sticky-tooltip #tooltip-main-button-link .button-publication-link")
 						.on("click", (event) => {
 							event.stopPropagation();
 							window.open(d.data.props.publication_link);
 						});
 					
 					// Go to altmetric link
-					d3.select("#sticky-tooltip .button-altmetric-link")
+					d3.select("#sticky-tooltip #tooltip-main-button-link .button-altmetric-link")
 						.on("click", (event) => {
 							event.stopPropagation();
 							window.open(d.data.props.info_collapsed.Impact);
@@ -1138,8 +1137,36 @@
 								.text(value);
 						}
 					});
-					if(mode === "viz-select-1") {
 
+					// TODO: Add Publication & Altmetric buttons if data exsists
+					d3.select("#tooltip-main-button-link").selectAll("*").remove();
+					if (d.data.props.publication_link || d.data.props.info_collapsed.Impact) {
+						let buttonLinks = d3.select("#tooltip-main-button-link");
+
+						if(d.data.props.publication_link) {
+							buttonLinks.append("button")
+								.attr("type", "button")
+								.attr("class", "button button-simplified button-publication-link")
+								.style("pointer-events", "all")
+								.style("margin", "10px")
+								.style("min-width", "150px")
+								.style("width", "calc(50% - 25px)")
+								.text("Go to publication");
+
+						}
+						if(d.data.props.info_collapsed.Impact) {
+							buttonLinks.append("button")
+								.attr("type", "button")
+								.attr("class", "button button-simplified button-altmetric-link")
+								.style("pointer-events", "all")
+								.style("margin", "10px")
+								.style("min-width", "150px")
+								.style("width", "calc(50% - 25px)")
+								.text("Go to altmetric");
+						}						
+					}
+					
+					if(mode === "viz-select-1") {
 						// Create leaf-to-leaf paths to be highlighted
 						if (d3.select("#curves-wrapper-leaves").selectChildren()["_groups"][0].length == 0) {
 							const leaves = root.leaves();
@@ -1167,14 +1194,14 @@
 								d_.data.props.data_source && d_.data.props.data_source.some(v => d.data.props.data_source.includes(v)));
 							
 							// accordion
-							const tooltipConnectionRow = d3.select("#hover-tooltip .table-main .tooltip-tbody");
-							
-							tooltipConnectionRow.append("tr").append("td").style("width", `${TOOLTIP_WIDTH * 0.2}px`)
-								.append("p")
+							d3.select("#hover-tooltip .tooltip-dropdown-title") 
 								.style("font-size", currentTextScale.TooltipBody)
 								.style("font-weight", "bold")
-								.text(`Publications (${connectedNodes.filter((d_) => d_ !== d).data().length})`);
+								.text(`Publications (${connectedNodes.size() - 1})`)
 
+							const tooltipConnectionRow = d3.select("#hover-tooltip .table-collapsed .tooltip-tbody");
+							tooltipConnectionRow.selectAll("*").remove();
+							
 							const publicationsList = tooltipConnectionRow.append("tr").append("td")
 								.selectAll(".papers-list-item")
 								.data(connectedNodes.filter((d_) => d_ !== d).data())
@@ -1271,27 +1298,32 @@
 							});
 
 						} else {
-							d3.select("#hover-tooltip .table-main .tooltip-tbody").append("tr").append("td").style("width", `${TOOLTIP_WIDTH * 0.2}px`)
-								.append("p")
-								.style("font-size", currentTextScale.TooltipBody)
-								.style("font-weight", "bold")
-								.text("Connections")
-
-							// TODO Accordian
+							// Accordion - Connections added in dropdown on tooltip
 							connectedNodes = visMode2Nodes.filter((d_) => 
 								d_.data.props.data_source && d_.data.props.data_source.some(v => d.data.props.data_source.includes(v)));
 							
+							d3.select("#hover-tooltip .tooltip-dropdown-title") 
+								.style("font-size", currentTextScale.TooltipBody)
+								.style("font-weight", "bold")
+								.text(`Connections (${connectedNodes.size() - 1})`)
+
+							const mainInfoRow = d3.select("#hover-tooltip .table-collapsed .tooltip-tbody");
+							mainInfoRow.selectAll("*").remove();
 							connectedNodes.filter((d_) => d_ !== d).each((d_) => {
-								const mainInfoRow = d3.select("#hover-tooltip .table-main .tooltip-tbody");
 								mainInfoRow.append("tr").append("td")
 									.style("padding-bottom", "3px")
 									.append("p")
 									.style("font-size", currentTextScale.TooltipBody)
 									.text(d_.data.text);
 							});
-						}					
 
-						console.log(currentTextScale);
+							if(connectedNodes.size() <= 1)
+								d3.select("#hover-tooltip .tooltip-collapsible-button").style("display", "none").style("pointer-events", "none");
+							else {
+								d3.select("#hover-tooltip .tooltip-collapsible-button").style("display", "block").style("pointer-events", "all");
+							}
+						}					
+						
 						connectedNodes
 							.attr('font-weight', 'bold')
 							.attr('font-size', currentTextScale.ConnectedNodes)
@@ -1314,38 +1346,32 @@
 						.text(topic.data.props.themeDescShort);
 				}
 
-				// if(d.data.props.publication_link)
-				// 	d3.select("#hover-tooltip .button-publication-link").style("display", null).style("pointer-events", "all");
-				// else 
-				// 	d3.select("#hover-tooltip .button-publication-link").style("pointer-events", "none").style("display", "none");
+				// Publication status dropdown
+				if (mode == "viz-select-0") {
+					d3.select("#hover-tooltip .tooltip-dropdown-title").text("");
+					d3.select("#hover-tooltip .table-collapsed .tooltip-tbody").style("display", "none").selectAll("*").remove();
+					let collapsibleInfo = false;
+					Object.entries(d.data.props.info_collapsed).forEach(([key, value]) => {
+						if(value && value !== "" && key !== "Impact") {
+							collapsibleInfo = true;
+							const collapsedInfoRow = d3.select("#hover-tooltip .table-collapsed .tooltip-tbody");
+							collapsedInfoRow.append("tr").append("td").style("width", `${TOOLTIP_WIDTH * 0.2}px`)
+								.append("p")
+								.style("font-weight", "bold")
+								.text(key)
+							collapsedInfoRow.append("tr").append("td")
+								.style("padding-bottom", "5px")
+								.append("p")
+								.text(value);
+						}
+					});
 
-				// if(d.data.props.info_collapsed.Impact)
-				// 	d3.select("#hover-tooltip .button-altmetric-link").style("display", null).style("pointer-events", "all");
-				// else 
-				// 	d3.select("#hover-tooltip .button-altmetric-link").style("pointer-events", "none").style("display", "none");
-
-				// d3.select("#hover-tooltip .table-collapsed .tooltip-tbody").style("display", "none").selectAll("*").remove();
-				// let collapsibleInfo = false;
-				// Object.entries(d.data.props.info_collapsed).forEach(([key, value]) => {
-				// 	if(value && value !== "" && key !== "Impact") {
-				// 		collapsibleInfo = true;
-				// 		const collapsedInfoRow = d3.select("#hover-tooltip .table-collapsed .tooltip-tbody");
-				// 		collapsedInfoRow.append("tr").append("td").style("width", `${TOOLTIP_WIDTH * 0.2}px`)
-				// 			.append("p")
-				// 			.style("font-weight", "bold")
-				// 			.text(key)
-				// 		collapsedInfoRow.append("tr").append("td")
-				// 			.style("padding-bottom", "5px")
-				// 			.append("p")
-				// 			.text(value);
-				// 	}
-				// });
-
-				// if(!collapsibleInfo)
-				// 	d3.select("#hover-tooltip .tooltip-collapsible-button").style("display", "none").style("pointer-events", "none");
-				// else {
-				// 	d3.select("#hover-tooltip .tooltip-collapsible-button").style("display", "block").style("pointer-events", "all");
-				// }
+					if(!collapsibleInfo)
+						d3.select("#hover-tooltip .tooltip-collapsible-button").style("display", "none").style("pointer-events", "none");
+					else {
+						d3.select("#hover-tooltip .tooltip-collapsible-button").style("display", "block").style("pointer-events", "all");
+					}
+				}
 
 				if(selectedNode === undefined) {
 					d3.selectAll(`#${d.data.id}-text,#${d.data.id}-text-2nd-line`).style("font-weight", "bold");
@@ -1453,15 +1479,15 @@
 			<table class="table-main" cellspacing="15">
 				<tbody class="tooltip-tbody"></tbody>
 			</table>
-			<center>
-				<button type="button" class="button button-simplified button-publication-link">Go to publication</button>
-				<button type="button" class="button button-simplified button-altmetric-link">Go to altmetric</button>
-			</center>
-			<svg class="tooltip-collapsible-button" style="margin-left:25px; cursor:pointer" width="15px" height="15px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-				<path d="M233.4 105.4c12.5-12.5 32.8-12.5 45.3 0l192 192c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L256 173.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l192-192z"
-				fill="#202020"
-				transform="translate(256,256) rotate(90) translate(-256,-256)"/>
-			</svg>
+			<center id="tooltip-main-button-link" style="padding:5px 25px 5px 25px"></center>
+			<div style="padding:5px 25px 5px 25px">
+				<p class="tooltip-dropdown-title" style="float:left;margin:0px"></p>
+				<svg class="tooltip-collapsible-button" style="margin-left:10px; cursor:pointer;float:left;" width="15px" height="15px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+					<path d="M233.4 105.4c12.5-12.5 32.8-12.5 45.3 0l192 192c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L256 173.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l192-192z"
+					fill="#202020"
+					transform="translate(256,256) rotate(90) translate(-256,-256)"/>
+				</svg>
+			</div>
 			<table class="table-collapsed" cellspacing="15">
 				<tbody class="tooltip-tbody"></tbody>
 			</table>
@@ -1499,11 +1525,5 @@
 		left: 0;
 		top: 0;
 		z-index: -1;
-	}
-
-	.button-publication-link, .button-altmetric-link {
-		min-width: 150px;
-		margin: 10px;
-		width: calc(50% - 25px);
 	}
 </style>

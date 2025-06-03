@@ -17,7 +17,7 @@
 	};
 
 	$:if(introTourStartTrigger) {
-		addIntroSteps(parseIntroData(introData)); // TODO: Needed because some elements don't exist in the DOM in the beginning
+		addIntroSteps(parseIntroData(introData)); // Needed because some elements don't exist in the DOM in the beginning
 	    startIntroTour();
 	    introTourStartTrigger = false;
 	}
