@@ -1,4 +1,5 @@
 <script type="text/javascript">
+
 	import * as d3 from 'd3';
 	import { Hamburger } from 'svelte-hamburgers';
 	
@@ -10,6 +11,7 @@
 	export let showMainVizTrigger;
 	export let ANIM_DURATION_IN;
 	export let ANIM_DURATION_OUT;
+	export let currentTextScale;
 
 	let menuOpen;
 	let activeDropdownElement;
@@ -96,7 +98,7 @@
 			.style("padding", "30px")
 			.style("margin", "0")
 			.style("font-weight", "bold")
-			.style("font-size", "120%")
+			.style("font-size", currentTextScale.TabsTitle)
 			.style("color", (d) => d.color)
 			.text((d) => d.text);
 
@@ -194,7 +196,7 @@
 			})
 			.join("div")
 			.attr("id", (d, i) => `papers-list-item-${d.parentIndex}-${i}`)
-			.attr("class", ".papers-list-item")
+			.attr("class", "papers-list-item")
 			.style("cursor", "pointer")
 			.style("border", "1px solid #d0d0d0")
 			.style("background-color", "#ffffff")
@@ -282,6 +284,7 @@
 			.style("display", "none");
 
 		papersListContent.each(function (d) {
+			// TODO - Add links to Data theme studies.
 			let collapsibleInfo = false;
 			Object.keys(d).filter((key) => key.indexOf("[INFO_MAIN]") !== -1).forEach((key) => {
 				if(d[key] && d[key] !== "") {
@@ -373,7 +376,7 @@
 				.transition("textVanish")
 				.delay(animated ? 750 : 0)
 				.style("display", "none")
-			d3.selectAll(`.title`)
+			d3.selectAll(`.tabs-left .title`)
 				.transition()
 				.duration(animated ? 750 : 0)
 				.style("border-color", (d) => `${d.color}`)
@@ -459,11 +462,6 @@
 </div>
 
 <style>
-
-	body {
-		overflow: hidden;
-	}
-
 	#full-page-fade {
 		position: absolute;
 		left: 0;
@@ -496,9 +494,6 @@
 	}
 
 	@media screen and (max-width: 768px) {
-		body {
-			overflow-y: scroll;
-		}
 		#tabs-wrapper {
 			position: relative;
 			left:0 !important;

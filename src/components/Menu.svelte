@@ -18,16 +18,10 @@
     <hr transition:scale={{ duration: 750, easing: quadOut, opacity: 1 }} />
 {/if}
 
-
-
-
-
 <style>
-    :global(html) {
-    }
     div {
         text-align: center;
-        font-size: 1.5em;
+        font-size: 150%;
         letter-spacing: 0.15em;
         padding: 1em;
         padding-top: 0;

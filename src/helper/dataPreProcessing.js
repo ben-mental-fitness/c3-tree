@@ -5,7 +5,7 @@ export const parseMetaData = (responseMetaData, metaDataHeader) => {
 	responseMetaData.forEach((metaInfo) => {
 		switch(metaInfo[0]) {
 			case 'welcomeMessageTitle':
-			d3.select('#welcome-dialog h3').html(metaInfo[1]);
+			d3.select('#welcome-dialog h1').html(metaInfo[1]);
 			break;
 			case 'welcomeMessageBody':
 			d3.select('#welcome-dialog span').html(metaInfo[1]);

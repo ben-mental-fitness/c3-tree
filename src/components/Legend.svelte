@@ -5,9 +5,10 @@
 	export let canvasWidth;
 	export let canvasHeight;
 	export let welcomeDialogVisible;
+	export let currentTextScale;
 	
 	$:if(canvasWidth && canvasHeight && !welcomeDialogVisible, true) {
-		renderLegend(canvasWidth, canvasHeight);
+		renderLegend(canvasWidth, canvasHeight, currentTextScale);
 	}
 
 </script>

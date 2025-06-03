@@ -19,6 +19,7 @@
     import { updateLeafTextAppearence } from './helper/updateLeafTextAppearence';
     import { startBuildHierarchy, buildHierarchy } from './helper/buildHierarchy';
     import { parseMetaData, parseNCSAndLHWData, parseDefaultData } from './helper/dataPreProcessing';
+	import { updateTextSize } from "./helper/updateTextSize";
     
 	// config
 	const TOOLTIP_WIDTH = 800;
@@ -31,7 +32,7 @@
     let mode = null;
     let rerenderTreeTrigger = null;
     let root;
-    let rootConnections;
+    let rootConnections = null;
 	let rootSimplified;
 
 	let simplifiedMode = true;
@@ -42,7 +43,7 @@
 	let dataSimplified;
 	let dataCategories;
 	let header;
-	let rawData;
+	let rawData = null;
 	let visibleTeams = [];
 
     // child component states
@@ -68,6 +69,27 @@
 	let canvasHeight = null;
 	let radius = null;
 	let outerRadius = null;	
+
+	// For controlling text sizing for elements that are dynamically created
+	// Represent % scale for font-size attribute
+	// Need for list view dropdown buttons; category labels; legend; leaf titles and tooltips
+	let currentTextScale = {
+		"H1": "117%",
+		"Button": "100%",
+		"TabsTitle": "120%",
+		"ListContent": "100%",
+		"BackButton": "80%",
+		"Controls": "90%",
+		"LegendWrapper": "120%",
+		"CategoryLabels": "20px",
+		"CategoryLegend": "125%",	
+		"NodeText": "100%",
+		"TooltipCloseButton": "138%",		
+		"TooltipTitle": "80%",	
+		"TooltipBody": "100%",
+		"MemberName": "60%",
+		"ConnectedNodes": "150%",
+	};
 
 	// switch visualizations
 	const showMainViz = () => {
@@ -104,6 +126,7 @@
 
 		}, ANIM_DURATION_OUT);
 		
+		updateTextSize(currentTextScale);
 		simplifiedMode = false;
 		rerenderTreeTrigger = true;
 	};
@@ -224,18 +247,19 @@
 	<WelcomeDialog bind:visible={welcomeDialogVisible} {ANIM_DURATION_OUT}/>
 	<IntroTour bind:introTourStartTrigger bind:introData/>
 	<MinWidthDialog bind:checkShowDisplayCompatabilityTrigger/>
-	<DimensionsCalculator bind:width bind:height bind:canvasWidth bind:canvasHeight bind:radius bind:outerRadius bind:twist {BRAIN_SIZE} {BRAIN_ASPECT_RATIO} bind:mode bind:rerenderTreeTrigger/>
+	<DimensionsCalculator bind:width bind:height bind:canvasWidth bind:canvasHeight bind:radius bind:outerRadius bind:twist {BRAIN_SIZE} {BRAIN_ASPECT_RATIO}/>
 	<CategoryLegend  bind:visible={categoryLegendVisible} {ANIM_DURATION_OUT} bind:mode bind:simplifiedMode/>
 
 	<CollapsibleRadialTree {BRAIN_SIZE} {BRAIN_ASPECT_RATIO} {TOOLTIP_WIDTH}
-		bind:data bind:rawData bind:dataSimplified bind:dataConnections bind:root bind:rootConnections bind:rootSimplified
+		bind:data bind:dataSimplified bind:dataConnections bind:root bind:rootSimplified
 		bind:simplifiedMode bind:twist
 		bind:width bind:height bind:canvasWidth bind:canvasHeight bind:radius bind:outerRadius
-		bind:controlsVisible bind:presets bind:checkboxesChecked bind:rerenderTreeTrigger bind:mode bind:categoryLegendVisible bind:loaderVisible/>
+		bind:controlsVisible bind:presets bind:checkboxesChecked bind:rerenderTreeTrigger bind:mode bind:categoryLegendVisible 
+		bind:loaderVisible bind:currentTextScale />
 
-	<TabView bind:data bind:rawData bind:showMainVizTrigger {ANIM_DURATION_IN} {ANIM_DURATION_OUT}/>
+	<TabView bind:data bind:rawData bind:showMainVizTrigger {ANIM_DURATION_IN} {ANIM_DURATION_OUT} bind:currentTextScale/>
 
-	<Legend bind:canvasWidth bind:canvasHeight bind:welcomeDialogVisible/>
+	<Legend bind:canvasWidth bind:canvasHeight bind:welcomeDialogVisible bind:currentTextScale/>
 	<Loader bind:visible={loaderVisible}/>
 
 </main>

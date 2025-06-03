@@ -45,7 +45,7 @@
 <div id="welcome-dialog" style="display:none;">
 
 	<center>
-		<h3>Welcome!</h3><br/>
+		<h1>Welcome!</h1><br/>
 	</center>
 	<span></span>
 	<br/><br/>

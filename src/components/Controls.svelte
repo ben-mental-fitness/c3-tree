@@ -6,6 +6,7 @@
 
 	import { setTreeVisibility } from '../helper/setTreeVisibility';
 	import { renderLegend } from "../helper/renderLegend";
+	import { updateTextSize } from "../helper/updateTextSize";
 
 	// Bound to CollapsibleRadialTree.svelte
     export let visible;
@@ -17,6 +18,7 @@
 	export let categoryLegendVisible;
 	export let canvasWidth;
 	export let canvasHeight;
+	export let currentTextScale;
 
     const initializePresetsDropdown = (presets) => {
 		d3.select("#preset-select")
@@ -93,80 +95,55 @@
 		d3.select("#checkbox-legend").on("change", (event) => {
 			checkboxesChecked["checkbox-legend"] = !checkboxesChecked["checkbox-legend"];
 			categoryLegendVisible =  checkboxesChecked["checkbox-legend"];
-			renderLegend(canvasWidth, canvasHeight, checkboxesChecked["checkbox-legend"], mode);
+			renderLegend(canvasWidth, canvasHeight, currentTextScale, checkboxesChecked["checkbox-legend"], mode);
 		});
 		d3.select("#checkbox-white-backgrounds").on("change", (event) => {
 			checkboxesChecked["checkbox-white-backgrounds"] = !checkboxesChecked["checkbox-white-backgrounds"];
 			rerenderTreeTrigger = true;
 		});
-		d3.select("#checkbox-text-size").on("change", (event) => {
-			checkboxesChecked["checkbox-text-size"] = !checkboxesChecked["checkbox-text-size"];
-			rerenderTreeTrigger = true;
-		});
 
 		d3.select("#increase-text-size").on("click", (event) => {
-			let allText = d3.selectAll("text")["_groups"][0];
-			
-            allText.forEach((d) => {
-				let currFontSize = d.getAttribute("font-size");
-				
-				if (currFontSize.includes("px")) {
-					currFontSize = currFontSize.trim(0, -2);
-					d3.select(d).attr("font-size", `${parseInt(currFontSize) + 2}px`);
-
-				} else if (currFontSize.includes("%")) {
-					currFontSize = currFontSize.trim(0, -1);
-					d3.select(d).attr("font-size", `${parseInt(currFontSize) + 5}%`);
+			for (const [k, v] of Object.entries(currentTextScale)) {
+				if (k == "CategoryLabels") {
+					currentTextScale[k] = `${parseInt(v.trim(0, -2)) + 1}px`;
+				} else {
+					currentTextScale[k] = `${parseInt(v.trim(0, -1)) + 5}%`;
 				}
-            });
-
-			allText = d3.selectAll("p, span, #back-button, input, button")["_groups"][0];
+			}
 			
-            allText.forEach((d) => {
-				let currNode = d3.select(d);
-				let currFontSize = currNode.style("font-size");
-				
-				if (currFontSize.includes("px")) {
-					currFontSize = currFontSize.trim(0, -2);
-					currNode.style("font-size", `${parseInt(currFontSize) + 2}px`);
-
-				} else if (currFontSize.includes("%")) {
-					currFontSize = currFontSize.trim(0, -1);
-					currNode.style("font-size", `${parseInt(currFontSize) + 5}%`);
-				}
-            }); 
+			updateTextSize(currentTextScale);
 		});
 		d3.select("#decrease-text-size").on("click", (event) => {
-			let allText = d3.selectAll("text")["_groups"][0];
-			
-            allText.forEach((d) => {
-				let currFontSize = d.getAttribute("font-size");
-				
-				if (currFontSize.includes("px")) {
-					currFontSize = currFontSize.trim(0, -2);
-					d3.select(d).attr("font-size", `${parseInt(currFontSize) - 2}px`);
-
-				} else if (currFontSize.includes("%")) {
-					currFontSize = currFontSize.trim(0, -1);
-					d3.select(d).attr("font-size", `${parseInt(currFontSize) - 5}%`);
+			for (const [k, v] of Object.entries(currentTextScale)) {
+				if (k == "CategoryLabels") {
+					currentTextScale[k] = `${parseInt(v.trim(0, -2)) - 1}px`;
+				} else {
+					currentTextScale[k] = `${parseInt(v.trim(0, -1)) - 5}%`;
 				}
-            });
+			}
 
-			allText = d3.selectAll("p, span, #back-button, input, button")["_groups"][0];
-			
-            allText.forEach((d) => {
-				let currNode = d3.select(d);
-				let currFontSize = currNode.style("font-size");
-			
-				if (currFontSize.includes("px")) {
-					currFontSize = currFontSize.trim(0, -2);
-					currNode.style("font-size", `${parseInt(currFontSize) - 2}px`);
+			updateTextSize(currentTextScale);
+		});
+		d3.select("#reset-text-size").on("click", (event) => {
+			currentTextScale = {
+				"H1": "117%",
+				"Button": "100%",
+				"TabsTitle": "120%",
+				"ListContent": "100%",
+				"BackButton": "80%",
+				"Controls": "90%",
+				"LegendWrapper": "120%",
+				"CategoryLabels": "20px",
+				"CategoryLegend": "125%",	
+				"NodeText": "100%",
+				"TooltipCloseButton": "138%",		
+				"TooltipTitle": "80%",	
+				"TooltipBody": "100%",
+				"MemberName": "60%",
+				"ConnectedNodes": "150%",
+			};
 
-				} else if (currFontSize.includes("%")) {
-					currFontSize = currFontSize.trim(0, -1);
-					currNode.style("font-size", `${parseInt(currFontSize) - 5}%`);
-				}
-            }); 
+			updateTextSize(currentTextScale);
 		});
 
 		d3.select("#checkbox-node-text").on("change", (event) => {
@@ -200,7 +177,7 @@
 			d3.selectAll("#curves-wrapper-leaves").attr("opacity", 0.0);
 			rerenderTreeTrigger = false;
 			d3.select("#checkbox-viz-select-connections").property("checked", false);
-			renderLegend(canvasWidth, canvasHeight, checkboxesChecked["checkbox-legend"], mode);
+			renderLegend(canvasWidth, canvasHeight, currentTextScale, checkboxesChecked["checkbox-legend"], mode);
 		}
 
 		const vizSelectConnections = () => {
@@ -209,10 +186,11 @@
 			d3.selectAll("#curves-wrapper-leaves").attr("opacity", 1.0);
 			rerenderTreeTrigger = false;
 			d3.select("#checkbox-viz-select-cluster").property("checked", false);
-			renderLegend(canvasWidth, canvasHeight, checkboxesChecked["checkbox-legend"], mode);
+			renderLegend(canvasWidth, canvasHeight, currentTextScale, checkboxesChecked["checkbox-legend"], mode);
 		}
 
 		d3.select("#checkbox-viz-select-cluster").on("click", (event) => {
+			// @ts-ignore
 			if (document.getElementById("checkbox-viz-select-cluster").checked) {
 				vizSelectCluster();
 			} else {
@@ -222,6 +200,7 @@
 		});
 
 		d3.select("#checkbox-viz-select-connections").on("click", (event) => {
+			// @ts-ignore
 			if (document.getElementById("checkbox-viz-select-connections").checked) {
 				vizSelectConnections();
 			} else {
@@ -310,17 +289,17 @@
 			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-legend" checked>
 			<span style="float:left;display:block">Show legend</span>
 			<div style="clear: both;"></div>
-			<input style="float:left;display:block;margin-left:20px" type="button" id="increase-text-size">
-			<span style="float:left;display:block">Increase text size</span>
+			<input style="float:left;display:block;margin-left:20px;margin-top:5px" type="button" id="increase-text-size">
+			<span style="float:left;display:block;margin-top:5px">Increase text size</span>
 			<div style="clear: both;"></div>
-			<input style="float:left;display:block;margin-left:20px" type="button" id="decrease-text-size">
-			<span style="float:left;display:block">Decrease text size</span>
+			<input style="float:left;display:block;margin-left:20px;margin-top:5px" type="button" id="decrease-text-size">
+			<span style="float:left;display:block;margin-top:5px">Decrease text size</span>
+			<div style="clear: both;"></div>
+			<input style="float:left;display:block;margin-left:20px;margin-top:5px" type="button" id="reset-text-size">
+			<span style="float:left;display:block;margin-top:5px">Reset text size</span>
 			<div style="clear: both;"></div>
 			<input style="float:left;display:none;margin-left:20px" type="checkbox" id="checkbox-white-backgrounds" checked>
 			<span style="float:left;display:none">Text has white background</span>
-			<div style="clear: both;"></div>
-			<input style="float:left;display:none;margin-left:20px" type="checkbox" id="checkbox-text-size" checked>
-			<span style="float:left;display:none">Smaller text size</span>
 			<div style="clear: both;"></div>
 		</div>
 		

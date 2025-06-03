@@ -9,6 +9,7 @@
     import { setTreeVisibility } from '../helper/setTreeVisibility';
     import { radialTreeLineFunction, connectedEdgesLineFunction, separationFunction } from '../helper/d3Functions';
 	import { renderLegend } from "../helper/renderLegend";
+	import { updateTextSize } from "../helper/updateTextSize";
 
 	// Bound to App.svelte
 	export let BRAIN_SIZE;
@@ -26,11 +27,11 @@
 	export let twist;
 
 	export let data;
-	export let rawData;
+	// export let rawData;
 	export let dataConnections;
 	export let dataSimplified;
 	export let root;
-	export let rootConnections;
+	// export let rootConnections;
 	export let rootSimplified;
 
 	// for controls
@@ -43,6 +44,7 @@
 	let prevShowLeafTitles;
 	export let categoryLegendVisible;
 	export let loaderVisible;
+	export let currentTextScale;
 	
 	let selectedNode = undefined;
 	let highlightedPaths = {"_groups" : [[]]};
@@ -84,6 +86,12 @@
 				createCollapsableRadialTree(dataConnections, separationFunction, checkboxesChecked["checkbox-leaf-titles"] ? radius : outerRadius - 25)
 			return;
 		}
+
+		// Update font sizes
+		d3.selectAll("#controls-wrapper span").style("font-size", currentTextScale.Controls);
+		document.getElementById("d3-canvas").style.fontSize = currentTextScale.D3Canvas;
+		document.getElementById("help-button").style.fontSize = currentTextScale.HelpButton;
+		document.getElementById("back-button").style.fontSize = currentTextScale.BackButton;
 		
 		// Define visible elements
 		const filteredRoot = root;
@@ -289,7 +297,7 @@
 
 		d3.selectAll(".node-text").transition(animation)
 			.attr("opacity", (d) => (d.data.depth > 2 || d.data.depth === d.data.maxDepth) && (d.data.visible || d.parent?.data.visible) && checkboxesChecked["checkbox-leaf-titles"] && !simplifiedMode && !d.children ? 1.0 : 0.0)
-			.attr("font-size", checkboxesChecked["checkbox-text-size"] && mode === "viz-select-1" ? "70%" : "100%")
+			.attr("font-size", currentTextScale.NodeText)
 
 		update.selectAll(".text-leaf-interact-area")
 			.style("pointer-events", (d) => d.data.visible && !simplifiedMode ? "all" : "none");
@@ -370,7 +378,7 @@
 		}
 
 		setMouseEvents();
-		if (mode === "viz-select-0") renderLegend(canvasWidth, canvasHeight, checkboxesChecked["checkbox-legend"]);
+		if (mode === "viz-select-0") renderLegend(canvasWidth, canvasHeight, currentTextScale, checkboxesChecked["checkbox-legend"]);
 	};
 
 	const createCollapsableRadialTree = (data, separationFunction, radius) => {
@@ -451,7 +459,7 @@
 			.join("p")
 			.attr("class", (d) => "legend-entry")
 			.style("dominant-baseline", "middle")
-			.style("font-size", "20px")
+			.style("font-size", currentTextScale.CategoryLegend)
 			.style("font-weight", "bold")
 			.style("color", (d) => d.data.color)
 			.text((d) => d.data.text)
@@ -462,13 +470,13 @@
 			.selectAll(".category-labels")
 			.data(root.descendants().filter((d) => d.depth === 1))//, (d) => d.data.id)
 			.join("text")
-			.attr("class", (d) => "category-labels")
+			.attr("class", "category-labels")
 			.attr("transform", (d) => `rotate(${d.x * 180 / Math.PI - 90}) 
 				translate(${radius + 100},0)
 				rotate(${-d.x * 180 / Math.PI + 90}) `)
 			.attr("text-anchor", (d) => d.x < Math.PI ? "start" : "end")
+			.attr("font-size", currentTextScale.CategoryLabels)
 			.attr("dominant-baseline", "middle")
-			.attr("font-size", "20px")
 			.attr("font-weight", "bold")
 			.attr("opacity", 1.0)
 			.attr("fill", (d) => d.data.color)
@@ -785,6 +793,7 @@
 					const themeDescRow = d3.select("#hover-tooltip .table-main .tooltip-tbody").append("tr");
 					themeDescRow.append("td")
 						.append("p")
+						.style("font-size", currentTextScale.TooltipBody)
 						.style("white-space", "pre-wrap")
 						.text(d.data.props.themeDescLong);
 				} else if("Members" in d.data.props.info_main && false) {
@@ -964,7 +973,7 @@
 
 						connectedNodes.selectAll('.node-text')
 							.attr('font-weight', 'bold')
-							.attr('font-size', checkboxesChecked["checkbox-text-size"] ? "90%" : '150%')
+							.attr('font-size', currentTextScale.ConnectedNodes)
 							.attr('fill', '#000000')
 							.attr('stroke', checkboxesChecked['checkbox-white-backgrounds'] ? '#ffffff' : '#0632E4')
 							.attr('stroke-width', checkboxesChecked['checkbox-white-backgrounds'] ? 10 : 1)
@@ -977,12 +986,13 @@
 								.data(connectedPublications)
 								.on("click", (event, d) => {
 
-									let i = connectedPublications.indexOf(d)
+									let i = connectedPublications.indexOf(d);
 
 									const entry = d3.select(`#sticky-tooltip #publications-list-tooltip-item-${i} .papers-list-item-content`);
 									const collapsed = entry.attr("data-collapsed")
 
 									if(collapsed === "true") {
+										console.log("Expanding...");
 										entry.attr("data-collapsed", "false")
 											.style("display", "block")
 											.transition("appear")
@@ -993,8 +1003,9 @@
 										d3.select(`#publications-list-tooltip-item-${i} .collapse-icon-paper path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
 											.attr("transform", "translate(256,256) rotate(180) translate(-256,-256)");
 									} else {
+										console.log("Collapsing...");
 										entry.attr("data-collapsed", "true")
-										.style("display", "none")
+											.style("display", "none")
 											.transition("appear")
 											.duration(400)
 											.ease(d3.easeQuadOut)
@@ -1054,13 +1065,14 @@
 				if(d.depth > 1) {
 					const topic = getParentWithDepth(d, 1);
 					d3.select("#hover-tooltip .tooltip-title")
+						.style("font-size", currentTextScale.TooltipTitle)	
 						.text(`TOPIC: ${topic.data.text}`);
-
 
 					const topicRow = d3.select("#hover-tooltip .table-main .tooltip-tbody").append("tr");
 					topicRow.append("td").style("text-align", "left")
 						.append("p")
 						.style("font-weight", "bold")
+						.style("font-size", currentTextScale.TooltipBody)
 						.text(d.data.text);
 					
 					Object.entries(d.data.props.info_main).forEach(([key, value]) => {
@@ -1080,18 +1092,18 @@
 										.style("padding-bottom", "1px");
 
 									infoCell.append("p")
-										.style("font-size", "100%")
+										.style("font-size", currentTextScale.TooltipBody)
 										.style("font-weight", "bold")
 										.style("margin-bottom", "15px")
 										.text(member.name);
 									infoCell.append("p")
-										.style("font-size", "100%")
+										.style("font-size", currentTextScale.TooltipBody)
 										.text(member.description);
 
 									if(member.member_link) {
 
 										infoCell.append("a")
-											.style("font-size", "100%")
+											.style("font-size", currentTextScale.TooltipBody)
 											.style("margin-top", "15px")
 											.style("display", "block")
 											.style("text-transform", "initial")
@@ -1107,7 +1119,7 @@
 									row.append("td")
 										.style("padding-bottom", "1px")
 										.append("p")
-										.style("font-size", "60%")
+										.style("font-size", currentTextScale.MemberName)
 										.text(member.name);
 									
 								}
@@ -1116,11 +1128,13 @@
 							const mainInfoRow = d3.select("#hover-tooltip .table-main .tooltip-tbody");
 							mainInfoRow.append("tr").append("td").style("width", `${TOOLTIP_WIDTH * 0.2}px`)
 								.append("p")
+								.style("font-size", currentTextScale.TooltipBody)
 								.style("font-weight", "bold")
 								.text(key)
 							mainInfoRow.append("tr").append("td")
 								.style("padding-bottom", "5px")
 								.append("p")
+								.style("font-size", currentTextScale.TooltipBody)
 								.text(value);
 						}
 					});
@@ -1146,11 +1160,6 @@
 								.raise();
 						}
 
-						d3.select("#hover-tooltip .table-main .tooltip-tbody").append("tr").append("td").style("width", `${TOOLTIP_WIDTH * 0.2}px`)
-							.append("p")
-							.style("font-weight", "bold")
-							.text("Connections")
-
 						let connectedNodes;
 						
 						if(["Data","Team"].includes(getParentWithDepth(d, 1).data.text)) {
@@ -1159,11 +1168,12 @@
 							
 							// accordion
 							const tooltipConnectionRow = d3.select("#hover-tooltip .table-main .tooltip-tbody");
-
+							
 							tooltipConnectionRow.append("tr").append("td").style("width", `${TOOLTIP_WIDTH * 0.2}px`)
 								.append("p")
+								.style("font-size", currentTextScale.TooltipBody)
 								.style("font-weight", "bold")
-								.text("Publications")
+								.text(`Publications (${connectedNodes.filter((d_) => d_ !== d).data().length})`);
 
 							const publicationsList = tooltipConnectionRow.append("tr").append("td")
 								.selectAll(".papers-list-item")
@@ -1177,6 +1187,7 @@
 								.style("pointer-events", "all")
 
 							publicationsList.append("p")
+								.style("font-size", currentTextScale.TooltipBody)
 								.style("width", "80%")
 								.style("float", "left")
 								.style("margin", "10px 0")
@@ -1210,9 +1221,11 @@
 										collapsibleInfo = true;
 										d3.select(this).append("p")
 											.style("font-weight", "bold")
+											.style("font-size", currentTextScale.TooltipBody)
 											.text(key.replace("[INFO_MAIN]", ""));
 										d3.select(this).append("p")
 											.style("padding-bottom", "5px")
+											.style("font-size", currentTextScale.TooltipBody)
 											.text(d.data.props.info_main[key]);
 									}
 								});
@@ -1221,6 +1234,7 @@
 									collapsibleInfo = true;
 									d3.select(this).append("center").append("button")
 										.attr("class", "button button-simplified button-publication-link")
+										.style("font-size", currentTextScale.Button)
 										.attr("type", "button")
 										.text("Go to publication")
 
@@ -1228,8 +1242,11 @@
 										d3.select(this).select(".button-publication-link")
 											.append("button")
 											.attr("class", "button button-simplified button-altmetric-link")
+											.style("font-size", currentTextScale.Button)
 											.attr("type", "button")
-											.text("Go to altmetric")
+											.text("Go to altmetric")											
+											.attr("href", d.data.props.info_collapsed.Impact)
+											.attr("target", "_blank")
 									}
 								
 								} else if(d.data.props.info_collapsed.Impact && d.data.props.info_collapsed.Impact !== "") {
@@ -1237,17 +1254,30 @@
 									d3.select(this).append("center").append("button")
 										.attr("class", "button button-simplified button-altmetric-link")
 										.attr("type", "button")
+										.style("font-size", currentTextScale.Button)
 										.text("Go to altmetric")
+										.attr("href", d.data.props.info_collapsed.Impact)
+										.attr("target", "_blank")
+
 								}
 
 								if(!collapsibleInfo) {
 									d3.select(this).append("p")
+										.style("font-size", currentTextScale.TooltipBody)
 										.style("font-weight", "bold")
 										.text("No additional information.");
 								}
+
 							});
 
 						} else {
+							d3.select("#hover-tooltip .table-main .tooltip-tbody").append("tr").append("td").style("width", `${TOOLTIP_WIDTH * 0.2}px`)
+								.append("p")
+								.style("font-size", currentTextScale.TooltipBody)
+								.style("font-weight", "bold")
+								.text("Connections")
+
+							// TODO Accordian
 							connectedNodes = visMode2Nodes.filter((d_) => 
 								d_.data.props.data_source && d_.data.props.data_source.some(v => d.data.props.data_source.includes(v)));
 							
@@ -1256,13 +1286,15 @@
 								mainInfoRow.append("tr").append("td")
 									.style("padding-bottom", "3px")
 									.append("p")
+									.style("font-size", currentTextScale.TooltipBody)
 									.text(d_.data.text);
 							});
 						}					
 
+						console.log(currentTextScale);
 						connectedNodes
 							.attr('font-weight', 'bold')
-							.attr('font-size', checkboxesChecked["checkbox-text-size"] ? "90%" : '150%')
+							.attr('font-size', currentTextScale.ConnectedNodes)
 							.attr('fill', '#000000')
 							.attr('stroke', checkboxesChecked['checkbox-white-backgrounds'] ? '#ffffff' : '#0632E4')
 							.attr('stroke-width', checkboxesChecked['checkbox-white-backgrounds'] ? 10 : 1)
@@ -1271,47 +1303,49 @@
 				} else {
 					const topic = d;
 					d3.select("#hover-tooltip .tooltip-title")
+						.style("font-size", currentTextScale.TooltipTitle)
 						.text(`TOPIC: ${topic.data.text}`);
 
 					const themeDescRow = d3.select("#hover-tooltip .table-main .tooltip-tbody");
 					themeDescRow.append("tr").append("td")
 						.append("p")
+						.style("font-size", currentTextScale.TooltipBody)
 						.style("white-space", "pre-wrap")
 						.text(topic.data.props.themeDescShort);
 				}
 
-				if(d.data.props.publication_link)
-					d3.select("#hover-tooltip .button-publication-link").style("display", null).style("pointer-events", "all");
-				else 
-					d3.select("#hover-tooltip .button-publication-link").style("pointer-events", "none").style("display", "none");
+				// if(d.data.props.publication_link)
+				// 	d3.select("#hover-tooltip .button-publication-link").style("display", null).style("pointer-events", "all");
+				// else 
+				// 	d3.select("#hover-tooltip .button-publication-link").style("pointer-events", "none").style("display", "none");
 
-				if(d.data.props.info_collapsed.Impact)
-					d3.select("#hover-tooltip .button-altmetric-link").style("display", null).style("pointer-events", "all");
-				else 
-					d3.select("#hover-tooltip .button-altmetric-link").style("pointer-events", "none").style("display", "none");
+				// if(d.data.props.info_collapsed.Impact)
+				// 	d3.select("#hover-tooltip .button-altmetric-link").style("display", null).style("pointer-events", "all");
+				// else 
+				// 	d3.select("#hover-tooltip .button-altmetric-link").style("pointer-events", "none").style("display", "none");
 
-				d3.select("#hover-tooltip .table-collapsed .tooltip-tbody").style("display", "none").selectAll("*").remove();
-				let collapsibleInfo = false;
-				Object.entries(d.data.props.info_collapsed).forEach(([key, value]) => {
-					if(value && value !== "" && key !== "Impact") {
-						collapsibleInfo = true;
-						const collapsedInfoRow = d3.select("#hover-tooltip .table-collapsed .tooltip-tbody");
-						collapsedInfoRow.append("tr").append("td").style("width", `${TOOLTIP_WIDTH * 0.2}px`)
-							.append("p")
-							.style("font-weight", "bold")
-							.text(key)
-						collapsedInfoRow.append("tr").append("td")
-							.style("padding-bottom", "5px")
-							.append("p")
-							.text(value);
-					}
-				});
+				// d3.select("#hover-tooltip .table-collapsed .tooltip-tbody").style("display", "none").selectAll("*").remove();
+				// let collapsibleInfo = false;
+				// Object.entries(d.data.props.info_collapsed).forEach(([key, value]) => {
+				// 	if(value && value !== "" && key !== "Impact") {
+				// 		collapsibleInfo = true;
+				// 		const collapsedInfoRow = d3.select("#hover-tooltip .table-collapsed .tooltip-tbody");
+				// 		collapsedInfoRow.append("tr").append("td").style("width", `${TOOLTIP_WIDTH * 0.2}px`)
+				// 			.append("p")
+				// 			.style("font-weight", "bold")
+				// 			.text(key)
+				// 		collapsedInfoRow.append("tr").append("td")
+				// 			.style("padding-bottom", "5px")
+				// 			.append("p")
+				// 			.text(value);
+				// 	}
+				// });
 
-				if(!collapsibleInfo)
-					d3.select("#hover-tooltip .tooltip-collapsible-button").style("display", "none").style("pointer-events", "none");
-				else {
-					d3.select("#hover-tooltip .tooltip-collapsible-button").style("display", "block").style("pointer-events", "all");
-				}
+				// if(!collapsibleInfo)
+				// 	d3.select("#hover-tooltip .tooltip-collapsible-button").style("display", "none").style("pointer-events", "none");
+				// else {
+				// 	d3.select("#hover-tooltip .tooltip-collapsible-button").style("display", "block").style("pointer-events", "all");
+				// }
 
 				if(selectedNode === undefined) {
 					d3.selectAll(`#${d.data.id}-text,#${d.data.id}-text-2nd-line`).style("font-weight", "bold");
@@ -1347,7 +1381,7 @@
 				if(mode === "viz-select-1" && d3.select("#sticky-tooltip").empty()) {
 					d3.selectAll('.node-text')
 						.attr('font-weight', null)
-						.attr('font-size', checkboxesChecked["checkbox-text-size"] ? "70%" : "100%")
+						.attr('font-size', currentTextScale.NodeText)
 						.attr("fill", (d) => d.data.color)
 						.attr('stroke', null)
 						.attr('stroke-width', null);
@@ -1436,7 +1470,7 @@
 	</div>
 
 	<!-- controls -->
-	<Controls bind:visible={controlsVisible} bind:presets bind:checkboxesChecked bind:rerenderTreeTrigger bind:mode bind:root bind:categoryLegendVisible bind:canvasWidth bind:canvasHeight/>
+	<Controls bind:visible={controlsVisible} bind:presets bind:checkboxesChecked bind:rerenderTreeTrigger bind:mode bind:root bind:categoryLegendVisible bind:canvasWidth bind:canvasHeight bind:currentTextScale/>
 
 	<!-- additional controls -->
 	<div id="back-button" style="display: none;position: absolute;color:#808080;font-size:80%;cursor:pointer;">
@@ -1453,38 +1487,11 @@
 	#main-viz-wrapper {
 		overflow: hidden;
 	}
-
-	.node-text {
-		paint-order: stroke;
-		stroke: white;
-		stroke-width: 3px;
-		font-size: 10px;
-	}
-
-	.category-labels {
-		dominant-baseline: middle;
-		font-size: 20px;
-		font-weight: bold;
-	}
 	
 	#d3-canvas {
 		opacity: 1.0;
 		font-family: sans-serif;
-		font-size: 10px;
-	}
-
-	#twist-circle-small-triangle {
-		fill: transparent;
-		fill: none;
-		stroke: #e0e0e0;
-		stroke-width: 10px;
-	}
-
-	#twist-circle-small {
-		fill: none;
-		stroke: #e0e0e0;
-		stroke-width: 10px;
-		cursor: grab;
+		font-size: 63%;
 	}
 
 	#curves-wrapper-leaves-img {

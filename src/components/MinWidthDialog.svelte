@@ -41,8 +41,8 @@
 
 <div id="min-width-dialog" style="display:none;position: absolute;left:50%;top:50%;width: 500px;min-height: 200px;margin-left:-250px;margin-top:-200px;border: 1px solid #f0f0f0;padding:20px;text-align: left;z-index: 99;background:#ffffff">
 	<center>
-		<h3 class="please-maximize" style="display:none">Please maximaze your browser window for best experience.</h3><br/>
-		<h3 class="please-desktop" style="display:none">This visualization was optimized for desktop use only.</h3><br/>
+		<h1 class="please-maximize" style="display:none">Please maximaze your browser window for best experience.</h1><br/>
+		<h1 class="please-desktop" style="display:none">This visualization was optimized for desktop use only.</h1><br/>
 	</center>
 	<div class="button-row">
 		<button class="button button-simplified" style="margin-right:10px">Close</button>

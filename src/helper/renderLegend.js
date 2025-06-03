@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 
 // Render legend on cluster group visualisation
-export const renderLegend = (canvasWidth, canvasHeight, visible = true, mode = "viz-select-0") => {
+export const renderLegend = (canvasWidth, canvasHeight, currentTextScale, visible = true, mode = "viz-select-0") => {
     d3.select("#d3-canvas").selectAll('.legend-wrapper').remove();
     if (!visible || mode == "viz-select-1") return;
 
@@ -35,7 +35,7 @@ export const renderLegend = (canvasWidth, canvasHeight, visible = true, mode = "
         .text("Legend")
         .attr("dominant-baseline", "middle")
         .attr("text-anchor", "left")
-        .attr("font-size", "120%")
+        .attr("font-size", currentTextScale.LegendWrapper)
         .attr("x", 15)
         .attr("y", -20)
 
@@ -47,7 +47,7 @@ export const renderLegend = (canvasWidth, canvasHeight, visible = true, mode = "
         .text("Published / Accepted")
         .attr("dominant-baseline", "middle")
         .attr("text-anchor", "left")
-        .attr("font-size", "120%")
+        .attr("font-size", currentTextScale.LegendWrapper)
         .attr("x", 15)
 
     legendWrapper.append("circle")
@@ -65,7 +65,7 @@ export const renderLegend = (canvasWidth, canvasHeight, visible = true, mode = "
         .text("Submitted")
         .attr("dominant-baseline", "middle")
         .attr("text-anchor", "left")
-        .attr("font-size", "120%")
+        .attr("font-size", currentTextScale.LegendWrapper)
         .attr("x", 15)
         .attr("y", 20);
 
@@ -80,7 +80,7 @@ export const renderLegend = (canvasWidth, canvasHeight, visible = true, mode = "
         .text("Manuscript")
         .attr("dominant-baseline", "middle")
         .attr("text-anchor", "left")
-        .attr("font-size", "120%")
+        .attr("font-size", currentTextScale.LegendWrapper)
         .attr("x", 15)
         .attr("y", 40);
 
@@ -93,7 +93,7 @@ export const renderLegend = (canvasWidth, canvasHeight, visible = true, mode = "
         .text("Unkown")
         .attr("dominant-baseline", "middle")
         .attr("text-anchor", "left")
-        .attr("font-size", "120%")
+        .attr("font-size", currentTextScale.LegendWrapper)
         .attr("x", 15)
         .attr("y", 60);
 }
