@@ -981,28 +981,25 @@
 
 							const connectedPublications = connectedNodes.filter((d_) => d_ !== d).data();
 
-							d3.selectAll('#sticky-tooltip .table-main .tooltip-tbody .papers-list-item')
+							d3.selectAll('#sticky-tooltip .table-collapsed .tooltip-tbody .papers-list-item')
 								.data(connectedPublications)
 								.on("click", (event, d) => {
-
 									let i = connectedPublications.indexOf(d);
-
 									const entry = d3.select(`#sticky-tooltip #publications-list-tooltip-item-${i} .papers-list-item-content`);
 									const collapsed = entry.attr("data-collapsed")
 
 									if(collapsed === "true") {
-										console.log("Expanding...");
 										entry.attr("data-collapsed", "false")
 											.style("display", "block")
 											.transition("appear")
 											.duration(750)
 											.ease(d3.easeQuadOut)
 											.style("height", "auto")
-
-										d3.select(`#publications-list-tooltip-item-${i} .collapse-icon-paper path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
+										
+										d3.select(`#sticky-tooltip #publications-list-tooltip-item-${i} .collapse-icon-paper path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
 											.attr("transform", "translate(256,256) rotate(180) translate(-256,-256)");
+
 									} else {
-										console.log("Collapsing...");
 										entry.attr("data-collapsed", "true")
 											.style("display", "none")
 											.transition("appear")
@@ -1015,13 +1012,13 @@
 											.delay(400)
 											.style("display", "none");
 
-										d3.select(`#publications-list-tooltip-item-${i} .collapse-icon-paper path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
+										d3.select(`#sticky-tooltip #publications-list-tooltip-item-${i} .collapse-icon-paper path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
 											.attr("transform", "translate(256,256) rotate(90) translate(-256,-256)");
 									}
 								});
 							
 							// Go to publication link
-							d3.selectAll('#sticky-tooltip .table-main .tooltip-tbody .papers-list-item .button-publication-link')
+							d3.selectAll('#sticky-tooltip .table-collapsed .tooltip-tbody .papers-list-item .button-publication-link')
 								.data(connectedPublications)
 								.on("click", (event, d) => {
 									event.stopPropagation();
@@ -1029,9 +1026,9 @@
 								});
 							
 							// Go to altmetric link
-							d3.selectAll("#sticky-tooltip .table-main .tooltip-tbody .papers-list-item .button-altmetric-link")
+							d3.selectAll("#sticky-tooltip .table-collapsed .tooltip-tbody .papers-list-item .button-altmetric-link")
 								.data(connectedPublications)
-								.on("click", (event) => {
+								.on("click", (event, d) => {
 									event.stopPropagation();
 									window.open(d.data.props.info_collapsed.Impact);
 								});
@@ -1138,7 +1135,7 @@
 						}
 					});
 
-					// TODO: Add Publication & Altmetric buttons if data exsists
+					// Add Publication & Altmetric buttons if data exsists
 					d3.select("#tooltip-main-button-link").selectAll("*").remove();
 					if (d.data.props.publication_link || d.data.props.info_collapsed.Impact) {
 						let buttonLinks = d3.select("#tooltip-main-button-link");
@@ -1152,7 +1149,6 @@
 								.style("min-width", "150px")
 								.style("width", "calc(50% - 25px)")
 								.text("Go to publication");
-
 						}
 						if(d.data.props.info_collapsed.Impact) {
 							buttonLinks.append("button")
@@ -1189,11 +1185,11 @@
 
 						let connectedNodes;
 						
+						// Accordion - Data & team
 						if(["Data","Team"].includes(getParentWithDepth(d, 1).data.text)) {
 							connectedNodes = visMode2Nodes.filter((d_) => 
 								d_.data.props.data_source && d_.data.props.data_source.some(v => d.data.props.data_source.includes(v)));
 							
-							// accordion
 							d3.select("#hover-tooltip .tooltip-dropdown-title") 
 								.style("font-size", currentTextScale.TooltipBody)
 								.style("font-weight", "bold")
@@ -1240,8 +1236,8 @@
 								.attr("class", "papers-list-item-content")
 								.attr("data-collapsed", "true")
 								.style("display", "none");
-
-							publicationsListContent.each((d) => {
+		
+							publicationsListContent.each(function (d) {
 								let collapsibleInfo = false;
 								Object.keys(d.data.props.info_main).forEach((key) => {
 									if(d.data.props.info_main[key] && d.data.props.info_main[key] !== "") {
@@ -1263,17 +1259,22 @@
 										.attr("class", "button button-simplified button-publication-link")
 										.style("font-size", currentTextScale.Button)
 										.attr("type", "button")
+										.style("padding", "5px 15px 5px 15px")
+										.style("margin", "5px")
+										.style("min-width", "150px")
+										.style("width", "auto")
 										.text("Go to publication")
 
 									if(d.data.props.info_collapsed.Impact && d.data.props.info_collapsed.Impact !== "") {
-										d3.select(this).select(".button-publication-link")
-											.append("button")
+										d3.select(this).select("center").append("button")
 											.attr("class", "button button-simplified button-altmetric-link")
 											.style("font-size", currentTextScale.Button)
 											.attr("type", "button")
-											.text("Go to altmetric")											
-											.attr("href", d.data.props.info_collapsed.Impact)
-											.attr("target", "_blank")
+											.style("padding", "5px 15px 5px 15px")
+											.style("margin", "5px")
+											.style("min-width", "150px")
+											.style("width", "auto")
+											.text("Go to altmetric")	
 									}
 								
 								} else if(d.data.props.info_collapsed.Impact && d.data.props.info_collapsed.Impact !== "") {
@@ -1282,10 +1283,11 @@
 										.attr("class", "button button-simplified button-altmetric-link")
 										.attr("type", "button")
 										.style("font-size", currentTextScale.Button)
+										.style("padding", "5px 15px 5px 15px")
+										.style("margin", "5px")
+										.style("min-width", "150px")
+										.style("width", "auto")
 										.text("Go to altmetric")
-										.attr("href", d.data.props.info_collapsed.Impact)
-										.attr("target", "_blank")
-
 								}
 
 								if(!collapsibleInfo) {
@@ -1316,13 +1318,13 @@
 									.style("font-size", currentTextScale.TooltipBody)
 									.text(d_.data.text);
 							});
-
-							if(connectedNodes.size() <= 1)
-								d3.select("#hover-tooltip .tooltip-collapsible-button").style("display", "none").style("pointer-events", "none");
-							else {
-								d3.select("#hover-tooltip .tooltip-collapsible-button").style("display", "block").style("pointer-events", "all");
-							}
-						}					
+						}				
+						
+						if(connectedNodes.size() <= 1)
+							d3.select("#hover-tooltip .tooltip-collapsible-button").style("display", "none").style("pointer-events", "none");
+						else {
+							d3.select("#hover-tooltip .tooltip-collapsible-button").style("display", "block").style("pointer-events", "all");
+						}
 						
 						connectedNodes
 							.attr('font-weight', 'bold')
