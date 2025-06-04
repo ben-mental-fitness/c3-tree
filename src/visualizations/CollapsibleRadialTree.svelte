@@ -767,7 +767,6 @@
 
 	// Show tooltip on hover & fix on click
 	const setMouseEvents = () => {
-		console.log("Setting mouse events");
 		d3.selectAll(".text-leaf-interact-area,.outer-node-group,.category-labels,.legend-entry")
 			.attr("tabindex", d => d.data.visible ? "0" : "-1")
 			.on("focus", (event, d) => {

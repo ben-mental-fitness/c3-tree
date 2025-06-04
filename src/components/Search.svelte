@@ -4,7 +4,7 @@
 
 	const highlightSearchTerm = (searchTerm) => {
 
-		d3.selectAll(".category-labels tspan")
+		d3.selectAll(".category-labels")
 			.attr("stroke", (d) => {
 				return d.data.text.toLowerCase().includes(searchTerm.toLowerCase()) || d.data.props?.themeDescShort?.toLowerCase().includes(searchTerm.toLowerCase()) ? "#ffee22" : null
 			})
