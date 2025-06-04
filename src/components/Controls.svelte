@@ -252,50 +252,50 @@
 <div id="controls-wrapper">
 	<center>
 		<Search/><br/><br/>
-		<input style="float:left;display:block" type="checkbox" id="checkbox-simple-view">
+		<input style="float:left;display:block" type="checkbox" id="checkbox-simple-view" tabindex="3">
 		<span style="float:left;display:block">Simple version</span>
 		<div style="clear: both;"></div>
-		<input style="float:left;display:block" type="checkbox" id="checkbox-detailed-view" checked>
+		<input style="float:left;display:block" type="checkbox" id="checkbox-detailed-view" checked tabindex="3">
 		<span style="float:left;display:block">Detailed visualisation</span>
 		<div style="clear: both;"></div>
 
 		<div style="display:{visible ? 'block' : 'none'}"> 
 			<span style="float:left;display:block">&nbsp;&nbsp;Layout:</span>
 			<div style="clear: both;"></div>
-			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-viz-select-cluster" checked>
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-viz-select-cluster" checked tabindex="3">
 			<span style="float:left;display:block">Cluster by theme</span>
 			<div style="clear: both;"></div>
-			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-viz-select-connections">
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-viz-select-connections" tabindex="3">
 			<span style="float:left;display:block">Connections</span>
 			<div style="clear: both;"></div>
 
 			<span style="float:left;display:block">&nbsp;&nbsp;Show information about:</span>
 			<div style="clear: both;"></div>
-			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-themes-publications" checked>
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-themes-publications" checked tabindex="3">
 			<span style="float:left;display:block">Themes and Publications</span>
 			<div style="clear: both;"></div>
-			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-team">
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-team" tabindex="3">
 			<span style="float:left;display:block">Team</span>
 			<div style="clear: both;"></div>
-			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-data-sources">
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-data-sources" tabindex="3">
 			<span style="float:left;display:block">Data Sources</span>
 			<div style="clear: both;"></div>
 
 			<span style="float:left;display:block">&nbsp;&nbsp;Labels:</span>
 			<div style="clear: both;"></div>
-			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-leaf-titles" checked>
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-leaf-titles" checked tabindex="3">
 			<span style="float:left;display:block">Show leaf titles</span>
 			<div style="clear: both;"></div>
-			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-legend" checked>
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-legend" checked tabindex="3">
 			<span style="float:left;display:block">Show legend</span>
 			<div style="clear: both;"></div>
-			<input style="float:left;display:block;margin-left:20px;margin-top:5px" type="button" id="increase-text-size">
+			<input style="float:left;display:block;margin-left:20px;margin-top:5px" type="button" id="increase-text-size" tabindex="3">
 			<span style="float:left;display:block;margin-top:5px">Increase text size</span>
 			<div style="clear: both;"></div>
-			<input style="float:left;display:block;margin-left:20px;margin-top:5px" type="button" id="decrease-text-size">
+			<input style="float:left;display:block;margin-left:20px;margin-top:5px" type="button" id="decrease-text-size" tabindex="3">
 			<span style="float:left;display:block;margin-top:5px">Decrease text size</span>
 			<div style="clear: both;"></div>
-			<input style="float:left;display:block;margin-left:20px;margin-top:5px" type="button" id="reset-text-size">
+			<input style="float:left;display:block;margin-left:20px;margin-top:5px" type="button" id="reset-text-size" tabindex="3">
 			<span style="float:left;display:block;margin-top:5px">Reset text size</span>
 			<div style="clear: both;"></div>
 			<input style="float:left;display:none;margin-left:20px" type="checkbox" id="checkbox-white-backgrounds" checked>

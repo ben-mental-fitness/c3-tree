@@ -42,4 +42,4 @@
 	
 </script>
 
-<input id="search" type="text" placeholder="search text..." />
+<input id="search" type="text" tabindex="3" placeholder="search text..." />

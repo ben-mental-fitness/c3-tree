@@ -14,6 +14,7 @@
 		document.querySelector("#main-viz-wrapper").appendChild(document.querySelector(".introjs-overlay"));
 		document.querySelector("#main-viz-wrapper").appendChild(document.querySelector(".introjs-helperLayer"));
 		document.querySelector("#main-viz-wrapper").appendChild(document.querySelector(".introjs-tooltipReferenceLayer"));
+		document.getElementsByClassName("introjs-nextbutton")[0].focus();
 	};
 
 	$:if(introTourStartTrigger) {
