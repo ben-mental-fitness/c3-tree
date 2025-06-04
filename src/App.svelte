@@ -122,6 +122,7 @@
 					.transition("display")
 					.delay(ANIM_DURATION_IN)
 					.style("display", "none");
+				document.getElementById("back-button").focus();
 			}, 1000);
 
 		}, ANIM_DURATION_OUT);
@@ -136,7 +137,6 @@
 		welcomeDialogVisible = false;
 		checkShowDisplayCompatabilityTrigger = true;
 
-		console.log(d3.selectAll("#yt-embed"));
 		d3.selectAll("#yt-embed")
 			.style("height", "0px")
 			.filter(d => d.youtubeId !== undefined && d.youtubeId !== "")
@@ -229,8 +229,23 @@
 			showMainViz();
 		});		
 
-		d3.select("#back-button").on("click", (event) => {simplifiedMode = true; showTabsView()});
-		d3.select("#help-button").on("click", (event) => introTourStartTrigger = true);
+		d3.select("#back-button")
+			.attr("tabindex", "1")
+			.on("keydown", (event) => {
+				if (event.key === "Enter" || event.key === "Spacebar" || event.key === " ") {
+					simplifiedMode = true;
+					showTabsView();
+				}
+			})
+			.on("click", (event) => {simplifiedMode = true; showTabsView()});
+		d3.select("#help-button")
+			.attr("tabindex", "2")
+			.on("keydown", (event) => {
+				if (event.key === "Enter" || event.key === "Spacebar" || event.key === " ") {
+					introTourStartTrigger = true;
+				}
+			})
+			.on("click", (event) => introTourStartTrigger = true);
 
 		d3.select("#hover-tooltip").style("width", `${TOOLTIP_WIDTH}px`).style("height", "auto")
 

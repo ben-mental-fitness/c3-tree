@@ -49,6 +49,14 @@
 			.style("width", `${tabWidth}px`)
 			.style("line-height", `${tabHeight - 14}px`)
 			.style("cursor", "pointer")
+			.attr("tabindex", "0")
+			.on("keydown", (event, d) => {
+				if (event.key === "Enter" || event.key === "Spacebar" || event.key === " ") {
+					if (activeDropdownElement) activeDropdownElement.click();
+					selectedTab = d;
+					showContentOfSelectedTab(true);
+				}
+			});
 
 		tabs.append("p")
 			.attr("class", "title")
@@ -78,6 +86,7 @@
 		}  else {
 
 			contents = d3.select("#tabs-wrapper .desktop-version .content-right")
+				.attr("tabindex", "0")
 				.style("float", "left")
 				.style("border-top", "1px solid #d0d0d0")
 				.style("border-right", "1px solid #d0d0d0")
@@ -121,40 +130,50 @@
 			.style("cursor", "pointer")
 			.style("margin", "40px 30px 10px")
 			.style("color", "#404040")
-			.on("click", (event, d) => {
-
-				const entry = d3.select(`#${d.id}-content .collapsible-content-wrapper`);
-				const collapsed = entry.attr("data-collapsed")
-
-				if(collapsed === "true") {
-					entry.attr("data-collapsed", "false")
-						.style("display", "block")
-						.transition("appear")
-						.duration(ANIM_DURATION_IN)
-						.ease(d3.easeQuadOut)
-						.style("height", "auto");
-
-					d3.select(`#${d.id}-content .collapsible-content-toggler .collapse-icon-toggler path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
-						.attr("transform", "translate(256,256) rotate(180) translate(-256,-256)");
-				} else {
-					entry.attr("data-collapsed", "true")
-						.style("display", "none")
-						.transition("appear")
-						.duration(ANIM_DURATION_OUT)
-						.ease(d3.easeQuadOut)
-						.style("height", "0")
-
-					entry.attr("data-collapsed", "true")
-						.transition("display")
-						.delay(ANIM_DURATION_OUT)
-						.style("display", "none");
-
-					d3.select(`#${d.id}-content .collapsible-content-toggler .collapse-icon-toggler path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
-						.attr("transform", "translate(256,256) rotate(90) translate(-256,-256)");
+			.attr("tabindex", "0")
+			.on("keydown", (event, d) => {
+				if (event.key === "Enter" || event.key === "Spacebar" || event.key === " ") {
+					if (activeDropdownElement) activeDropdownElement.click();
+					collapsibleContentTogglerEvent(event, d);
 				}
-
-				event.target.scrollIntoView({ behavior: "smooth", block: "start" });
+			})
+			.on("click", (event, d) => {
+				collapsibleContentTogglerEvent(event, d);
 			});
+		
+		const collapsibleContentTogglerEvent = (event, d) => {
+			const entry = d3.select(`#${d.id}-content .collapsible-content-wrapper`);
+			const collapsed = entry.attr("data-collapsed")
+
+			if(collapsed === "true") {
+				entry.attr("data-collapsed", "false")
+					.style("display", "block")
+					.transition("appear")
+					.duration(ANIM_DURATION_IN)
+					.ease(d3.easeQuadOut)
+					.style("height", "auto");
+
+				d3.select(`#${d.id}-content .collapsible-content-toggler .collapse-icon-toggler path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
+					.attr("transform", "translate(256,256) rotate(180) translate(-256,-256)");
+			} else {
+				entry.attr("data-collapsed", "true")
+					.style("display", "none")
+					.transition("appear")
+					.duration(ANIM_DURATION_OUT)
+					.ease(d3.easeQuadOut)
+					.style("height", "0")
+
+				entry.attr("data-collapsed", "true")
+					.transition("display")
+					.delay(ANIM_DURATION_OUT)
+					.style("display", "none");
+
+				d3.select(`#${d.id}-content .collapsible-content-toggler .collapse-icon-toggler path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
+					.attr("transform", "translate(256,256) rotate(90) translate(-256,-256)");
+			}
+
+			event.target.scrollIntoView({ behavior: "smooth", block: "start" });
+		}
 
 		collapsibleContentToggler.append("p")
 			.style("float", "left")
@@ -202,60 +221,70 @@
 			.style("background-color", "#ffffff")
 			.style("padding", "0 10px")
 			.style("position", "relative")
+			.attr("tabindex", "0")
+			.on("keydown", (event, d, i) => {
+				if (event.key === "Enter" || event.key === "Spacebar" || event.key === " ") {
+					if (activeDropdownElement && activeDropdownElement !== document.getElementById(`papers-list-item-${d.parentIndex}-${d.rIndex}`)) activeDropdownElement.click();
+					papersListItemEvent(event, d, i);
+				}
+			})
 			.on("click", (event, d, i) => {
-
-				const entry = d3.select(`#papers-list-item-${d.parentIndex}-${d.rIndex} .papers-list-item-content`);
-				const collapsed = entry.attr("data-collapsed")
-
-				if(collapsed === "true") {
-					const waitForCollapse = () => {
-						if (activeDropdownElement == null) {
-							entry.attr("data-collapsed", "false")
-								.style("display", "block")
-								.transition("appear")
-								.duration(ANIM_DURATION_IN)
-								.ease(d3.easeQuadOut)
-								.style("height", "auto");
-
-							d3.select(`#papers-list-item-${d.parentIndex}-${d.rIndex} .collapse-icon-paper path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
-								.attr("transform", "translate(256,256) rotate(180) translate(-256,-256)");
-
-							document.getElementById(`papers-list-item-${d.parentIndex}-${d.rIndex}`).style.zIndex = "40";
-							document.getElementById("full-page-fade").style.display = "block";
-							d3.select("#full-page-fade").transition().duration(ANIM_DURATION_IN).ease(d3.easeQuadOut).style("opacity", 0.6);
-							document.body.addEventListener("click", overlayClickEvent);
-							activeDropdownElement = document.getElementById(`papers-list-item-${d.parentIndex}-${d.rIndex}`);
-							document.getElementById(`papers-list-item-${d.parentIndex}-${d.rIndex}`).scrollIntoView({ behavior: "smooth", block: "start" });
-						} else {
-							setTimeout(waitForCollapse, 250);
-						}
-					}
-					waitForCollapse();
-				} else {
-					entry.attr("data-collapsed", "true")
-						.style("display", "none")
-						.transition("appear")
-						.duration(ANIM_DURATION_OUT)
-						.ease(d3.easeQuadOut)
-						.style("height", "0")
-
-					entry.attr("data-collapsed", "true")
-						.transition("display")
-						.delay(ANIM_DURATION_OUT)
-						.style("display", "none");
-
-					d3.select(`#papers-list-item-${d.parentIndex}-${d.rIndex} .collapse-icon-paper path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
-						.attr("transform", "translate(256,256) rotate(90) translate(-256,-256)");
-
-					d3.select("#full-page-fade").transition().duration(ANIM_DURATION_OUT).ease(d3.easeQuadOut).style("opacity", 0.0);
-					setTimeout(() => {
-						d3.select("#full-page-fade").style("display", "none");
-						d3.select(`#papers-list-item-${d.parentIndex}-${d.rIndex}`).style("z-index", "auto");
-						document.body.removeEventListener("click", overlayClickEvent);
-						activeDropdownElement = null;
-					}, ANIM_DURATION_OUT);
-				}	
+				papersListItemEvent(event, d, i);
 			});
+
+		const papersListItemEvent = (event, d, i) => {
+			const entry = d3.select(`#papers-list-item-${d.parentIndex}-${d.rIndex} .papers-list-item-content`);
+			const collapsed = entry.attr("data-collapsed")
+
+			if(collapsed === "true") {
+				const waitForCollapse = () => {
+					if (activeDropdownElement == null) {
+						entry.attr("data-collapsed", "false")
+							.style("display", "block")
+							.transition("appear")
+							.duration(ANIM_DURATION_IN)
+							.ease(d3.easeQuadOut)
+							.style("height", "auto");
+
+						d3.select(`#papers-list-item-${d.parentIndex}-${d.rIndex} .collapse-icon-paper path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
+							.attr("transform", "translate(256,256) rotate(180) translate(-256,-256)");
+
+						document.getElementById(`papers-list-item-${d.parentIndex}-${d.rIndex}`).style.zIndex = "40";
+						d3.select("#full-page-fade").style("display", "block");
+						d3.select("#full-page-fade").transition().duration(ANIM_DURATION_IN).ease(d3.easeQuadOut).style("opacity", 0.6);
+						document.body.addEventListener("click", overlayClickEvent);
+						activeDropdownElement = document.getElementById(`papers-list-item-${d.parentIndex}-${d.rIndex}`);
+						document.getElementById(`papers-list-item-${d.parentIndex}-${d.rIndex}`).scrollIntoView({ behavior: "smooth", block: "start" });
+					} else {
+						setTimeout(waitForCollapse, 250);
+					}
+				}
+				waitForCollapse();
+			} else {
+				entry.attr("data-collapsed", "true")
+					.style("display", "none")
+					.transition("appear")
+					.duration(ANIM_DURATION_OUT)
+					.ease(d3.easeQuadOut)
+					.style("height", "0")
+
+				entry.attr("data-collapsed", "true")
+					.transition("display")
+					.delay(ANIM_DURATION_OUT)
+					.style("display", "none");
+
+				d3.select(`#papers-list-item-${d.parentIndex}-${d.rIndex} .collapse-icon-paper path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
+					.attr("transform", "translate(256,256) rotate(90) translate(-256,-256)");
+
+				d3.select("#full-page-fade").transition().duration(ANIM_DURATION_OUT).ease(d3.easeQuadOut).style("opacity", 0.0);
+				setTimeout(() => {
+					d3.select("#full-page-fade").style("display", "none");
+					d3.select(`#papers-list-item-${d.parentIndex}-${d.rIndex}`).style("z-index", "auto");
+					document.body.removeEventListener("click", overlayClickEvent);
+					activeDropdownElement = null;
+				}, ANIM_DURATION_OUT);
+			}
+		}
 
 		papersList.append("p")
 			.style("width", "80%")
@@ -358,7 +387,11 @@
 		d3.select("#go-to-main-vis")
 			.style("margin", "20px 0")
 			.style("display", "inline-block")
-			.on("click", () => {d3.selectAll("#yt-embed").html(""); showMainVizTrigger = true})
+			.on("click", () => {
+				d3.select("#full-page-fade").style("display", "none");
+				d3.selectAll("#yt-embed").html("");
+				showMainVizTrigger = true;
+			})
 
 		let selectedTab = data.children[0];
 
