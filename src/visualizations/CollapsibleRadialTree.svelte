@@ -52,7 +52,7 @@
 
 	// Update visible teams array & refresh the view 
 	const nodeOnClick = (d) => {
-		console.log("NODECLICK");
+		console.log("Unexpected Event Triggered: nodeOnClick");
 		if("Members" in d.data.props.info_main) {
 			if(visibleTeams.indexOf(d.data.text) !== -1) {
 				visibleTeams.splice(visibleTeams.indexOf(d.data.text, 1));
@@ -918,6 +918,7 @@
 							.style("min-width", "150px")
 							.style("width", "calc(50% - 25px)")
 							.text("Go to publication");
+						d3.select("#hover-tooltip #tooltip-main-button-link").style("display", "block");
 					}
 					if(d.data.props.info_collapsed.Impact) {
 						buttonLinks.append("button")
@@ -928,6 +929,7 @@
 							.style("min-width", "150px")
 							.style("width", "calc(50% - 25px)")
 							.text("Go to altmetric");
+						d3.select("#hover-tooltip #tooltip-main-button-link").style("display", "block");
 					}						
 				}
 				
@@ -961,7 +963,10 @@
 					d3.select("#hover-tooltip .tooltip-dropdown-title") 
 						.style("font-size", currentTextScale.TooltipBody)
 						.style("font-weight", "bold")
+						.style("display", "block")
 						.text(["Data","Team"].includes(getParentWithDepth(d, 1).data.text) ? `Publications (${connectedNodes.size()})` : `Connections (${connectedNodes.size()})`);
+
+					d3.select("#hover-tooltip .tooltip-collapsible-button").style("display", connectedNodes.size() > 0 ? "block" : "none");
 
 					const tooltipConnectionRow = d3.select("#hover-tooltip .table-collapsed .tooltip-tbody");
 					tooltipConnectionRow.style("display", "none").selectAll("*").remove();
@@ -1067,10 +1072,12 @@
 
 					});	
 					
-					if(connectedNodes.size() <= 0)
+					if(connectedNodes.size() <= 0) {
 						d3.select("#hover-tooltip .tooltip-collapsible-button").style("display", "none").style("pointer-events", "none");
-					else {
+						d3.select("#hover-tooltip #tooltip-collapsible-button-group").style("pointer-events", "none").style("cursor","default");
+					} else {
 						d3.select("#hover-tooltip .tooltip-collapsible-button").style("display", "block").style("pointer-events", "all");
+						d3.select("#hover-tooltip #tooltip-collapsible-button-group").style("pointer-events", "all").style("cursor","pointer");
 					}
 					
 					connectedNodes
@@ -1093,6 +1100,12 @@
 					.style("font-size", currentTextScale.TooltipBody)
 					.style("white-space", "pre-wrap")
 					.text(topic.data.props.themeDescShort);
+				
+				// Hide other elements on tooltip
+				d3.select("#hover-tooltip #tooltip-main-button-link").style("display", "none");
+				d3.select("#hover-tooltip .tooltip-collapsible-button").style("display", "none");
+				d3.select("#hover-tooltip .tooltip-dropdown-title").text("");
+				d3.select("#hover-tooltip .table-collapsed .tooltip-tbody").style("display", "none").selectAll("*").remove();
 			}
 
 			// Publication status dropdown
@@ -1115,10 +1128,12 @@
 					}
 				});
 
-				if(!collapsibleInfo)
+				if(!collapsibleInfo) {
 					d3.select("#hover-tooltip .tooltip-collapsible-button").style("display", "none").style("pointer-events", "none");
-				else {
+					d3.select("#hover-tooltip #tooltip-collapsible-button-group").style("pointer-events", "none").style("cursor","default");
+				} else {
 					d3.select("#hover-tooltip .tooltip-collapsible-button").style("display", "block").style("pointer-events", "all");
+					d3.select("#hover-tooltip #tooltip-collapsible-button-group").style("pointer-events", "all").style("cursor","pointer");
 				}
 			}
 
@@ -1280,7 +1295,7 @@
 
 				// Expand tooltip content on arrow click
 				let collapsed = true;
-				d3.select("#sticky-tooltip .tooltip-collapsible-button")
+				d3.select("#sticky-tooltip #tooltip-collapsible-button-group")
 				.on("keydown", (event) => {
 					if (event.key === "Enter" || event.key === "Spacebar" || event.key === " ") {
 					stickyCollapseEvent(event);
@@ -1359,8 +1374,6 @@
 					const connectedNodes = d3.selectAll('.node-group').filter((d_) => 
 						d_.data.props.data_source && d_.data.props.data_source.some(v => d.data.props.data_source.includes(v)) && d_.data.visible)
 						.filter((d_) => d_ !== d)
-
-					console.log(d.data.props);
 
 					connectedNodes.selectAll('.node-text')
 						.attr('font-weight', 'bold')
@@ -1524,7 +1537,7 @@
 				<tbody class="tooltip-tbody"></tbody>
 			</table>
 			<center id="tooltip-main-button-link" style="padding:5px 25px 5px 25px"></center>
-			<div style="padding:5px 25px 5px 25px">
+			<div style="padding:5px 25px 5px 25px" id="tooltip-collapsible-button-group">
 				<p class="tooltip-dropdown-title" style="float:left;margin:0px"></p>
 				<svg class="tooltip-collapsible-button" tabindex="0" style="margin-left:10px; cursor:pointer;float:left;" width="15px" height="15px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
 					<path d="M233.4 105.4c12.5-12.5 32.8-12.5 45.3 0l192 192c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L256 173.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l192-192z"
