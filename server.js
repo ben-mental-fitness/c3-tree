@@ -77,9 +77,6 @@ async function authorize() {
   return client;
 }
 
-
-
-
 // create express app
 const app = express();
 app.use(cors());
@@ -120,8 +117,7 @@ app.post('/fetch_c3tree_data_from_google_sheet', (req, res) => {
 
         const mainDataSheet = sheets.spreadsheets.values.get({
           spreadsheetId: '11tCraeH710zGQ0-OhJ-8wwcrZRbRRvSWrHO-llYueuM',
-          //range: 'NCS & LHW Projects',
-          range: 'NCS & LHW ProjectsOLD2',
+          range: 'NCS & LHW Projects',
         });
 
         const metaDataSheet = sheets.spreadsheets.values.get({
@@ -158,7 +154,7 @@ app.post('/fetch_c3tree_data_from_google_sheet', (req, res) => {
             mainData: mainDataRows,
             metaData: metaDataSheet.data.values,
             introData: introDataSheet.data.values,
-            teamData: teamDataSheet.data.values
+            teamData: teamDataSheet.data.values // TODO: Remove as unused
           })
         }).catch((err) => {
           console.warn(err);

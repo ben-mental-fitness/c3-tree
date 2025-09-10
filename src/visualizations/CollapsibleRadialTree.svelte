@@ -444,13 +444,14 @@
 			.style("cursor", "pointer")
 			.attr("transform", `translate(
 				${width / 2.0 - radius * BRAIN_SIZE / 2.0},
-				${height / 2.0 - radius * BRAIN_SIZE / 2.0 * BRAIN_ASPECT_RATIO})`)
-			.on("click", (event) => {
-				checkboxesChecked["checkbox-simple-view"] = !checkboxesChecked["checkbox-simple-view"];
-				d3.select("#checkbox-simple-view").property("checked", checkboxesChecked["checkbox-simple-view"]);
-				d3.select("#checkbox-detailed-view").property("checked", !checkboxesChecked["checkbox-simple-view"])
-				rerenderTreeTrigger = true;
-			});
+				${height / 2.0 - radius * BRAIN_SIZE / 2.0 * BRAIN_ASPECT_RATIO})`);
+			// REMOVED CENTER ICON CLICK FUNCTIONALITY
+			// .on("click", (event) => {
+			// 	checkboxesChecked["checkbox-simple-view"] = !checkboxesChecked["checkbox-simple-view"];
+			// 	d3.select("#checkbox-simple-view").property("checked", checkboxesChecked["checkbox-simple-view"]);
+			// 	d3.select("#checkbox-detailed-view").property("checked", !checkboxesChecked["checkbox-simple-view"])
+			// 	rerenderTreeTrigger = true;
+			// });
 
 		// Repopulate legend
 		d3.select("#category-legend").selectAll("*").remove();
@@ -955,18 +956,19 @@
 					let connectedNodes;
 					connectedNodes = visMode2Nodes.filter((d_) => 
 						d_.data.props.data_source && d_.data.props.data_source.some(v => d.data.props.data_source.includes(v)));
+					connectedNodes = connectedNodes.filter((d_) => d_ !== d); // Removes self if referenced
 					
 					d3.select("#hover-tooltip .tooltip-dropdown-title") 
 						.style("font-size", currentTextScale.TooltipBody)
 						.style("font-weight", "bold")
-						.text(["Data","Team"].includes(getParentWithDepth(d, 1).data.text) ? `Publications (${connectedNodes.size() - 1})` : `Connections (${connectedNodes.size() - 1})`);
+						.text(["Data","Team"].includes(getParentWithDepth(d, 1).data.text) ? `Publications (${connectedNodes.size()})` : `Connections (${connectedNodes.size()})`);
 
 					const tooltipConnectionRow = d3.select("#hover-tooltip .table-collapsed .tooltip-tbody");
 					tooltipConnectionRow.style("display", "none").selectAll("*").remove();
 					
 					const publicationsList = tooltipConnectionRow.append("tr").append("td")
 						.selectAll(".papers-list-item")
-						.data(connectedNodes.filter((d_) => d_ !== d).data())
+						.data(connectedNodes.data())
 						.join("div")
 						.attr("id", (d, i) => `publications-list-tooltip-item-${i}`)
 						.attr("class", "papers-list-item")
@@ -1065,7 +1067,7 @@
 
 					});	
 					
-					if(connectedNodes.size() <= 1)
+					if(connectedNodes.size() <= 0)
 						d3.select("#hover-tooltip .tooltip-collapsible-button").style("display", "none").style("pointer-events", "none");
 					else {
 						d3.select("#hover-tooltip .tooltip-collapsible-button").style("display", "block").style("pointer-events", "all");
@@ -1356,6 +1358,9 @@
 				if(mode === "viz-select-1") {
 					const connectedNodes = d3.selectAll('.node-group').filter((d_) => 
 						d_.data.props.data_source && d_.data.props.data_source.some(v => d.data.props.data_source.includes(v)) && d_.data.visible)
+						.filter((d_) => d_ !== d)
+
+					console.log(d.data.props);
 
 					connectedNodes.selectAll('.node-text')
 						.attr('font-weight', 'bold')
@@ -1365,7 +1370,7 @@
 						.attr('stroke-width', checkboxesChecked['checkbox-white-backgrounds'] ? 10 : 1)
 
 					// Accordion dropdown toggle
-					const connectedPublications = connectedNodes.filter((d_) => d_ !== d).data();
+					const connectedPublications = connectedNodes.data();
 					d3.selectAll('#sticky-tooltip .table-collapsed .tooltip-tbody .papers-list-item')
 						.attr("tabindex", "0")
 						.data(connectedPublications)
