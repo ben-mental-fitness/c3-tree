@@ -817,8 +817,8 @@
 					.style('pointer-events', 'none')
 					.style('left', '0')
 					.style('top', '0')
-					.style('width', '100%')
-					.style('height', '100%')
+					.style('width', '100vw')
+					.style('height', '100vh')
 					.style('max-height', `${window.innerHeight}px`)
 					.style('opacity', '0.3')
 					.style('background', '#ffffff');
@@ -1148,7 +1148,7 @@
 			if(!d3.select("#sticky-tooltip").empty()) {
 				d3.select("#sticky-tooltip").remove();
 			}
-			if(d3.select("#sticky-tooltip")) {
+			if(d3.select("#sticky-tooltip-overlay")) {
 				d3.select("#sticky-tooltip-overlay").remove();
 			}
 			d3.select(".canvas-wrapper")
@@ -1157,8 +1157,8 @@
 				.style('position', 'fixed')
 				.style('left', '0')
 				.style('top', '0')
-				.style('width', '100%')
-				.style('height', '100%')
+				.style('width', '100vw')
+				.style('height', '100vh')
 				.style('max-height', `${window.innerHeight}px`)
 				.style('opacity', '0.4')
 				.style('background', '#ffffff');
@@ -1328,16 +1328,16 @@
 
 				// Go to publication link
 				d3.select("#sticky-tooltip #tooltip-main-button-link .button-publication-link")
-					.on("click", (event) => {
-						event.stopPropagation();
+					.on("click", (event_new) => {
 						window.open(d.data.props.publication_link);
+						event.stopPropagation();
 					});
 				
 				// Go to altmetric link
 				d3.select("#sticky-tooltip #tooltip-main-button-link .button-altmetric-link")
-					.on("click", (event) => {
-						event.stopPropagation();
+					.on("click", (event_new) => {
 						window.open(d.data.props.info_collapsed.Impact);
+						event.stopPropagation();
 					});
 
 				// Remove highlighted paths
@@ -1453,7 +1453,9 @@
 		// Unselect element
 		const mouseLeaveEvent = (event, d) => {
 			d3.select("#hover-tooltip.tooltip").style("display", "none");
-			d3.select("#sticky-tooltip-overlay").remove();
+			if(d3.select("#sticky-tooltip").empty()) {
+				d3.select("#sticky-tooltip-overlay").remove();
+			}
 			d3.selectAll(`#${d.data.id}-text,#${d.data.id}-text-2nd-line`).style("font-weight", null);
 			if(selectedNode === undefined) {
 				if (highlightedPaths._groups[0].length > 0) {
