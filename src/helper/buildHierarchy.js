@@ -21,6 +21,7 @@ export const buildHierarchy = ((parentLevel, data, presetsAvailable, presetsPare
 			"props": {
 				"publication_link": d.publication_link,
 				"data_source": d.data_source ? d.data_source.split(',').map(item => item.trim()) : [],
+				"connected_data_source": {},
 				"status": d.Status,
 				"info_main": {},
 				"info_collapsed": {
@@ -33,6 +34,9 @@ export const buildHierarchy = ((parentLevel, data, presetsAvailable, presetsPare
 			"children": [],
 		};
 
+		Object.keys(d).filter((key) => key.indexOf("[CONNECTED_DATA_SOURCE]") !== -1).forEach((key) => {
+			level.props.connected_data_source[key.replace("[CONNECTED_DATA_SOURCE]", "")] = d[key] ? d[key].split(',').map(item => item.trim()) : [];
+		});
 		Object.keys(d).filter((key) => key.indexOf("[INFO_MAIN]") !== -1).forEach((key) => {
 			level.props.info_main[key.replace("[INFO_MAIN]", "")] = d[key];
 		});
