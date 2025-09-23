@@ -96,7 +96,6 @@
 		
 		// Define visible elements
 		const filteredRoot = root;
-		categoryLegendVisible = !simplifiedMode && checkboxesChecked["checkbox-legend"];
 		simplifiedMode = checkboxesChecked["checkbox-simple-view"];
 		controlsVisible = !simplifiedMode;
 
@@ -445,13 +444,6 @@
 			.attr("transform", `translate(
 				${width / 2.0 - radius * BRAIN_SIZE / 2.0},
 				${height / 2.0 - radius * BRAIN_SIZE / 2.0 * BRAIN_ASPECT_RATIO})`);
-			// REMOVED CENTER ICON CLICK FUNCTIONALITY
-			// .on("click", (event) => {
-			// 	checkboxesChecked["checkbox-simple-view"] = !checkboxesChecked["checkbox-simple-view"];
-			// 	d3.select("#checkbox-simple-view").property("checked", checkboxesChecked["checkbox-simple-view"]);
-			// 	d3.select("#checkbox-detailed-view").property("checked", !checkboxesChecked["checkbox-simple-view"])
-			// 	rerenderTreeTrigger = true;
-			// });
 
 		// Repopulate legend
 		d3.select("#category-legend").selectAll("*").remove();
@@ -1478,6 +1470,7 @@
 		if (mode == "viz-select-0") {
 			rerenderTree(rerenderTreeTrigger);
 			rerenderTreeTrigger = null;
+			categoryLegendVisible = !simplifiedMode && checkboxesChecked["checkbox-legend"];
 
 		} else {
 			loaderVisible =  true;
@@ -1486,6 +1479,7 @@
 				.duration(500)
 				.ease(d3.easeQuadOut)
 				.style("opacity", 0.0);
+			categoryLegendVisible = false;
 
 			setTimeout(async () => {
 				await rerenderTree(rerenderTreeTrigger).then(() => {
@@ -1493,6 +1487,7 @@
 
 					setTimeout(() => {
 						loaderVisible = false;
+						categoryLegendVisible = !simplifiedMode && checkboxesChecked["checkbox-legend"];
 						d3.select("#main-viz-wrapper")
 							.transition("opacity")
 							.duration(500)
