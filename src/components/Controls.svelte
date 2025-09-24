@@ -274,7 +274,7 @@
 			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-themes-publications" checked tabindex="3">
 			<span style="float:left;display:block">Publications</span>
 			<div style="clear: both;"></div>
-			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-team" tabindex="3">
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-team" checked tabindex="3">
 			<span style="float:left;display:block">Team</span>
 			<div style="clear: both;"></div>
 			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-data-sources" tabindex="3">

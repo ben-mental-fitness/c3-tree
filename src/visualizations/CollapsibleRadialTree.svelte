@@ -816,7 +816,6 @@
 					.style('background', '#ffffff');
 			}
 
-
 			const pointerPos = [event.pageX, event.pageY];
 			d3.select("#hover-tooltip .table-main .tooltip-tbody").selectAll("*").remove();
 			if(d.depth > 1) {
@@ -1254,6 +1253,87 @@
 						event.stopPropagation();
 					});
 
+				// Prev & next item buttons for publications
+				if (event.target.getAttribute("class") == "text-leaf-interact-area") {
+					const findPrevItem = (currentNode) => {
+						let prevNode = currentNode;
+						do {
+							if (prevNode.previousElementSibling == null) {
+								if (prevNode.parentNode.previousElementSibling == null) return null; // First list item, no wrap around
+								prevNode = prevNode.parentNode.previousElementSibling.lastChild;
+							} else {
+								prevNode = prevNode.previousElementSibling;
+							}
+						} while (!prevNode || prevNode.getAttribute("class") != "text-leaf-interact-area")
+
+						// Only return if text is visible, otherwise keep searching
+						return prevNode.previousElementSibling.checkVisibility({opacityProperty: true})  ? prevNode : findPrevItem(prevNode);
+					}
+					const findNextItem = (currentNode) => {
+						let nextNode = currentNode;
+						do {
+							if (nextNode.nextElementSibling == null) {
+								if (nextNode.parentNode.nextElementSibling == null) return null; // Last list item, no wrap around
+								nextNode = nextNode.parentNode.nextElementSibling.children[0];
+							} else {
+								nextNode = nextNode.nextElementSibling;
+							}
+						} while (!nextNode || nextNode.getAttribute("class") != "text-leaf-interact-area")
+						
+						// Only return if text is visible, otherwise keep searching
+						return nextNode.nextElementSibling.checkVisibility({opacityProperty: true})  ? nextNode : findNextItem(nextNode);
+					}
+
+					const prevItem = findPrevItem(event.target);
+					const nextItem = findNextItem(event.target);
+
+					if (!prevItem) {
+						stickyTooltip.select(".tooltip-left-button")
+							.style("display", "none")
+							.attr("tabindex", "-1");
+					} else {	
+						stickyTooltip.select(".tooltip-left-button")
+							.style("display", "inline-block")
+							.attr("tabindex", "0")
+							.on("click", () => {
+								prevItem.dispatchEvent(new Event('focus'));
+								prevItem.dispatchEvent(new Event('click'));
+							})
+							.on("keydown", (event, d) => {
+								if (event.key === "Enter" || event.key === "Spacebar" || event.key === " ") {
+									prevItem.dispatchEvent(new Event('focus'));
+									prevItem.dispatchEvent(new Event('click'));
+								}
+							});
+					}
+
+					if (!nextItem) {
+						stickyTooltip.select(".tooltip-right-button")
+							.style("display", "none")
+							.attr("tabindex", "-1");
+					} else {
+						stickyTooltip.select(".tooltip-right-button")
+							.style("display", "inline-block")
+							.attr("tabindex", "0")
+							.on("click", () => {
+								nextItem.dispatchEvent(new Event('focus'));
+								nextItem.dispatchEvent(new Event('click'));
+							})
+							.on("keydown", (event, d) => {
+								if (event.key === "Enter" || event.key === "Spacebar" || event.key === " ") {
+									nextItem.dispatchEvent(new Event('focus'));
+									nextItem.dispatchEvent(new Event('click'));
+								}
+							});
+					}
+				} else {
+					stickyTooltip.select(".tooltip-left-button")
+							.style("display", "none");
+					stickyTooltip.select(".tooltip-right-button")
+							.style("display", "none")
+							.attr("tabindex", "-1");
+				}
+
 				// Close tooltip on 'X' button click
 				d3.select("#hover-tooltip.tooltip").style("display", "none")
 				stickyTooltip.style("pointer-events", "all");
@@ -1528,7 +1608,9 @@
 		<div id="hover-tooltip" class="tooltip" style="display:none;z-index:99;">
 			<div class="tooltip-close-button" style="display:none">x</div>
 			<center>
-				<div class="tooltip-title"></div>
+				<div class="tooltip-left-button" style="display:none;margin-right:64px;cursor:pointer"> ◄ Prev </div>
+				<div class="tooltip-title" style="display:inline-block"></div>
+				<div class="tooltip-right-button" style="display:none;margin-left:64px;cursor:pointer"> Next ► </div>
 			</center>
 			<table class="table-main" cellspacing="15">
 				<tbody class="tooltip-tbody"></tbody>
