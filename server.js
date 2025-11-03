@@ -86,7 +86,6 @@ const port = process.env.PORT || 5000;
 const protocol = process.env.USE_HTTPS === "TRUE" ? https : http;
 
 // TODO: Use offline mode as fallback if Google Sheet is unreachable
-// TODO: Fix this to use BW1-DEV to load the Google Sheet
 app.post('/fetch_c3tree_data_from_google_sheet', (req, res) => {
 
   if(process.env.OFFLINE_MODE === 'TRUE') { // TODO: change to csv

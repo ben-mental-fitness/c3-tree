@@ -172,7 +172,6 @@
 
 		loaderVisible = true;
 
-		// TODO: Switch to using bw1-dev to read data from
 		var xhr = new XMLHttpRequest();
 		xhr.open("POST", "https://c3tree.bw1-dev.com/fetch_c3tree_data_from_google_sheet", true);
 		// xhr.open("POST", "https://c3tree.framed-mice.eu/fetch_c3tree_data_from_google_sheet", true);
