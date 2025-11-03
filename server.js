@@ -15,7 +15,6 @@ import { authenticate } from '@google-cloud/local-auth';
 import { google } from 'googleapis';
 
 const GOOGLE_API_TOKEN_JSON_PATH = path.join(process.cwd(), process.env.GOOGLE_API_TOKEN_JSON);
-const GOOGLE_API_CREDENTIALS_SA = path.join(process.cwd(), process.env.GOOGLE_API_TOKEN_JSON);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -114,24 +113,25 @@ app.post('/fetch_c3tree_data_from_google_sheet', (req, res) => {
     authorize()
       .then((auth) => {
         const sheets = google.sheets({version: 'v4', auth});
+        const sheetsID = process.env.GOOGLE_SHEETS_ID;
 
         const mainDataSheet = sheets.spreadsheets.values.get({
-          spreadsheetId: '11tCraeH710zGQ0-OhJ-8wwcrZRbRRvSWrHO-llYueuM',
+          spreadsheetId: sheetsID,
           range: 'NCS & LHW Projects',
         });
 
         const metaDataSheet = sheets.spreadsheets.values.get({
-          spreadsheetId: '11tCraeH710zGQ0-OhJ-8wwcrZRbRRvSWrHO-llYueuM',
+          spreadsheetId: sheetsID,
           range: 'MetaData',
         });
 
         const introDataSheet = sheets.spreadsheets.values.get({
-          spreadsheetId: '11tCraeH710zGQ0-OhJ-8wwcrZRbRRvSWrHO-llYueuM',
+          spreadsheetId: sheetsID,
           range: 'Intro',
         });
 
         const teamDataSheet = sheets.spreadsheets.values.get({
-          spreadsheetId: '11tCraeH710zGQ0-OhJ-8wwcrZRbRRvSWrHO-llYueuM',
+          spreadsheetId: sheetsID,
           range: 'Team',
         });
 
