@@ -831,6 +831,7 @@
 					.style("font-size", currentTextScale.TooltipBody)
 					.text(d.data.text);
 				
+				let summaryExists = false;
 				Object.entries(d.data.props.info_main).forEach(([key, value]) => {
 					if(value && Array.isArray(value)) {
 						const mainInfoRow = d3.select("#hover-tooltip .table-main .tooltip-tbody");
@@ -881,17 +882,59 @@
 							}
 						});
 					} else if(value && value !== "") {
-						const mainInfoRow = d3.select("#hover-tooltip .table-main .tooltip-tbody");
-						mainInfoRow.append("tr").append("td").style("width", `${TOOLTIP_WIDTH * 0.2}px`)
-							.append("p")
-							.style("font-size", currentTextScale.TooltipBody)
-							.style("font-weight", "bold")
-							.text(key)
-						mainInfoRow.append("tr").append("td")
-							.style("padding-bottom", "5px")
-							.append("p")
-							.style("font-size", currentTextScale.TooltipBody)
-							.text(value);
+						if (key == "Summary") summaryExists = true;						
+								
+						// TODO - Show abstract in dropdown if summary exists 
+						if (summaryExists && key == "Abstract") {
+							console.log("Abstract exists");
+							// const mainInfoRow = d3.select("#hover-tooltip .table-main .tooltip-tbody");
+							// let dropdown = mainInfoRow
+							// 	.append("tr")
+							// 	.append("td")
+							// 	.attr("id", "abstract-group")
+							// 	.style("width", `${TOOLTIP_WIDTH * 0.2}px`);				
+							// dropdown.append("p")
+							// 	.style("float", "left")
+							// 	.style("margin", "0px")
+							// 	.style("font-weight", "bold")
+							// 	.style("font-size", currentTextScale.TooltipBody)
+							// 	.text("Abstract");
+							// dropdown.append("svg")
+							// 	.attr("id", "abstract-tooltip")
+							// 	.attr("class", "tooltip-collapsible-button")
+							// 	.style("cursor", "pointer")
+							// 	.style("margin-left", "10px")
+							// 	.style("float", "left")
+							// 	.attr("tabindex", "0")
+							// 	.attr("width", "15px")
+							// 	.attr("height", "15px")
+							// 	.attr("xmlns", "http://www.w3.org/2000/svg")
+							// 	.attr("viewbox", "0 0 512 512")
+							// 	.append("path")
+							// 	.attr("d", "M233.4 105.4c12.5-12.5 32.8-12.5 45.3 0l192 192c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L256 173.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l192-192z")
+							// 	.attr("fill", "#202020")
+							// 	.attr("transform", "translate(256,256) rotate(90) translate(-256,-256)");
+							
+							// dropdown.append("p")
+							// 	.attr("id", "abstract-dropdown")
+							// 	.style("display","none")
+							// 	.style("padding-bottom", "5px")
+							// 	.style("font-size", currentTextScale.TooltipBody)
+							// 	.text(d.data.props.info_main.Abstract);
+
+						} else {
+							const mainInfoRow = d3.select("#hover-tooltip .table-main .tooltip-tbody");
+							mainInfoRow.append("tr").append("td").style("width", `${TOOLTIP_WIDTH * 0.2}px`)
+								.append("p")
+								.style("font-size", currentTextScale.TooltipBody)
+								.style("font-weight", "bold")
+								.text(key)
+							mainInfoRow.append("tr").append("td")
+								.style("padding-bottom", "5px")
+								.append("p")
+								.style("font-size", currentTextScale.TooltipBody)
+								.text(value);	
+						}
 					}
 				});
 
@@ -1003,19 +1046,30 @@
 
 					publicationsListContent.each(function (d) {
 						let collapsibleInfo = false;
-						Object.keys(d.data.props.info_main).forEach((key) => {
-							if(d.data.props.info_main[key] && d.data.props.info_main[key] !== "") {
-								collapsibleInfo = true;
-								d3.select(this).append("p")
-									.style("font-weight", "bold")
-									.style("font-size", currentTextScale.TooltipBody)
-									.text(key.replace("[INFO_MAIN]", ""));
-								d3.select(this).append("p")
-									.style("padding-bottom", "5px")
-									.style("font-size", currentTextScale.TooltipBody)
-									.text(d.data.props.info_main[key]);
-							}
-						});
+
+						// Display Summary as default with Abstract dropdown, otherwise display Abstract
+						if (d.data.props.info_main.Summary) {
+							collapsibleInfo = true;
+							d3.select(this).append("p")
+								.style("font-weight", "bold")
+								.style("font-size", currentTextScale.TooltipBody)
+								.text("Summary");
+							d3.select(this).append("p")
+								.style("padding-bottom", "5px")
+								.style("font-size", currentTextScale.TooltipBody)
+								.text(d.data.props.info_main.Summary);
+
+						} else if (d.data.props.info_main.Abstract) {
+							collapsibleInfo = true;
+							d3.select(this).append("p")
+								.style("font-weight", "bold")
+								.style("font-size", currentTextScale.TooltipBody)
+								.text("Abstract");
+							d3.select(this).append("p")
+								.style("padding-bottom", "5px")
+								.style("font-size", currentTextScale.TooltipBody)
+								.text(d.data.props.info_main.Abstract);
+						}
 
 						if(d.data.props.publication_link && d.data.props.publication_link !== "") {
 							collapsibleInfo = true;
@@ -1364,6 +1418,24 @@
 						d3.select("#sticky-tooltip-overlay").remove();
 					});
 				stickyTooltip.select(".tooltip-bottom-note").remove();
+
+				// Expand abstract dropdown if exists
+				console.log(d3.select("#sticky-tooltip #abstract-dropdown"));
+				d3.select("#sticky-tooltip #abstract-dropdown").on("click", (event) => {
+					console.log("Clicked");
+					let abstract = d3.select("#abstract-dropdown");
+					console.log(abstract);
+					debugger;
+					if (abstract.style("display") == "none") {
+						d3.select("#abstract-tooltip").transition("rotate").duration(200).ease(d3.easeQuadOut)
+							.attr("transform", "translate(256,256) rotate(180) translate(-256,-256)");
+						abstract.style("display", "block");
+					} else {
+						d3.select("#abstract-tooltip").transition("rotate").duration(200).ease(d3.easeQuadOut)
+							.attr("transform", "translate(256,256) rotate(90) translate(-256,-256)");
+						abstract.style("display", "none");
+					}
+				});
 
 				// Expand tooltip content on arrow click
 				let collapsed = true;
