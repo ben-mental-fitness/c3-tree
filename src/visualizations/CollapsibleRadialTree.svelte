@@ -106,10 +106,10 @@
 		twist = twist < 0 ? twist + Math.PI * 2.0 : twist;
 
 		d3.select("#twist-circle")
-			.attr("r", outerRadius + (mode === "viz-select-1" && !simplifiedMode ? 80 : 0))
+			.attr("r", outerRadius + ((mode === "viz-select-1" || !checkboxesChecked["checkbox-subtheme-titles"]) && !simplifiedMode ? 80 : 0))
 
 		// Increase visualisation radius when leaf titles are not visible
-		const treeFunction = d3.cluster().size([2 * Math.PI, (checkboxesChecked["checkbox-leaf-titles"] ? radius : outerRadius - 25) + (mode === "viz-select-1" && !simplifiedMode ? 80 : 0)]);
+		const treeFunction = d3.cluster().size([2 * Math.PI, (checkboxesChecked["checkbox-leaf-titles"] ? radius : outerRadius - 25) + ((mode === "viz-select-1" || !checkboxesChecked["checkbox-subtheme-titles"]) && !simplifiedMode ? 80 : 0)]);
 		treeFunction.separation(separationFunction)(filteredRoot);
 		treeFunction.separation(separationFunction)(rootSimplified);
 
@@ -239,7 +239,7 @@
 		// Outer large circles on cluster visualisation - subtheme labels
 		d3.select("#outer-node-group-wrapper")
 			.transition(animation)
-			.attr("opacity",  !simplifiedMode ? 1.0 : 0.0)
+			.attr("opacity",  (!simplifiedMode && checkboxesChecked["checkbox-subtheme-titles"]) ? 1.0 : 0.0)
 		
 		if (!simplifiedMode) { 
 			d3.select("#outer-node-group-wrapper")
@@ -509,8 +509,8 @@
 						
 						d3.select("#twist-circle-scalar").remove();
 						const arc = d3.arc()
-							.innerRadius(outerRadius + (mode === "viz-select-1" && !simplifiedMode ? 80 : 0) - 5)
-							.outerRadius(outerRadius + (mode === "viz-select-1" && !simplifiedMode ? 80 : 0) + 5)
+							.innerRadius(outerRadius + ((mode === "viz-select-1" || !checkboxesChecked["checkbox-subtheme-titles"]) && !simplifiedMode ? 80 : 0) - 5)
+							.outerRadius(outerRadius + ((mode === "viz-select-1" || !checkboxesChecked["checkbox-subtheme-titles"]) && !simplifiedMode ? 80 : 0) + 5)
 							.startAngle(0) 
 							.endAngle((startAngle + twist) % (2 * Math.PI)); 
 

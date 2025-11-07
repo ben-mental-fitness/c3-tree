@@ -92,6 +92,10 @@
 			checkboxesChecked["checkbox-leaf-titles"] = !checkboxesChecked["checkbox-leaf-titles"];
 			rerenderTreeTrigger = true;
 		});
+		d3.select("#checkbox-subtheme-titles").on("change", (event) => {
+			checkboxesChecked["checkbox-subtheme-titles"] = !checkboxesChecked["checkbox-subtheme-titles"];
+			rerenderTreeTrigger = true;
+		});
 		d3.select("#checkbox-legend").on("change", (event) => {
 			checkboxesChecked["checkbox-legend"] = !checkboxesChecked["checkbox-legend"];
 			categoryLegendVisible =  checkboxesChecked["checkbox-legend"];
@@ -293,6 +297,10 @@
 			<!-- svelte-ignore a11y-positive-tabindex -->
 			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-leaf-titles" checked tabindex="3">
 			<span style="float:left;display:block">Show leaf titles</span>
+			<div style="clear: both;"></div>
+			<!-- svelte-ignore a11y-positive-tabindex -->
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-subtheme-titles" checked tabindex="3">
+			<span style="float:left;display:block">Show subtheme titles</span>
 			<div style="clear: both;"></div>
 			<!-- svelte-ignore a11y-positive-tabindex -->
 			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-legend" checked tabindex="3">
