@@ -2,12 +2,12 @@
 const colors = ["#8C88BA", "#BF84AE", "#DB95AC", "#FBB9A6", "#F6A294", "#B0DBEA", "#B3E5BE", "#CFC69D"];
 
 export const buildHierarchy = ((parentLevel, data, presetsAvailable, presetsParent, visibleTeams, filterSpecifics, depth, maxDepth) => {
+	if (depth > maxDepth) return;
 
 	data.filter((d) => parentLevel.text !== "" && parentLevel.text !== undefined && d.text !== undefined && d.text !== "" && d.parent === parentLevel.text).forEach((d) => {
-		if(filterSpecifics && d.text === 'Team')
-			return;
-		else if(!filterSpecifics && d.text === 'Teams')
-			return;
+		if(filterSpecifics && d.text === 'Team') return;
+		else if(!filterSpecifics && d.text === 'Teams') return;
+
 		const level = {
 			"id": `${parentLevel.id}${parentLevel.children.length}${filterSpecifics ? 'filtered' : ''}`,
 			"text": d.text,
@@ -37,12 +37,18 @@ export const buildHierarchy = ((parentLevel, data, presetsAvailable, presetsPare
 		Object.keys(d).filter((key) => key.indexOf("[CONNECTED_DATA_SOURCE]") !== -1).forEach((key) => {
 			level.props.connected_data_source[key.replace("[CONNECTED_DATA_SOURCE]", "")] = d[key] ? d[key].split(',').map(item => item.trim()) : [];
 		});
-		Object.keys(d).filter((key) => key.indexOf("[INFO_MAIN]") !== -1).forEach((key) => {
-			level.props.info_main[key.replace("[INFO_MAIN]", "")] = d[key];
-		});
 		Object.keys(d).filter((key) => key.indexOf("[INFO_COLLAPSED]") !== -1).forEach((key) => {
 			level.props.info_collapsed[key.replace("[INFO_COLLAPSED]", "")] = d[key];
 		});
+		
+		Object.keys(d).filter((key) => key.indexOf("[INFO_MAIN]") !== -1).forEach((key) => {
+			level.props.info_main[key.replace("[INFO_MAIN]", "")] = d[key];
+		});
+		if (d.parent === "Data") {
+			let datas = [];
+			data.filter((c) => c.parent === d.text).forEach((c) => datas.push(c["Papers Title"]));
+			level.props.info_main.Summary = datas;
+		};		
 
 		if(depth <= maxDepth)
 			parentLevel.children.push(level);
@@ -53,6 +59,7 @@ export const buildHierarchy = ((parentLevel, data, presetsAvailable, presetsPare
 			}
 
 			if(!("Members" in parentLevel.props.info_main)) parentLevel.props.info_main["Members"] = [];
+			
 			parentLevel.props.info_main["Full title"] = null;
 			parentLevel.props.info_main["Summary"] = null;
 			parentLevel.props.info_main["description"] = null;
@@ -66,6 +73,7 @@ export const buildHierarchy = ((parentLevel, data, presetsAvailable, presetsPare
 		}
 
 		let specificMaxDepth = filterSpecifics && (level.text === "Teams" || level.text === "Team" || level.text === "Data") ? 2 : maxDepth;
+		// let specificMaxDepth = maxDepth;
 
 		buildHierarchy(level, data, presetsAvailable, level.presets, visibleTeams, filterSpecifics, depth + 1, specificMaxDepth);
 	});

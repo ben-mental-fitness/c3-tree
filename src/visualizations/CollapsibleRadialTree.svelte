@@ -9,6 +9,7 @@
     import { setTreeVisibility } from '../helper/setTreeVisibility';
     import { radialTreeLineFunction, connectedEdgesLineFunction, separationFunction } from '../helper/d3Functions';
 	import { renderLegend } from "../helper/renderLegend";
+	// import { nodeOnClick } from "../helper/clusterView.js";
   	
 	// Bound to App.svelte
 	export let BRAIN_SIZE;
@@ -50,9 +51,8 @@
 	let highlightedPaths = {"_groups" : [[]]};
 	let visMode2Nodes = undefined; 
 
-	// Update visible teams array & refresh the view 
+	// When mid-level node on Cluster View is clicked update visible teams array & refresh the view 
 	const nodeOnClick = (d) => {
-		console.log("Unexpected Event Triggered: nodeOnClick");
 		if("Members" in d.data.props.info_main) {
 			if(visibleTeams.indexOf(d.data.text) !== -1) {
 				visibleTeams.splice(visibleTeams.indexOf(d.data.text, 1));
@@ -145,7 +145,7 @@
 						.attr("d", radialTreeLineFunction)
 						.attr("stroke", (d) => d.target.data.color)
 						.attr("stroke-width", 1.5)
-						.attr("opacity", (d) => d.source.data.visible/* && d.target.data.visible*/ ? 1.0 : 0.0)
+						.attr("opacity", (d) => d.source.data.visible /* && d.target.data.visible */ ? 1.0 : 0.0)
 				});
 		}
 
@@ -234,7 +234,7 @@
 			}, 1000)
 		}
 
-		// Outer large circles on cluster visualisation
+		// Outer large circles on cluster visualisation - subtheme labels
 		d3.select("#outer-node-group-wrapper")
 			.transition(animation)
 			.attr("opacity",  !simplifiedMode ? 1.0 : 0.0)
@@ -735,14 +735,14 @@
 			.attr("transform", "translate(4,0)")
 			.on("mouseover", function(event, d) {
 				//if(d.data.visible)
-					d3.select(this).attr("stroke-width", "2").attr("stroke", "#d0d0d0");
+				d3.select(this).attr("stroke-width", "2").attr("stroke", "#d0d0d0");
 			})
 			.on("mouseleave", function(event, d) {
 				d3.select(this).attr("stroke-width", "0").attr("stroke", "transparent");
 			})
 			.on("click", (event, d) => {
 				//if(d.data.visible)
-				nodeOnClick(d)
+				nodeOnClick(d);
 			});
 
 		// Toggle between cluster group & connected views
@@ -833,7 +833,9 @@
 				
 				let summaryExists = false;
 				Object.entries(d.data.props.info_main).forEach(([key, value]) => {
-					if(value && Array.isArray(value)) {
+					
+					// If Team, Teams profile - add profile data
+					if(value && Array.isArray(value) && d.parent.data.text !== "Data") {
 						const mainInfoRow = d3.select("#hover-tooltip .table-main .tooltip-tbody");
 						let row = undefined;
 						value.forEach((member, i) => {
@@ -881,6 +883,17 @@
 								
 							}
 						});
+
+					// If Data add list of members
+					} else if (value && Array.isArray(value)) {
+						const mainInfoRow = d3.select("#hover-tooltip .table-main .tooltip-tbody");
+						mainInfoRow.append("tr").append("td")
+							.style("padding-bottom", "2px")
+							.append("p")
+							.style("font-size", currentTextScale.TooltipBody)
+							.html(value.join("<br/>"));	
+
+					// If publication add summary and/or abstract
 					} else if(value && value !== "") {
 						if (key == "Summary") summaryExists = true;						
 								
@@ -1419,8 +1432,8 @@
 					});
 				stickyTooltip.select(".tooltip-bottom-note").remove();
 
-				// Expand abstract dropdown if exists
-				console.log(d3.select("#sticky-tooltip #abstract-dropdown"));
+				// TODO: Expand abstract dropdown if exists
+				// console.log(d3.select("#sticky-tooltip #abstract-dropdown"));
 				d3.select("#sticky-tooltip #abstract-dropdown").on("click", (event) => {
 					console.log("Clicked");
 					let abstract = d3.select("#abstract-dropdown");
@@ -1690,6 +1703,7 @@
 			<center id="tooltip-main-button-link" style="padding:5px 25px 5px 25px"></center>
 			<div style="padding:5px 25px 5px 25px" id="tooltip-collapsible-button-group">
 				<p class="tooltip-dropdown-title" style="float:left;margin:0px"></p>
+				<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
 				<svg class="tooltip-collapsible-button" tabindex="0" style="margin-left:10px; cursor:pointer;float:left;" width="15px" height="15px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
 					<path d="M233.4 105.4c12.5-12.5 32.8-12.5 45.3 0l192 192c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L256 173.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l192-192z"
 					fill="#202020"

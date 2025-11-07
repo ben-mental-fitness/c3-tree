@@ -82,7 +82,7 @@ app.use(cors());
 
 app.use(express.static('dist'));
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5011;
 const protocol = process.env.USE_HTTPS === "TRUE" ? https : http;
 
 // TODO: Use offline mode as fallback if Google Sheet is unreachable

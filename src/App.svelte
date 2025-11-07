@@ -173,7 +173,7 @@
 		loaderVisible = true;
 
 		var xhr = new XMLHttpRequest();
-		xhr.open("POST", "https://c3tree.bw1-dev.com/fetch_c3tree_data_from_google_sheet", true);
+		xhr.open("POST", "https://c3tree-dev.bw1-dev.com/fetch_c3tree_data_from_google_sheet", true);
 		// xhr.open("POST", "https://c3tree.framed-mice.eu/fetch_c3tree_data_from_google_sheet", true);
 		// xhr.open("POST", "http://localhost:8001/fetch_c3tree_data_from_google_sheet", true);
 		xhr.send(null);

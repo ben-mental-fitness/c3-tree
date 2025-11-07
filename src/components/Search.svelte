@@ -42,4 +42,5 @@
 	
 </script>
 
+<!-- svelte-ignore a11y-positive-tabindex -->
 <input id="search" type="text" tabindex="3" placeholder="search text..." />
