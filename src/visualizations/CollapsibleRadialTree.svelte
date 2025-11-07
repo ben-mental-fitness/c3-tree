@@ -46,10 +46,12 @@
 	export let loaderVisible;
 	export let currentTextScale;
 	
+	// For interactions
 	let selectedNode = undefined;
 	let focusElement = undefined;
 	let highlightedPaths = {"_groups" : [[]]};
 	let visMode2Nodes = undefined; 
+	let persistentSticky = {"persist" : false};
 
 	// When mid-level node on Cluster View is clicked update visible teams array & refresh the view 
 	const nodeOnClick = (d) => {
@@ -894,48 +896,9 @@
 							.html(value.join("<br/>"));	
 
 					// If publication add summary and/or abstract
-					} else if(value && value !== "") {
-						if (key == "Summary") summaryExists = true;						
+					} else if(value && value !== "") {					
 								
-						// TODO - Show abstract in dropdown if summary exists 
-						if (summaryExists && key == "Abstract") {
-							console.log("Abstract exists");
-							// const mainInfoRow = d3.select("#hover-tooltip .table-main .tooltip-tbody");
-							// let dropdown = mainInfoRow
-							// 	.append("tr")
-							// 	.append("td")
-							// 	.attr("id", "abstract-group")
-							// 	.style("width", `${TOOLTIP_WIDTH * 0.2}px`);				
-							// dropdown.append("p")
-							// 	.style("float", "left")
-							// 	.style("margin", "0px")
-							// 	.style("font-weight", "bold")
-							// 	.style("font-size", currentTextScale.TooltipBody)
-							// 	.text("Abstract");
-							// dropdown.append("svg")
-							// 	.attr("id", "abstract-tooltip")
-							// 	.attr("class", "tooltip-collapsible-button")
-							// 	.style("cursor", "pointer")
-							// 	.style("margin-left", "10px")
-							// 	.style("float", "left")
-							// 	.attr("tabindex", "0")
-							// 	.attr("width", "15px")
-							// 	.attr("height", "15px")
-							// 	.attr("xmlns", "http://www.w3.org/2000/svg")
-							// 	.attr("viewbox", "0 0 512 512")
-							// 	.append("path")
-							// 	.attr("d", "M233.4 105.4c12.5-12.5 32.8-12.5 45.3 0l192 192c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L256 173.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l192-192z")
-							// 	.attr("fill", "#202020")
-							// 	.attr("transform", "translate(256,256) rotate(90) translate(-256,-256)");
-							
-							// dropdown.append("p")
-							// 	.attr("id", "abstract-dropdown")
-							// 	.style("display","none")
-							// 	.style("padding-bottom", "5px")
-							// 	.style("font-size", currentTextScale.TooltipBody)
-							// 	.text(d.data.props.info_main.Abstract);
-
-						} else {
+						if (key !== "Abstract" || (key === "Abstract" && (!d.data.props.info_main.Summary || d.data.props.info_main.Summary === ""))) {
 							const mainInfoRow = d3.select("#hover-tooltip .table-main .tooltip-tbody");
 							mainInfoRow.append("tr").append("td").style("width", `${TOOLTIP_WIDTH * 0.2}px`)
 								.append("p")
@@ -1166,11 +1129,29 @@
 				d3.select("#hover-tooltip .table-collapsed .tooltip-tbody").style("display", "none").selectAll("*").remove();
 			}
 
-			// Publication status dropdown
+			// Publication abstract / status dropdown
 			if (mode == "viz-select-0") {
 				d3.select("#hover-tooltip .tooltip-dropdown-title").text("");
 				d3.select("#hover-tooltip .table-collapsed .tooltip-tbody").style("display", "none").selectAll("*").remove();
 				let collapsibleInfo = false;
+				
+				// If summary & abstract, show abstract in dropdown
+				if (d.data.props.info_main.Summary && d.data.props.info_main.Summary !== ""
+					&& d.data.props.info_main.Abstract && d.data.props.info_main.Abstract !== "") {
+
+					collapsibleInfo = true;
+					const collapsedInfoRow = d3.select("#hover-tooltip .table-collapsed .tooltip-tbody");
+					collapsedInfoRow.append("tr").append("td").style("width", `${TOOLTIP_WIDTH * 0.2}px`)
+						.append("p")
+						.style("font-weight", "bold")
+						.text("Abstract")
+					collapsedInfoRow.append("tr").append("td")
+						.style("padding-bottom", "5px")
+						.append("p")
+						.text(d.data.props.info_main.Abstract);
+				};
+
+				// Status info
 				Object.entries(d.data.props.info_collapsed).forEach(([key, value]) => {
 					if(value && value !== "" && key !== "Impact") {
 						collapsibleInfo = true;
@@ -1245,18 +1226,14 @@
 
 			if(createSticky) {
 				const boundingRect = d3.select("#hover-tooltip.tooltip").node().getBoundingClientRect();
-				const pointerPos = [event.pageX, event.pageY];
-				let left = event.pageX + TOOLTIP_WIDTH >= width - 20 ? event.pageX - TOOLTIP_WIDTH - 10 : event.pageX + 10;
-				let top = event.pageY + boundingRect.height >= height - 20 ? event.pageY - boundingRect.height - 10 : event.pageY + 10;
-
-				if(left < 5) left = 5;
-				if(top < 5) top = 5;
 
 				const stickyTooltip = d3.select("#hover-tooltip.tooltip").clone(true)
 					.attr("id", "sticky-tooltip")
 					.style("display", "block")
-					.style("left", `${boundingRect.left}px`)
-					.style("top", `${boundingRect.top}px`)
+					.style("left", persistentSticky.persist ? persistentSticky.left : `${boundingRect.left}px`)
+					.style("top", persistentSticky.persist ? persistentSticky.top : `${boundingRect.top}px`)
+					.style("width", persistentSticky.persist ? persistentSticky.width : `${boundingRect.width}px`)
+					.style("height", persistentSticky.persist ? persistentSticky.height : `${boundingRect.height}px`)
 					.style("pointer-events", "all")
 					.style("cursor", "move")
 					.style("resize", "both")
@@ -1320,6 +1297,9 @@
 						event.stopPropagation();
 					});
 
+				// Don't preserve position unless back/next arrow clicked
+				persistentSticky.persist = false;
+
 				// Prev & next item buttons for publications
 				if (event.target.getAttribute("class") == "text-leaf-interact-area") {
 					const findPrevItem = (currentNode) => {
@@ -1363,11 +1343,25 @@
 							.style("display", "inline-block")
 							.attr("tabindex", "0")
 							.on("click", () => {
+								persistentSticky = {
+									"persist" : true,
+									"left" : stickyTooltip.style("left"),
+									"top" : stickyTooltip.style("top"),
+									"width" : stickyTooltip.style("width"),
+									"height" : stickyTooltip.style("height")
+								}
 								prevItem.dispatchEvent(new Event('focus'));
 								prevItem.dispatchEvent(new Event('click'));
 							})
 							.on("keydown", (event, d) => {
 								if (event.key === "Enter" || event.key === "Spacebar" || event.key === " ") {
+									persistentSticky = {
+										"persist" : true,
+										"left" : stickyTooltip.style("left"),
+										"top" : stickyTooltip.style("top"),
+										"width" : stickyTooltip.style("width"),
+										"height" : stickyTooltip.style("height")
+									}
 									prevItem.dispatchEvent(new Event('focus'));
 									prevItem.dispatchEvent(new Event('click'));
 								}
@@ -1383,11 +1377,25 @@
 							.style("display", "inline-block")
 							.attr("tabindex", "0")
 							.on("click", () => {
+								persistentSticky = {
+									"persist" : true,
+									"left" : stickyTooltip.style("left"),
+									"top" : stickyTooltip.style("top"),
+									"width" : stickyTooltip.style("width"),
+									"height" : stickyTooltip.style("height")
+								}
 								nextItem.dispatchEvent(new Event('focus'));
 								nextItem.dispatchEvent(new Event('click'));
 							})
 							.on("keydown", (event, d) => {
 								if (event.key === "Enter" || event.key === "Spacebar" || event.key === " ") {
+									persistentSticky = {
+										"persist" : true,
+										"left" : stickyTooltip.style("left"),
+										"top" : stickyTooltip.style("top"),
+										"width" : stickyTooltip.style("width"),
+										"height" : stickyTooltip.style("height")
+									}
 									nextItem.dispatchEvent(new Event('focus'));
 									nextItem.dispatchEvent(new Event('click'));
 								}
@@ -1431,24 +1439,6 @@
 						d3.select("#sticky-tooltip-overlay").remove();
 					});
 				stickyTooltip.select(".tooltip-bottom-note").remove();
-
-				// TODO: Expand abstract dropdown if exists
-				// console.log(d3.select("#sticky-tooltip #abstract-dropdown"));
-				d3.select("#sticky-tooltip #abstract-dropdown").on("click", (event) => {
-					console.log("Clicked");
-					let abstract = d3.select("#abstract-dropdown");
-					console.log(abstract);
-					debugger;
-					if (abstract.style("display") == "none") {
-						d3.select("#abstract-tooltip").transition("rotate").duration(200).ease(d3.easeQuadOut)
-							.attr("transform", "translate(256,256) rotate(180) translate(-256,-256)");
-						abstract.style("display", "block");
-					} else {
-						d3.select("#abstract-tooltip").transition("rotate").duration(200).ease(d3.easeQuadOut)
-							.attr("transform", "translate(256,256) rotate(90) translate(-256,-256)");
-						abstract.style("display", "none");
-					}
-				});
 
 				// Expand tooltip content on arrow click
 				let collapsed = true;
