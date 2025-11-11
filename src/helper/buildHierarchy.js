@@ -1,13 +1,20 @@
 
 const colors = ["#8C88BA", "#BF84AE", "#DB95AC", "#FBB9A6", "#F6A294", "#B0DBEA", "#B3E5BE", "#CFC69D"];
 
-export const buildHierarchy = ((parentLevel, data, presetsAvailable, presetsParent, visibleTeams, filterSpecifics, depth, maxDepth) => {
+export const buildHierarchy = ((parentLevel, data, presetsAvailable, presetsParent, visibleTeams, filterSpecifics, depth, maxDepth, type = null) => {
 	if (depth > maxDepth) return;
 
 	data.filter((d) => parentLevel.text !== "" && parentLevel.text !== undefined && d.text !== undefined && d.text !== "" && d.parent === parentLevel.text).forEach((d) => {
 		if(filterSpecifics && d.text === 'Team') return;
 		else if(!filterSpecifics && d.text === 'Teams') return;
+		
+		// Set type for item & children, based on theeme
+		if (depth === 1) {
+			if (d.text === "Team" || d.text === "Teams" || d.text === "Data") type = d.text;
+			else type = "Publication";
+		}
 
+		// Set data for item
 		const level = {
 			"id": `${parentLevel.id}${parentLevel.children.length}${filterSpecifics ? 'filtered' : ''}`,
 			"text": d.text,
@@ -29,6 +36,7 @@ export const buildHierarchy = ((parentLevel, data, presetsAvailable, presetsPare
 				},
 				"themeDescLong": d.themeDescLong,
 				"themeDescShort": d.themeDescShort,
+				"type": type
 			},
 			"presets": [...presetsParent, ...presetsAvailable.filter((preset) => !presetsParent.includes(preset) && d[`[PRESET]${preset}`] === "x")],
 			"children": [],
@@ -75,7 +83,7 @@ export const buildHierarchy = ((parentLevel, data, presetsAvailable, presetsPare
 		let specificMaxDepth = filterSpecifics && (level.text === "Teams" || level.text === "Team" || level.text === "Data") ? 2 : maxDepth;
 		// let specificMaxDepth = maxDepth;
 
-		buildHierarchy(level, data, presetsAvailable, level.presets, visibleTeams, filterSpecifics, depth + 1, specificMaxDepth);
+		buildHierarchy(level, data, presetsAvailable, level.presets, visibleTeams, filterSpecifics, depth + 1, specificMaxDepth, type);
 	});
 });
 

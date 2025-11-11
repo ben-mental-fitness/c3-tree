@@ -238,6 +238,13 @@
 			rerenderTreeTrigger = true;
 		})
 
+		d3.select("#checkbox-connect-all").on("click", (event) => {
+			// @ts-ignore
+			if (document.getElementById("checkbox-viz-select-connections").checked) {
+				rerenderTreeTrigger = true;
+			} 
+		});
+
 		d3.selectAll(".checkbox-status").on("change", function() {
 			const checkboxId = d3.select(this).attr("id");
 			checkboxesChecked[checkboxId] = !checkboxesChecked[checkboxId];
@@ -292,6 +299,13 @@
 			<span style="float:left;display:block">Data Sources</span>
 			<div style="clear: both;"></div>
 
+			<span style="float:left;display:block">&nbsp;&nbsp;Connections:</span>
+			<div style="clear: both;"></div>
+			<!-- svelte-ignore a11y-positive-tabindex -->
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-connect-all" checked tabindex="3">
+			<span style="float:left;display:block">Connect to all data types</span>
+			<div style="clear: both;"></div>
+			
 			<span style="float:left;display:block">&nbsp;&nbsp;Labels:</span>
 			<div style="clear: both;"></div>
 			<!-- svelte-ignore a11y-positive-tabindex -->
@@ -305,6 +319,9 @@
 			<!-- svelte-ignore a11y-positive-tabindex -->
 			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-legend" checked tabindex="3">
 			<span style="float:left;display:block">Show legend</span>
+			<div style="clear: both;"></div>
+
+			<span style="float:left;display:block">&nbsp;&nbsp;Text:</span>
 			<div style="clear: both;"></div>
 			<!-- svelte-ignore a11y-positive-tabindex -->
 			<input style="float:left;display:block;margin-left:20px;margin-top:5px" type="button" id="increase-text-size" tabindex="3">

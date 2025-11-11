@@ -187,9 +187,12 @@
 				}))
 				.call((update) => {
 					update.attr("d", ([i, o]) => connectedEdgesLineFunction(i.path(o)))
-						.attr("opacity", (d) => d[0].data.visible && d[1].data.visible ? 0.1 : 0.0);
+						.attr("opacity", (d) => {
+							// @ts-ignore
+							return d[0].data.visible && d[1].data.visible && (document.getElementById("checkbox-connect-all").checked || (!document.getElementById("checkbox-connect-all").checked && d[0].data.props.type !== d[1].data.props.type)) ? 0.1 : 0.0
+						});
 				});
-
+				
 			// Wait 1 secs & convert to PNG
 			setTimeout(() => {
 				const svgWrapper = document.querySelector("#d3-canvas");
@@ -951,7 +954,9 @@
 							.selectAll("path")
 							.data(() => {
 							return leaves.filter(
-								(d_) => d_.data.props.data_source.some(v => d.data.props.data_source.includes(v)) && d_ !== d && d_.data.visible
+								(d_) => d_.data.props.data_source.some(v => d.data.props.data_source.includes(v)) && d_ !== d && d_.data.visible 
+								// @ts-ignore
+								&& (document.getElementById("checkbox-connect-all").checked || (!document.getElementById("checkbox-connect-all").checked && d.data.props.type !== d_.data.props.type))
 								).map((d_) => [d, d_]);
 							})
 							.join("path")
@@ -967,8 +972,11 @@
 					// Accordion - Dropdown for connected nodes
 					let connectedNodes;
 					connectedNodes = visMode2Nodes.filter((d_) => 
-						d_.data.props.data_source && d_.data.props.data_source.some(v => d.data.props.data_source.includes(v)));
-					connectedNodes = connectedNodes.filter((d_) => d_ !== d); // Removes self if referenced
+						d_ !== d && d_.data.props.data_source && d_.data.props.data_source.some(v => d.data.props.data_source.includes(v))
+						// @ts-ignore
+						&& (document.getElementById("checkbox-connect-all").checked || (!document.getElementById("checkbox-connect-all").checked && d.data.props.type !== d_.data.props.type))		
+					);
+					// connectedNodes = connectedNodes.filter((d_) => d_ !== d); // Removes self if referenced
 					
 					d3.select("#hover-tooltip .tooltip-dropdown-title") 
 						.style("font-size", currentTextScale.TooltipBody)
@@ -1504,6 +1512,8 @@
 						.data(() => {
 							return leaves.filter(
 								(d_) => d_.data.props.data_source.some(v => selectedNode.data.props.data_source.includes(v)) && d_ !== selectedNode && d_.data.visible
+								// @ts-ignore
+								&& (document.getElementById("checkbox-connect-all").checked || (!document.getElementById("checkbox-connect-all").checked && d.data.props.type !== d_.data.props.type))
 								).map((d_) => [selectedNode, d_]);
 							})
 						.join("path")
@@ -1519,8 +1529,10 @@
 				// Highlight connected publication text on connected view & show on tooltip
 				if(mode === "viz-select-1") {
 					const connectedNodes = d3.selectAll('.node-group').filter((d_) => 
-						d_.data.props.data_source && d_.data.props.data_source.some(v => d.data.props.data_source.includes(v)) && d_.data.visible)
-						.filter((d_) => d_ !== d)
+						// @ts-ignore
+						(document.getElementById("checkbox-connect-all").checked || (!document.getElementById("checkbox-connect-all").checked && d.data.props.type !== d_.data.props.type))
+						&& d_.data.props.data_source && d_.data.props.data_source.some(v => d.data.props.data_source.includes(v)) && d_.data.visible && d_ !== d)
+					// .filter((d_) => d_ !== d)
 
 					connectedNodes.selectAll('.node-text')
 						.attr('font-weight', 'bold')
