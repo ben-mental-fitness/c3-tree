@@ -194,10 +194,11 @@
 					introData = response.introData;
 
 					welcomeDialogVisible = true;
-					loaderVisible = false;
+					loaderVisible = false
 
 				} else {
-
+					console.log("ERROR");
+					console.log(xhr.readyState, xhr.status, xhr.responseText)
 				}
 			}
 		}
