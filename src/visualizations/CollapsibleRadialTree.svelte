@@ -9,8 +9,7 @@
     import { setTreeVisibility } from '../helper/setTreeVisibility';
     import { radialTreeLineFunction, connectedEdgesLineFunction, separationFunction } from '../helper/d3Functions';
 	import { renderLegend } from "../helper/renderLegend";
-	// import { nodeOnClick } from "../helper/clusterView.js";
-  	
+	
 	// Bound to App.svelte
 	export let BRAIN_SIZE;
 	export let BRAIN_ASPECT_RATIO;
@@ -419,7 +418,12 @@
 						.attr('font-weight', null)
 						.attr("fill", (d) => d.data.color)
 						.attr('stroke', null)
-						.attr('stroke-width', null);
+						.attr('stroke-width', null)						
+						.attr("font-size", currentTextScale.NodeText);
+				} else {
+					d3.selectAll(`.node-text`)
+						.attr("font-weight", null)
+						.attr("font-size", currentTextScale.NodeText);
 				}
 			}
 			if (d3.select("#sticky-tooltip-overlay")) d3.select("#sticky-tooltip-overlay").remove();
@@ -976,7 +980,6 @@
 						// @ts-ignore
 						&& (document.getElementById("checkbox-connect-all").checked || (!document.getElementById("checkbox-connect-all").checked && d.data.props.type !== d_.data.props.type))		
 					);
-					// connectedNodes = connectedNodes.filter((d_) => d_ !== d); // Removes self if referenced
 					
 					d3.select("#hover-tooltip .tooltip-dropdown-title") 
 						.style("font-size", currentTextScale.TooltipBody)
@@ -1109,6 +1112,15 @@
 						d3.select("#hover-tooltip #tooltip-collapsible-button-group").style("pointer-events", "all").style("cursor","pointer");
 					}
 					
+					// Bold Selected node
+					visMode2Nodes.filter((d_) => d_ === d)
+						.attr('font-weight', 'bold')
+						.attr('font-size', currentTextScale.ConnectedNodes)
+						.attr('fill', '#000000')
+						.attr('stroke', checkboxesChecked['checkbox-white-backgrounds'] ? '#ffffff' : '#0632E4')
+						.attr('stroke-width', checkboxesChecked['checkbox-white-backgrounds'] ? 10 : 1)
+
+					// Bold Connected nodes
 					connectedNodes
 						.attr('font-weight', 'bold')
 						.attr('font-size', currentTextScale.ConnectedNodes)
@@ -1184,8 +1196,11 @@
 				}
 			}
 
+			// On cluster view, highlight selected node
 			if(selectedNode === undefined) {
-				d3.selectAll(`#${d.data.id}-text,#${d.data.id}-text-2nd-line`).style("font-weight", "bold");
+				d3.selectAll(`#${d.data.id}-text,#${d.data.id}-text-2nd-line`)
+					.attr("font-weight", "bold")
+					.attr("font-size", currentTextScale.ConnectedNodes);
 			}	
 		}
 
@@ -1434,9 +1449,14 @@
 							d3.select("#sticky-tooltip").remove();
 							d3.select("#sticky-tooltip-overlay").remove();
 							focusElement.focus();
+
+							// Unselect current node
+							d3.selectAll(`.node-text`)
+								.attr("font-weight", null)
+								.attr("font-size", currentTextScale.NodeText);
 						}
 					})
-					.on("click", () => {
+					.on("click", (event, d) => {
 						if(selectedNode !== undefined) {
 							if (highlightedPaths._groups[0].length > 0) {
 								highlightedPaths.remove();
@@ -1445,20 +1465,25 @@
 						}
 						d3.select("#sticky-tooltip").remove();
 						d3.select("#sticky-tooltip-overlay").remove();
+
+						// Unselect current node
+						d3.selectAll(`.node-text`)
+							.attr("font-weight", null)
+							.attr("font-size", currentTextScale.NodeText);
 					});
 				stickyTooltip.select(".tooltip-bottom-note").remove();
 
 				// Expand tooltip content on arrow click
 				let collapsed = true;
 				d3.select("#sticky-tooltip #tooltip-collapsible-button-group")
-				.on("keydown", (event) => {
-					if (event.key === "Enter" || event.key === "Spacebar" || event.key === " ") {
-					stickyCollapseEvent(event);
-					}
-				})
-				.on("click", (event) => {
-					stickyCollapseEvent(event);
-				});
+					.on("keydown", (event) => {
+						if (event.key === "Enter" || event.key === "Spacebar" || event.key === " ") {
+						stickyCollapseEvent(event);
+						}
+					})
+					.on("click", (event) => {
+						stickyCollapseEvent(event);
+					});
 
 				const stickyCollapseEvent = (event) => {
 					event.stopPropagation();
@@ -1556,37 +1581,37 @@
 						});
 					
 					const connectedPublicationsDropdownEvent = (event, d) => {
-							let i = connectedPublications.indexOf(d);
-							const entry = d3.select(`#sticky-tooltip #publications-list-tooltip-item-${i} .papers-list-item-content`);
-							const collapsed = entry.attr("data-collapsed")
+						let i = connectedPublications.indexOf(d);
+						const entry = d3.select(`#sticky-tooltip #publications-list-tooltip-item-${i} .papers-list-item-content`);
+						const collapsed = entry.attr("data-collapsed")
 
-							if(collapsed === "true") {
-								entry.attr("data-collapsed", "false")
-									.style("display", "block")
-									.transition("appear")
-									.duration(750)
-									.ease(d3.easeQuadOut)
-									.style("height", "auto")
-								
-								d3.select(`#sticky-tooltip #publications-list-tooltip-item-${i} .collapse-icon-paper path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
-									.attr("transform", "translate(256,256) rotate(180) translate(-256,-256)");
+						if(collapsed === "true") {
+							entry.attr("data-collapsed", "false")
+								.style("display", "block")
+								.transition("appear")
+								.duration(750)
+								.ease(d3.easeQuadOut)
+								.style("height", "auto")
+							
+							d3.select(`#sticky-tooltip #publications-list-tooltip-item-${i} .collapse-icon-paper path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
+								.attr("transform", "translate(256,256) rotate(180) translate(-256,-256)");
 
-							} else {
-								entry.attr("data-collapsed", "true")
-									.style("display", "none")
-									.transition("appear")
-									.duration(400)
-									.ease(d3.easeQuadOut)
-									.style("height", "0")
+						} else {
+							entry.attr("data-collapsed", "true")
+								.style("display", "none")
+								.transition("appear")
+								.duration(400)
+								.ease(d3.easeQuadOut)
+								.style("height", "0")
 
-								entry.attr("data-collapsed", "true")
-									.transition("display")
-									.delay(400)
-									.style("display", "none");
+							entry.attr("data-collapsed", "true")
+								.transition("display")
+								.delay(400)
+								.style("display", "none");
 
-								d3.select(`#sticky-tooltip #publications-list-tooltip-item-${i} .collapse-icon-paper path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
-									.attr("transform", "translate(256,256) rotate(90) translate(-256,-256)");
-							}
+							d3.select(`#sticky-tooltip #publications-list-tooltip-item-${i} .collapse-icon-paper path`).transition("rotate").duration(200).ease(d3.easeQuadOut)
+								.attr("transform", "translate(256,256) rotate(90) translate(-256,-256)");
+						}
 					}
 					
 					// Go to publication link
@@ -1615,20 +1640,30 @@
 			if(d3.select("#sticky-tooltip").empty()) {
 				d3.select("#sticky-tooltip-overlay").remove();
 			}
-			d3.selectAll(`#${d.data.id}-text,#${d.data.id}-text-2nd-line`).style("font-weight", null);
+
 			if(selectedNode === undefined) {
 				if (highlightedPaths._groups[0].length > 0) {
 					highlightedPaths.remove();
 				}
 			}
 
+			// Reset all node text
 			if(mode === "viz-select-1" && d3.select("#sticky-tooltip").empty()) {
+				console.log("Resetting");
 				d3.selectAll('.node-text')
 					.attr('font-weight', null)
 					.attr('font-size', currentTextScale.NodeText)
 					.attr("fill", (d) => d.data.color)
 					.attr('stroke', null)
 					.attr('stroke-width', null);
+				console.log("Reset!");
+			}
+
+			// Unselect current node
+			if(mode === "viz-select-0" && d3.select("#sticky-tooltip").empty()) {
+				d3.selectAll(`#${d.data.id}-text,#${d.data.id}-text-2nd-line`)
+					.attr("font-weight", null)
+					.attr("font-size", currentTextScale.NodeText);
 			}
 		}
 	}
