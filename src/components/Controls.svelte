@@ -305,6 +305,7 @@
 			<!-- <input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-connect-all" tabindex="3">
 			<span style="float:left;display:block">Connect to all data types</span>
 			<div style="clear: both;"></div> -->
+			<input style="float:left;display:none;margin-left:20px" type="checkbox" id="checkbox-connect-all">
 			
 			<span style="float:left;display:block">&nbsp;&nbsp;Labels:</span>
 			<div style="clear: both;"></div>
@@ -317,7 +318,7 @@
 			<span style="float:left;display:block">Show subtheme titles</span>
 			<div style="clear: both;"></div>
 			<!-- svelte-ignore a11y-positive-tabindex -->
-			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-legend" checked tabindex="3">
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-legend" tabindex="3">
 			<span style="float:left;display:block">Show legend</span>
 			<div style="clear: both;"></div>
 

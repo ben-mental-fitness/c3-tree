@@ -1,5 +1,5 @@
 
-const colors = ["#8C88BA", "#BF84AE", "#DB95AC", "#FBB9A6", "#F6A294", "#B0DBEA", "#B3E5BE", "#CFC69D"];
+const colors = ["#8C88BA", "#BF84AE", "#DB95AC", "#FBB9A6", "#F6A294", "#B0DBEA", "#B3E5BE", "#CFC69D", "#c99045ff"];
 
 export const buildHierarchy = ((parentLevel, data, presetsAvailable, presetsParent, visibleTeams, filterSpecifics, depth, maxDepth, type = null) => {
 	if (depth > maxDepth) return;
