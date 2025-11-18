@@ -295,16 +295,16 @@
 			<span style="float:left;display:block">Team</span>
 			<div style="clear: both;"></div>
 			<!-- svelte-ignore a11y-positive-tabindex -->
-			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-data-sources" tabindex="3">
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-data-sources" checked tabindex="3">
 			<span style="float:left;display:block">Data Sources</span>
 			<div style="clear: both;"></div>
 
-			<span style="float:left;display:block">&nbsp;&nbsp;Connections:</span>
-			<div style="clear: both;"></div>
+			<!-- <span style="float:left;display:block">&nbsp;&nbsp;Connections:</span>
+			<div style="clear: both;"></div> -->
 			<!-- svelte-ignore a11y-positive-tabindex -->
-			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-connect-all" checked tabindex="3">
+			<!-- <input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-connect-all" tabindex="3">
 			<span style="float:left;display:block">Connect to all data types</span>
-			<div style="clear: both;"></div>
+			<div style="clear: both;"></div> -->
 			
 			<span style="float:left;display:block">&nbsp;&nbsp;Labels:</span>
 			<div style="clear: both;"></div>
