@@ -428,6 +428,7 @@
 				}
 			}
 			if (d3.select("#sticky-tooltip-overlay")) d3.select("#sticky-tooltip-overlay").remove();
+			if (d3.selectAll(".node-highlight-group")) d3.selectAll(".node-highlight-group").remove();
 		});
 
 		// Empty the canvas, ready to rebuild
@@ -1113,29 +1114,21 @@
 						d3.select("#hover-tooltip #tooltip-collapsible-button-group").style("pointer-events", "all").style("cursor","pointer");
 					}
 					
-					// Bold Selected node
-					visMode2Nodes.filter((d_) => d_ === d)
-						.attr('font-weight', 'bold')
-						.attr('font-size', currentTextScale.ConnectedNodes)
-						.attr('fill', '#000000')
-						.attr('stroke', checkboxesChecked['checkbox-white-backgrounds'] ? '#ffffff' : '#0632E4')
-						.attr('stroke-width', checkboxesChecked['checkbox-white-backgrounds'] ? 10 : 1)
-
-					// Bold Connected nodes
-					connectedNodes
-						.attr('font-weight', 'bold')
-						.attr('font-size', currentTextScale.ConnectedNodes)
-						.attr('fill', '#000000')
-						.attr('stroke', checkboxesChecked['checkbox-white-backgrounds'] ? '#ffffff' : '#0632E4')
-						.attr('stroke-width', checkboxesChecked['checkbox-white-backgrounds'] ? 10 : 1)
-
-					console.log(connectedNodes._groups[0]);
-
+					// Bring connected nodes to the front
 					connectedNodeDuplicates = connectedNodes._groups[0].map((d_) => d_.parentNode.cloneNode(true));
+					// connectedNodeDuplicates.push(event.target.parentNode.cloneNode(true));
 					const nodeGroupWrapper = document.getElementById("node-group-wrapper");
 					connectedNodeDuplicates.forEach(d_ => {
-						nodeGroupWrapper.insertBefore(d_, nodeGroupWrapper.firstChild);
-					})
+						d_.classList.add("node-highlight-group");
+						nodeGroupWrapper.appendChild(d_);
+					});
+					d3.selectAll(".node-highlight-group .node-text")
+							.attr("class", "node-highlight")
+							.attr('font-weight', 'bold')
+							.attr('font-size', currentTextScale.ConnectedNodes)
+							.attr('fill', '#000000')
+							.attr('stroke', checkboxesChecked['checkbox-white-backgrounds'] ? '#ffffff' : '#0632E4')
+							.attr('stroke-width', checkboxesChecked['checkbox-white-backgrounds'] ? 10 : 1)
 				}
 			// Topic rather than publication
 			} else {
@@ -1457,6 +1450,7 @@
 							}
 							d3.select("#sticky-tooltip").remove();
 							d3.select("#sticky-tooltip-overlay").remove();
+							if (d3.selectAll(".node-highlight-group")) d3.selectAll(".node-highlight-group").remove();
 							focusElement.focus();
 
 							// Unselect current node
@@ -1474,6 +1468,7 @@
 						}
 						d3.select("#sticky-tooltip").remove();
 						d3.select("#sticky-tooltip-overlay").remove();
+						if (d3.selectAll(".node-highlight-group")) d3.selectAll(".node-highlight-group").remove();
 
 						// Unselect current node
 						d3.selectAll(`.node-text`)
@@ -1649,6 +1644,8 @@
 			if(d3.select("#sticky-tooltip").empty()) {
 				d3.select("#sticky-tooltip-overlay").remove();
 			}
+
+			if (d3.selectAll(".node-highlight-group")) d3.selectAll(".node-highlight-group").remove();
 
 			if(selectedNode === undefined) {
 				if (highlightedPaths._groups[0].length > 0) {
