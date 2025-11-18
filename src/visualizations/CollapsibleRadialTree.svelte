@@ -906,8 +906,10 @@
 
 					// If publication add summary and/or abstract
 					} else if(value && value !== "") {					
-								
-						if (key !== "Abstract" || (key === "Abstract" && (!d.data.props.info_main.Summary || d.data.props.info_main.Summary === ""))) {
+							
+						//  TEMP | SHOW ABSTRACT, NOT SUMMARY
+						// if (key !== "Abstract" || (key === "Abstract" && (!d.data.props.info_main.Summary || d.data.props.info_main.Summary === ""))) {
+						if (key !== "Summary") {
 							const mainInfoRow = d3.select("#hover-tooltip .table-main .tooltip-tbody");
 							mainInfoRow.append("tr").append("td").style("width", `${TOOLTIP_WIDTH * 0.2}px`)
 								.append("p")
@@ -1157,21 +1159,22 @@
 				d3.select("#hover-tooltip .table-collapsed .tooltip-tbody").style("display", "none").selectAll("*").remove();
 				let collapsibleInfo = false;
 				
+				// TEMP | REMOVED ABSTRACT DROPDOWN
 				// If summary & abstract, show abstract in dropdown
-				if (d.data.props.info_main.Summary && d.data.props.info_main.Summary !== ""
-					&& d.data.props.info_main.Abstract && d.data.props.info_main.Abstract !== "") {
+				// if (d.data.props.info_main.Summary && d.data.props.info_main.Summary !== ""
+				// 	&& d.data.props.info_main.Abstract && d.data.props.info_main.Abstract !== "") {
 
-					collapsibleInfo = true;
-					const collapsedInfoRow = d3.select("#hover-tooltip .table-collapsed .tooltip-tbody");
-					collapsedInfoRow.append("tr").append("td").style("width", `${TOOLTIP_WIDTH * 0.2}px`)
-						.append("p")
-						.style("font-weight", "bold")
-						.text("Abstract")
-					collapsedInfoRow.append("tr").append("td")
-						.style("padding-bottom", "5px")
-						.append("p")
-						.text(d.data.props.info_main.Abstract);
-				};
+				// 	collapsibleInfo = true;
+				// 	const collapsedInfoRow = d3.select("#hover-tooltip .table-collapsed .tooltip-tbody");
+				// 	collapsedInfoRow.append("tr").append("td").style("width", `${TOOLTIP_WIDTH * 0.2}px`)
+				// 		.append("p")
+				// 		.style("font-weight", "bold")
+				// 		.text("Abstract")
+				// 	collapsedInfoRow.append("tr").append("td")
+				// 		.style("padding-bottom", "5px")
+				// 		.append("p")
+				// 		.text(d.data.props.info_main.Abstract);
+				// };
 
 				// Status info
 				Object.entries(d.data.props.info_collapsed).forEach(([key, value]) => {
