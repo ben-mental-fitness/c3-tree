@@ -51,6 +51,7 @@
 	let highlightedPaths = {"_groups" : [[]]};
 	let visMode2Nodes = undefined; 
 	let persistentSticky = {"persist" : false};
+	let connectedNodeDuplicates = undefined;
 
 	// When mid-level node on Cluster View is clicked update visible teams array & refresh the view 
 	const nodeOnClick = (d) => {
@@ -1127,6 +1128,14 @@
 						.attr('fill', '#000000')
 						.attr('stroke', checkboxesChecked['checkbox-white-backgrounds'] ? '#ffffff' : '#0632E4')
 						.attr('stroke-width', checkboxesChecked['checkbox-white-backgrounds'] ? 10 : 1)
+
+					console.log(connectedNodes._groups[0]);
+
+					connectedNodeDuplicates = connectedNodes._groups[0].map((d_) => d_.parentNode.cloneNode(true));
+					const nodeGroupWrapper = document.getElementById("node-group-wrapper");
+					connectedNodeDuplicates.forEach(d_ => {
+						nodeGroupWrapper.insertBefore(d_, nodeGroupWrapper.firstChild);
+					})
 				}
 			// Topic rather than publication
 			} else {
@@ -1649,14 +1658,12 @@
 
 			// Reset all node text
 			if(mode === "viz-select-1" && d3.select("#sticky-tooltip").empty()) {
-				console.log("Resetting");
 				d3.selectAll('.node-text')
 					.attr('font-weight', null)
 					.attr('font-size', currentTextScale.NodeText)
 					.attr("fill", (d) => d.data.color)
 					.attr('stroke', null)
 					.attr('stroke-width', null);
-				console.log("Reset!");
 			}
 
 			// Unselect current node
