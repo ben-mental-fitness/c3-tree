@@ -1038,19 +1038,21 @@
 					publicationsListContent.each(function (d) {
 						let collapsibleInfo = false;
 
+						// TEMP DISPLAY ABSTRACT ONLY
 						// Display Summary as default with Abstract dropdown, otherwise display Abstract
-						if (d.data.props.info_main.Summary) {
-							collapsibleInfo = true;
-							d3.select(this).append("p")
-								.style("font-weight", "bold")
-								.style("font-size", currentTextScale.TooltipBody)
-								.text("Summary");
-							d3.select(this).append("p")
-								.style("padding-bottom", "5px")
-								.style("font-size", currentTextScale.TooltipBody)
-								.text(d.data.props.info_main.Summary);
+						// if (d.data.props.info_main.Summary) {
+						// 	collapsibleInfo = true;
+						// 	d3.select(this).append("p")
+						// 		.style("font-weight", "bold")
+						// 		.style("font-size", currentTextScale.TooltipBody)
+						// 		.text("Summary");
+						// 	d3.select(this).append("p")
+						// 		.style("padding-bottom", "5px")
+						// 		.style("font-size", currentTextScale.TooltipBody)
+						// 		.text(d.data.props.info_main.Summary);
 
-						} else if (d.data.props.info_main.Abstract) {
+						// } else 
+						if (d.data.props.info_main.Abstract) {
 							collapsibleInfo = true;
 							d3.select(this).append("p")
 								.style("font-weight", "bold")
@@ -1116,21 +1118,26 @@
 						d3.select("#hover-tooltip #tooltip-collapsible-button-group").style("pointer-events", "all").style("cursor","pointer");
 					}
 					
-					// Bring connected nodes to the front
-					connectedNodeDuplicates = connectedNodes._groups[0].map((d_) => d_.parentNode.cloneNode(true));
-					// connectedNodeDuplicates.push(event.target.parentNode.cloneNode(true));
-					const nodeGroupWrapper = document.getElementById("node-group-wrapper");
-					connectedNodeDuplicates.forEach(d_ => {
-						d_.classList.add("node-highlight-group");
-						nodeGroupWrapper.appendChild(d_);
-					});
-					d3.selectAll(".node-highlight-group .node-text")
+					// Duplicate and bring connected nodes to the front
+					if (event.target.getAttribute("class") == "text-leaf-interact-area") {
+						connectedNodeDuplicates = connectedNodes._groups[0].map((d_) => d_.parentNode.cloneNode(true));
+						
+						const nodeGroupWrapper = document.getElementById("node-group-wrapper");
+						connectedNodeDuplicates.forEach(d_ => {
+							d_.classList.remove("node-group");
+							d_.classList.add("node-highlight-group");
+							nodeGroupWrapper.appendChild(d_);
+						});
+
+						d3.selectAll(".node-highlight-group .node-text")
 							.attr("class", "node-highlight")
 							.attr('font-weight', 'bold')
 							.attr('font-size', currentTextScale.ConnectedNodes)
 							.attr('fill', '#000000')
 							.attr('stroke', checkboxesChecked['checkbox-white-backgrounds'] ? '#ffffff' : '#0632E4')
 							.attr('stroke-width', checkboxesChecked['checkbox-white-backgrounds'] ? 10 : 1)
+					}
+					
 				}
 			// Topic rather than publication
 			} else {
@@ -1201,11 +1208,18 @@
 				}
 			}
 
-			// On cluster view, highlight selected node
+			// Highlight selected node
 			if(selectedNode === undefined) {
-				d3.selectAll(`#${d.data.id}-text,#${d.data.id}-text-2nd-line`)
-					.attr("font-weight", "bold")
-					.attr("font-size", currentTextScale.ConnectedNodes);
+				if (mode == "viz-select-1") {
+					d3.selectAll(`#${d.data.id}-text,#${d.data.id}-text-2nd-line`)
+						.attr("font-weight", "bold")
+						.attr("font-size", currentTextScale.ConnectedNodes)
+						.attr("fill", "#000000");
+				} else {
+					d3.selectAll(`#${d.data.id}-text,#${d.data.id}-text-2nd-line`)
+						.attr("font-weight", "bold")
+						.attr("font-size", currentTextScale.ConnectedNodes);
+				}
 			}	
 		}
 
@@ -1229,6 +1243,26 @@
 				.style('max-height', `${window.innerHeight}px`)
 				.style('opacity', '0.4')
 				.style('background', '#ffffff');
+
+			// Clone & highlight selected node
+			d3.selectAll(`#${d.data.id}-text,#${d.data.id}-text-2nd-line`)
+				.attr("font-weight", null)
+				.attr("font-size", currentTextScale.NodeText)
+				.attr("fill", d.data.color);
+
+			let thisNodeClone = d3.select(`#${d.data.id}-text`).node().parentNode.cloneNode(true);
+			thisNodeClone.classList.remove("node-group");
+			thisNodeClone.classList.add("node-highlight-group");
+			thisNodeClone.classList.add("node-highlight-group-selected");
+			document.getElementById("node-group-wrapper").appendChild(thisNodeClone);
+						
+			d3.selectAll(".node-highlight-group-selected .node-text")
+				.attr("class", "node-highlight")
+				.attr('font-weight', 'bold')
+				.attr('font-size', currentTextScale.ConnectedNodes)
+				.attr('fill', '#000000')
+				.attr('stroke', checkboxesChecked['checkbox-white-backgrounds'] ? '#ffffff' : '#0632E4')
+				.attr('stroke-width', checkboxesChecked['checkbox-white-backgrounds'] ? 10 : 1)
 
 			let createSticky = true;
 
@@ -1378,6 +1412,7 @@
 									"width" : stickyTooltip.style("width"),
 									"height" : stickyTooltip.style("height")
 								}
+								if (d3.selectAll(".node-highlight-group")) d3.selectAll(".node-highlight-group").remove();
 								prevItem.dispatchEvent(new Event('focus'));
 								prevItem.dispatchEvent(new Event('click'));
 							})
@@ -1390,6 +1425,7 @@
 										"width" : stickyTooltip.style("width"),
 										"height" : stickyTooltip.style("height")
 									}
+									if (d3.selectAll(".node-highlight-group")) d3.selectAll(".node-highlight-group").remove();
 									prevItem.dispatchEvent(new Event('focus'));
 									prevItem.dispatchEvent(new Event('click'));
 								}
@@ -1412,6 +1448,7 @@
 									"width" : stickyTooltip.style("width"),
 									"height" : stickyTooltip.style("height")
 								}
+								if (d3.selectAll(".node-highlight-group")) d3.selectAll(".node-highlight-group").remove();
 								nextItem.dispatchEvent(new Event('focus'));
 								nextItem.dispatchEvent(new Event('click'));
 							})
@@ -1424,6 +1461,7 @@
 										"width" : stickyTooltip.style("width"),
 										"height" : stickyTooltip.style("height")
 									}
+									if (d3.selectAll(".node-highlight-group")) d3.selectAll(".node-highlight-group").remove();
 									nextItem.dispatchEvent(new Event('focus'));
 									nextItem.dispatchEvent(new Event('click'));
 								}
@@ -1564,14 +1602,13 @@
 						// @ts-ignore
 						(document.getElementById("checkbox-connect-all").checked || (!document.getElementById("checkbox-connect-all").checked && d.data.props.type !== d_.data.props.type))
 						&& d_.data.props.data_source && d_.data.props.data_source.some(v => d.data.props.data_source.includes(v)) && d_.data.visible && d_ !== d)
-					// .filter((d_) => d_ !== d)
-
-					connectedNodes.selectAll('.node-text')
-						.attr('font-weight', 'bold')
-						.attr('font-size', currentTextScale.ConnectedNodes)
-						.attr('fill', '#000000')
-						.attr('stroke', checkboxesChecked['checkbox-white-backgrounds'] ? '#ffffff' : '#0632E4')
-						.attr('stroke-width', checkboxesChecked['checkbox-white-backgrounds'] ? 10 : 1)
+					
+					// connectedNodes.selectAll('.node-text')
+					// 	.attr('font-weight', 'bold')
+					// 	.attr('font-size', currentTextScale.ConnectedNodes)
+					// 	.attr('fill', '#000000')
+					// 	.attr('stroke', checkboxesChecked['checkbox-white-backgrounds'] ? '#ffffff' : '#0632E4')
+					// 	.attr('stroke-width', checkboxesChecked['checkbox-white-backgrounds'] ? 10 : 1)
 
 					// Accordion dropdown toggle
 					const connectedPublications = connectedNodes.data();
@@ -1648,8 +1685,6 @@
 				d3.select("#sticky-tooltip-overlay").remove();
 			}
 
-			if (d3.selectAll(".node-highlight-group")) d3.selectAll(".node-highlight-group").remove();
-
 			if(selectedNode === undefined) {
 				if (highlightedPaths._groups[0].length > 0) {
 					highlightedPaths.remove();
@@ -1658,6 +1693,7 @@
 
 			// Reset all node text
 			if(mode === "viz-select-1" && d3.select("#sticky-tooltip").empty()) {
+				if (d3.selectAll(".node-highlight-group")) d3.selectAll(".node-highlight-group").remove();
 				d3.selectAll('.node-text')
 					.attr('font-weight', null)
 					.attr('font-size', currentTextScale.NodeText)
