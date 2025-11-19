@@ -256,129 +256,141 @@
 			});
 			rerenderTreeTrigger = true;
 		});
+
+		d3.selectAll("#checkbox-show-controls").on("change", function() {
+			console.log(document.getElementById("controls-dropdown").style.display);
+			document.getElementById("controls-dropdown").style.display = document.getElementById("controls-dropdown").style.display === "block" ? "none" : "block";
+		});
 	});
 
 </script>
 
 <div id="controls-wrapper">
 	<center>
-		<Search/><br/><br/>
+		<h1>Covid Research Publications and Datasources</h1> 
+		<p>UK National Core Studies</p>
 		<!-- svelte-ignore a11y-positive-tabindex -->
-		<input style="float:left;display:none" type="checkbox" id="checkbox-simple-view" tabindex="3">
-		<span style="float:left;display:none">Simple version</span>
-		<!-- <div style="clear: both;"></div> -->
-		<!-- svelte-ignore a11y-positive-tabindex -->
-		<input style="float:left;display:none" type="checkbox" id="checkbox-detailed-view" checked tabindex="3">
-		<span style="float:left;display:none">Detailed visualisation</span>
-		<!-- <div style="clear: both;"></div> -->
+		<input style="float:left;display:block" type="checkbox" id="checkbox-show-controls" checked tabindex="3">
+		<span style="float:left;display:block">Show Controls</span>
+		<div style="display:block" id="controls-dropdown">
+			<Search/><br/><br/>
+			<!-- svelte-ignore a11y-positive-tabindex -->
+			<input style="float:left;display:none" type="checkbox" id="checkbox-simple-view" tabindex="3">
+			<span style="float:left;display:none">Simple version</span>
+			<!-- <div style="clear: both;"></div> -->
+			<!-- svelte-ignore a11y-positive-tabindex -->
+			<input style="float:left;display:none" type="checkbox" id="checkbox-detailed-view" checked tabindex="3">
+			<span style="float:left;display:none">Detailed visualisation</span>
+			<!-- <div style="clear: both;"></div> -->
 
-		<!-- <div style="display:{visible ? 'block' : 'none'}">  -->
-		<span style="float:left;display:block">&nbsp;&nbsp;Layout:</span>
-		<div style="clear: both;"></div>
-		<!-- svelte-ignore a11y-positive-tabindex -->
-		<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-viz-select-cluster" checked tabindex="3">
-		<span style="float:left;display:block">Cluster by theme</span>
-		<div style="clear: both;"></div>
-		<!-- svelte-ignore a11y-positive-tabindex -->
-		<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-viz-select-connections" tabindex="3">
-		<span style="float:left;display:block">Connections</span>
-		<div style="clear: both;"></div>
-
-		<span style="float:left;display:block">&nbsp;&nbsp;Show information about:</span>
-		<div style="clear: both;"></div>
-		<!-- svelte-ignore a11y-positive-tabindex -->
-		<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-themes-publications" checked tabindex="3">
-		<span style="float:left;display:block">Publications</span>
-		<div style="clear: both;"></div>
-		<!-- svelte-ignore a11y-positive-tabindex -->
-		<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-team" tabindex="3">
-		<span style="float:left;display:block">Team</span>
-		<div style="clear: both;"></div>
-		<!-- svelte-ignore a11y-positive-tabindex -->
-		<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-data-sources" checked tabindex="3">
-		<span style="float:left;display:block">Data Sources</span>
-		<div style="clear: both;"></div>
-
-		<!-- <span style="float:left;display:block">&nbsp;&nbsp;Connections:</span>
-		<div style="clear: both;"></div> -->
-		<!-- svelte-ignore a11y-positive-tabindex -->
-		<!-- <input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-connect-all" tabindex="3">
-		<span style="float:left;display:block">Connect to all data types</span>
-		<div style="clear: both;"></div> -->
-		<input style="float:left;display:none;margin-left:20px" type="checkbox" id="checkbox-connect-all">
-		
-		<span style="float:left;display:block">&nbsp;&nbsp;Labels:</span>
-		<div style="clear: both;"></div>
-		<!-- svelte-ignore a11y-positive-tabindex -->
-		<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-leaf-titles" checked tabindex="3">
-		<span style="float:left;display:block">Show leaf titles</span>
-		<div style="clear: both;"></div>
-		<!-- svelte-ignore a11y-positive-tabindex -->
-		<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-subtheme-titles" checked tabindex="3">
-		<span style="float:left;display:block">Show subtheme titles</span>
-		<div style="clear: both;"></div>
-		<!-- svelte-ignore a11y-positive-tabindex -->
-		<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-legend" tabindex="3">
-		<span style="float:left;display:block">Show legend</span>
-		<div style="clear: both;"></div>
-
-		<span style="float:left;display:block">&nbsp;&nbsp;Text:</span>
-		<div style="clear: both;"></div>
-		<!-- svelte-ignore a11y-positive-tabindex -->
-		<input style="float:left;display:block;margin-left:20px;margin-top:5px" type="button" id="increase-text-size" tabindex="3">
-		<span style="float:left;display:block;margin-top:5px">Increase text size</span>
-		<div style="clear: both;"></div>
-		<!-- svelte-ignore a11y-positive-tabindex -->
-		<input style="float:left;display:block;margin-left:20px;margin-top:5px" type="button" id="decrease-text-size" tabindex="3">
-		<span style="float:left;display:block;margin-top:5px">Decrease text size</span>
-		<div style="clear: both;"></div>
-		<!-- svelte-ignore a11y-positive-tabindex -->
-		<input style="float:left;display:block;margin-left:20px;margin-top:5px" type="button" id="reset-text-size" tabindex="3">
-		<span style="float:left;display:block;margin-top:5px">Reset text size</span>
-		<div style="clear: both;"></div>
-		<input style="float:left;display:none;margin-left:20px" type="checkbox" id="checkbox-white-backgrounds" checked>
-		<span style="float:left;display:none">Text has white background</span>
-		<div style="clear: both;"></div>
-		<!-- </div> -->
-		
-		<br/><br/><br/>
-
-		<div style="display:{visible ? 'block' : 'none'}"> 
-			<!-- <Search/>
-			<select id="viz-select" style="width:200px">
-				<option value="0">Radial Tree</option>
-				<option value="1">Connected Edges</option>
-			</select>
-			<select id="preset-select" style="display:none;width:200px">
-			</select>
-			<br/><br/> -->
-			<input style="float:left;display:none" type="checkbox" id="checkbox-image" checked>
-			<span style="float:left;display:none">Show center image</span>
+			<!-- <div style="display:{visible ? 'block' : 'none'}">  -->
+			<span style="float:left;display:block">&nbsp;&nbsp;Layout:</span>
 			<div style="clear: both;"></div>
+			<!-- svelte-ignore a11y-positive-tabindex -->
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-viz-select-cluster" checked tabindex="3">
+			<span style="float:left;display:block">Cluster by theme</span>
+			<div style="clear: both;"></div>
+			<!-- svelte-ignore a11y-positive-tabindex -->
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-viz-select-connections" tabindex="3">
+			<span style="float:left;display:block">Connections</span>
+			<div style="clear: both;"></div>
+
+			<span style="float:left;display:block">&nbsp;&nbsp;Show information about:</span>
+			<div style="clear: both;"></div>
+			<!-- svelte-ignore a11y-positive-tabindex -->
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-themes-publications" checked tabindex="3">
+			<span style="float:left;display:block">Publications</span>
+			<div style="clear: both;"></div>
+			<!-- svelte-ignore a11y-positive-tabindex -->
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-team" tabindex="3">
+			<span style="float:left;display:block">Team</span>
+			<div style="clear: both;"></div>
+			<!-- svelte-ignore a11y-positive-tabindex -->
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-data-sources" checked tabindex="3">
+			<span style="float:left;display:block">Data Sources</span>
+			<div style="clear: both;"></div>
+
+			<!-- <span style="float:left;display:block">&nbsp;&nbsp;Connections:</span>
+			<div style="clear: both;"></div> -->
+			<!-- svelte-ignore a11y-positive-tabindex -->
+			<!-- <input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-connect-all" tabindex="3">
+			<span style="float:left;display:block">Connect to all data types</span>
+			<div style="clear: both;"></div> -->
+			<input style="float:left;display:none;margin-left:20px" type="checkbox" id="checkbox-connect-all">
 			
-			<input style="float:left;display:none" type="checkbox" id="checkbox-twist-circle" checked>
-			<span style="float:left;display:none">Large twist circle</span>
+			<span style="float:left;display:block">&nbsp;&nbsp;Labels:</span>
 			<div style="clear: both;"></div>
-			<input style="float:left;display:none" type="checkbox" id="checkbox-node-text">
-			<span style="float:left;display:none">Node text second line</span>
+			<!-- svelte-ignore a11y-positive-tabindex -->
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-leaf-titles" checked tabindex="3">
+			<span style="float:left;display:block">Show leaf titles</span>
 			<div style="clear: both;"></div>
-			<br/>
-			<input style="float:left;display:none" type="checkbox" class="checkbox-status" id="checkbox-status-Published" checked>
-			<span style="float:left;display:none">Status: Published</span>
+			<!-- svelte-ignore a11y-positive-tabindex -->
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-subtheme-titles" checked tabindex="3">
+			<span style="float:left;display:block">Show subtheme titles</span>
 			<div style="clear: both;"></div>
-			<input style="float:left;display:none" type="checkbox" class="checkbox-status" id="checkbox-status-Accepted" checked>
-			<span style="float:left;display:none">Status: Accepted</span>
+			<!-- svelte-ignore a11y-positive-tabindex -->
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-legend" tabindex="3">
+			<span style="float:left;display:block">Show legend</span>
 			<div style="clear: both;"></div>
-			<input style="float:left;display:none" type="checkbox" class="checkbox-status" id="checkbox-status-Submitted" checked>
-			<span style="float:left;display:none">Status: Submitted</span>
+
+			<span style="float:left;display:block">&nbsp;&nbsp;Text:</span>
 			<div style="clear: both;"></div>
-			<input style="float:left;display:none" type="checkbox" class="checkbox-status" id="checkbox-status-Manuscript" checked>
-			<span style="float:left;display:none">Status: Manuscript</span>
+			<!-- svelte-ignore a11y-positive-tabindex -->
+			<input style="float:left;display:block;margin-left:20px;margin-top:5px" type="button" id="increase-text-size" tabindex="3">
+			<span style="float:left;display:block;margin-top:5px">Increase text size</span>
 			<div style="clear: both;"></div>
-			<br/>
-			<input style="float:left;display:none" type="checkbox" id="checkbox-second-tooltip">
-			<span style="float:left;display:none">Second tooltip</span>
+			<!-- svelte-ignore a11y-positive-tabindex -->
+			<input style="float:left;display:block;margin-left:20px;margin-top:5px" type="button" id="decrease-text-size" tabindex="3">
+			<span style="float:left;display:block;margin-top:5px">Decrease text size</span>
 			<div style="clear: both;"></div>
+			<!-- svelte-ignore a11y-positive-tabindex -->
+			<input style="float:left;display:block;margin-left:20px;margin-top:5px" type="button" id="reset-text-size" tabindex="3">
+			<span style="float:left;display:block;margin-top:5px">Reset text size</span>
+			<div style="clear: both;"></div>
+			<input style="float:left;display:none;margin-left:20px" type="checkbox" id="checkbox-white-backgrounds" checked>
+			<span style="float:left;display:none">Text has white background</span>
+			<div style="clear: both;"></div>
+			<!-- </div> -->
+			
+			<br/><br/><br/>
+
+			<div style="display:{visible ? 'block' : 'none'}"> 
+				<!-- <Search/>
+				<select id="viz-select" style="width:200px">
+					<option value="0">Radial Tree</option>
+					<option value="1">Connected Edges</option>
+				</select>
+				<select id="preset-select" style="display:none;width:200px">
+				</select>
+				<br/><br/> -->
+				<input style="float:left;display:none" type="checkbox" id="checkbox-image" checked>
+				<span style="float:left;display:none">Show center image</span>
+				<div style="clear: both;"></div>
+				
+				<input style="float:left;display:none" type="checkbox" id="checkbox-twist-circle" checked>
+				<span style="float:left;display:none">Large twist circle</span>
+				<div style="clear: both;"></div>
+				<input style="float:left;display:none" type="checkbox" id="checkbox-node-text">
+				<span style="float:left;display:none">Node text second line</span>
+				<div style="clear: both;"></div>
+				<br/>
+				<input style="float:left;display:none" type="checkbox" class="checkbox-status" id="checkbox-status-Published" checked>
+				<span style="float:left;display:none">Status: Published</span>
+				<div style="clear: both;"></div>
+				<input style="float:left;display:none" type="checkbox" class="checkbox-status" id="checkbox-status-Accepted" checked>
+				<span style="float:left;display:none">Status: Accepted</span>
+				<div style="clear: both;"></div>
+				<input style="float:left;display:none" type="checkbox" class="checkbox-status" id="checkbox-status-Submitted" checked>
+				<span style="float:left;display:none">Status: Submitted</span>
+				<div style="clear: both;"></div>
+				<input style="float:left;display:none" type="checkbox" class="checkbox-status" id="checkbox-status-Manuscript" checked>
+				<span style="float:left;display:none">Status: Manuscript</span>
+				<div style="clear: both;"></div>
+				<br/>
+				<input style="float:left;display:none" type="checkbox" id="checkbox-second-tooltip">
+				<span style="float:left;display:none">Second tooltip</span>
+				<div style="clear: both;"></div>
+			</div>
 		</div>
 	</center>
 </div>
