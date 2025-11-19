@@ -1332,27 +1332,27 @@
 								let newX = startPos[0] + deltaX
 								let newY = startPos[1] + deltaY
 								
-								if(startPos[0] + deltaX > width - tooltipWidth) {
-									newX = width - tooltipWidth;
-								} else if(startPos[0] + deltaX < 10) {
-									newX = 10;
+								if(startPos[0] + deltaX > width - (0.25 * tooltipWidth)) {
+									newX = width - (0.25 * tooltipWidth);
+								} else if(startPos[0] + deltaX < -0.75 * tooltipWidth) {
+									newX = -0.75 * tooltipWidth;
 								}
-								if(startPos[1] + deltaY > height - tooltipHeight) {
-									newY = height - tooltipHeight;
-								} else if(startPos[1] + deltaY < 10) {
-									newY = 10;
+								if(startPos[1] + deltaY > height - (0.25 * tooltipHeight)) {
+									newY = height - (0.25 * tooltipHeight);
+								} else if(startPos[1] + deltaY < -0.75 * tooltipHeight) {
+									newY = -0.75 * tooltipHeight;
 								}
 
 								d3.select("#sticky-tooltip")
-								.style("left", `${newX}px`)
-								.style("top", `${newY}px`)
-								.style("max-width", `${canvasWidth - newX - 10}px`)
-								.style("max-height", `${canvasHeight - newY - 10}px`)
+									.style("left", `${newX}px`)
+									.style("top", `${newY}px`)
+									// .style("max-width", `${canvasWidth - newX - 10}px`)
+									// .style("max-height", `${canvasHeight - newY - 10}px`)
 							})
 							.on("mouseup.dragTooltip,mouseleave.dragTooltip", (event) => {
 								d3.select("body")
-								.on("mousemove.dragTooltip", null)
-								.on("mouseup.dragTooltip,mouseleave.dragTooltip", null);
+									.on("mousemove.dragTooltip", null)
+									.on("mouseup.dragTooltip,mouseleave.dragTooltip", null);
 							});
 					})
 					.on("click", (event) => {
