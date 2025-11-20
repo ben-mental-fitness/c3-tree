@@ -23,7 +23,7 @@ export const connectedEdgesLineFunction = d3.lineRadial()
 
 export const separationFunction = (a, b) => {
 	if((a.parent && !a.parent.data.visible) && (b.parent && !b.parent.data.visible))
-		return 0.05;
+		return 0; // 0.05;
 	else if(!a.data.visible && !b.data.visible) 
 		return a.parent?.parent === b.parent?.parent ? 0.2 : 2;
 	else if(!a.data.visible || !b.data.visible)

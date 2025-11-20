@@ -114,7 +114,7 @@
 		d3.select("#reduced-category-labels-wrapper").selectAll("*").remove();
 		
 		// Increase visualisation radius when leaf titles are not visible
-		const treeFunction = d3.cluster().size([2 * Math.PI, (checkboxesChecked["checkbox-leaf-titles"] ? radius : outerRadius - 25) + ((mode === "viz-select-1" || !checkboxesChecked["checkbox-subtheme-titles"]) && !simplifiedMode ? 80 : 0)]);
+		const treeFunction = d3.cluster().size([2 * Math.PI - 0.02, (checkboxesChecked["checkbox-leaf-titles"] ? radius : outerRadius - 25) + ((mode === "viz-select-1" || !checkboxesChecked["checkbox-subtheme-titles"]) && !simplifiedMode ? 80 : 0)]);
 		treeFunction.separation(separationFunction)(filteredRoot);
 		treeFunction.separation(separationFunction)(rootSimplified);
 
