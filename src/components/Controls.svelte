@@ -269,7 +269,6 @@
 		});
 
 		d3.selectAll("#checkbox-show-controls").on("change", function() {
-			console.log(document.getElementById("controls-dropdown").style.display);
 			document.getElementById("controls-dropdown").style.display = document.getElementById("controls-dropdown").style.display === "block" ? "none" : "block";
 		});
 	});
@@ -283,7 +282,7 @@
 		<!-- svelte-ignore a11y-positive-tabindex -->
 		<input style="float:left;display:block" type="checkbox" id="checkbox-show-controls" checked tabindex="3">
 		<span style="float:left;display:block">Show Controls</span>
-		<div style="display:block" id="controls-dropdown">
+		<div style="display:none" id="controls-dropdown">
 			<Search/><br/><br/>
 			<!-- svelte-ignore a11y-positive-tabindex -->
 			<input style="float:left;display:none" type="checkbox" id="checkbox-simple-view" tabindex="3">
