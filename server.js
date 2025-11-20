@@ -116,7 +116,7 @@ app.post('/fetch_c3tree_data_from_google_sheet', (req, res) => {
 
         const mainDataSheet = sheets.spreadsheets.values.get({
           spreadsheetId: sheetsID,
-          range: 'NCS & LHW Projects',
+          range: 'NCS & LHW Projects [jk-merge]',
         });
 
         const metaDataSheet = sheets.spreadsheets.values.get({
