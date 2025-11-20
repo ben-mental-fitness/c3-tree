@@ -9,6 +9,7 @@
     import { setTreeVisibility } from '../helper/setTreeVisibility';
     import { radialTreeLineFunction, connectedEdgesLineFunction, separationFunction } from '../helper/d3Functions';
 	import { renderLegend } from "../helper/renderLegend";
+	import { loadCategoryLabels } from "../helper/calculateCategoryLabels.js";
 	
 	// Bound to App.svelte
 	export let BRAIN_SIZE;
@@ -32,6 +33,7 @@
 	export let root;
 	// export let rootConnections;
 	export let rootSimplified;
+	export let categoriesDataConnections;
 
 	// for controls
 	export let controlsVisible;
@@ -108,6 +110,9 @@
 		d3.select("#twist-circle")
 			.attr("r", outerRadius + ((mode === "viz-select-1" || !checkboxesChecked["checkbox-subtheme-titles"]) && !simplifiedMode ? 80 : 0))
 
+		// Reset Publication, Data, Team labels
+		d3.select("#reduced-category-labels-wrapper").selectAll("*").remove();
+		
 		// Increase visualisation radius when leaf titles are not visible
 		const treeFunction = d3.cluster().size([2 * Math.PI, (checkboxesChecked["checkbox-leaf-titles"] ? radius : outerRadius - 25) + ((mode === "viz-select-1" || !checkboxesChecked["checkbox-subtheme-titles"]) && !simplifiedMode ? 80 : 0)]);
 		treeFunction.separation(separationFunction)(filteredRoot);
@@ -237,6 +242,12 @@
 				image.setAttribute("src", svgDataUrl);
 				image.setAttribute("alt", "Something went wrong.");
 			}, 1000)
+
+			// Add Publications, Data, Author labels
+			d3.select("#reduced-category-labels-wrapper").selectAll("*").remove();
+			if (checkboxesChecked["checkbox-legend"]) {
+				loadCategoryLabels(categoriesDataConnections, checkboxesChecked, radius, currentTextScale, twist);
+			}
 		}
 
 		// Outer large circles on cluster visualisation - subtheme labels
@@ -468,6 +479,9 @@
 			.style("font-weight", "bold")
 			.style("color", (d) => d.data.color)
 			.text((d) => d.data.text)
+
+		// Add Publication, Team, Data labels wrapper
+		svg.append("g").attr("id", "reduced-category-labels-wrapper");
 
 		// research questions text in the corners (currently only works with 4)
 		svg.append("g")
@@ -1798,7 +1812,9 @@
 	</div>
 
 	<!-- controls -->
-	<Controls bind:visible={controlsVisible} bind:presets bind:checkboxesChecked bind:rerenderTreeTrigger bind:mode bind:root bind:categoryLegendVisible bind:canvasWidth bind:canvasHeight bind:currentTextScale/>
+	<Controls bind:visible={controlsVisible} bind:presets bind:checkboxesChecked bind:rerenderTreeTrigger bind:mode bind:root 
+		bind:categoryLegendVisible bind:canvasWidth bind:canvasHeight bind:currentTextScale
+		bind:categoriesDataConnections bind:radius bind:twist/>
 
 	<!-- additional controls -->
 	<div id="back-button" style="display: none;position: absolute;color:#808080;font-size:80%;cursor:pointer;">

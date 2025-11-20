@@ -20,6 +20,7 @@
     import { startBuildHierarchy, buildHierarchy } from './helper/buildHierarchy';
     import { parseMetaData, parseNCSAndLHWData, parseDefaultData } from './helper/dataPreProcessing';
 	import { updateTextSize } from "./helper/updateTextSize";
+	import { calculateCategoryLabels } from "./helper/calculateCategoryLabels";
     
 	// config
 	const TOOLTIP_WIDTH = 800;
@@ -45,6 +46,7 @@
 	let header;
 	let rawData = null;
 	let visibleTeams = [];
+	let categoriesDataConnections;
 
     // child component states
 	let showMainVizTrigger;
@@ -189,6 +191,7 @@
 
 					data = startBuildHierarchy(rawData, presets, visibleTeams, true);
 					dataConnections = startBuildHierarchy(rawData, presets, visibleTeams, false);
+					categoriesDataConnections = calculateCategoryLabels(dataConnections);
 					dataSimplified = startBuildHierarchy(rawData, presets, visibleTeams, false, 2);
 
 					introData = response.introData;
@@ -267,7 +270,7 @@
 
 	<CollapsibleRadialTree {BRAIN_SIZE} {BRAIN_ASPECT_RATIO} {TOOLTIP_WIDTH}
 		bind:data bind:dataSimplified bind:dataConnections bind:root bind:rootSimplified
-		bind:simplifiedMode bind:twist
+		bind:simplifiedMode bind:twist bind:categoriesDataConnections
 		bind:width bind:height bind:canvasWidth bind:canvasHeight bind:radius bind:outerRadius
 		bind:controlsVisible bind:presets bind:checkboxesChecked bind:rerenderTreeTrigger bind:mode bind:categoryLegendVisible 
 		bind:loaderVisible bind:currentTextScale />

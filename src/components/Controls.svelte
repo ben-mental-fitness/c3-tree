@@ -7,6 +7,7 @@
 	import { setTreeVisibility } from '../helper/setTreeVisibility';
 	import { renderLegend } from "../helper/renderLegend";
 	import { updateTextSize } from "../helper/updateTextSize";
+	import { loadCategoryLabels } from "../helper/calculateCategoryLabels.js";
 
 	// Bound to CollapsibleRadialTree.svelte
     export let visible;
@@ -19,6 +20,9 @@
 	export let canvasWidth;
 	export let canvasHeight;
 	export let currentTextScale;
+	export let categoriesDataConnections;
+	export let radius;
+	export let twist;
 
     const initializePresetsDropdown = (presets) => {
 		d3.select("#preset-select")
@@ -97,9 +101,16 @@
 			rerenderTreeTrigger = true;
 		});
 		d3.select("#checkbox-legend").on("change", (event) => {
-			checkboxesChecked["checkbox-legend"] = !checkboxesChecked["checkbox-legend"];
+			checkboxesChecked["checkbox-legend"] = d3.select("#checkbox-legend").property('checked');
 			categoryLegendVisible =  checkboxesChecked["checkbox-legend"];
 			renderLegend(canvasWidth, canvasHeight, currentTextScale, checkboxesChecked["checkbox-legend"], mode);
+
+			if (mode !== "viz-select-1") return;
+			d3.select("#reduced-category-labels-wrapper").selectAll("*").remove();
+			
+			if (checkboxesChecked["checkbox-legend"]) {
+				loadCategoryLabels(categoriesDataConnections, checkboxesChecked, radius, currentTextScale, twist);
+			}
 		});
 		d3.select("#checkbox-white-backgrounds").on("change", (event) => {
 			checkboxesChecked["checkbox-white-backgrounds"] = !checkboxesChecked["checkbox-white-backgrounds"];
@@ -267,8 +278,8 @@
 
 <div id="controls-wrapper">
 	<center>
-		<h1>Covid Research Publications and Datasources</h1> 
 		<p>UK National Core Studies</p>
+		<h1>Covid Research Publications and Datasources</h1> 
 		<!-- svelte-ignore a11y-positive-tabindex -->
 		<input style="float:left;display:block" type="checkbox" id="checkbox-show-controls" checked tabindex="3">
 		<span style="float:left;display:block">Show Controls</span>
@@ -329,7 +340,7 @@
 			<span style="float:left;display:block">Show subtheme titles</span>
 			<div style="clear: both;"></div>
 			<!-- svelte-ignore a11y-positive-tabindex -->
-			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-legend" tabindex="3">
+			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-legend" checked tabindex="3">
 			<span style="float:left;display:block">Show legend</span>
 			<div style="clear: both;"></div>
 
