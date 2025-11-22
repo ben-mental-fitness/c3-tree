@@ -280,7 +280,7 @@
 		<p>UK National Core Studies</p>
 		<h1>Covid Research Publications and Datasources</h1> 
 		<!-- svelte-ignore a11y-positive-tabindex -->
-		<input style="float:left;display:block" type="checkbox" id="checkbox-show-controls" checked tabindex="3">
+		<input style="float:left;display:block" type="checkbox" id="checkbox-show-controls" tabindex="3">
 		<span style="float:left;display:block">Show Controls</span>
 		<div style="display:none" id="controls-dropdown">
 			<Search/><br/><br/>
