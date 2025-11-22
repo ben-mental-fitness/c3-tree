@@ -52,11 +52,9 @@
 				.style("right", "10px")
 		} else {
 			d3.select("#controls-wrapper")
-				.style("left", "150px")
+				.style("left", width > 1500 ? `${(width - height) * 0.2 + 160}px` : "150px")
 				.style("top", "29px")
 				.style("height", "366px")
-				//.style("margin-top", `-${366 / 2}px`)
-				// .style("margin-top", `-${550 / 2}px`)
 				.style("margin-left", null);
 			d3.select("#help-button")
 				.style("display", "block")
