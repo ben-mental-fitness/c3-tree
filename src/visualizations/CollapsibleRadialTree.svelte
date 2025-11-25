@@ -849,10 +849,19 @@
 					.style("font-size", currentTextScale.TooltipTitle)	
 					.text(`TOPIC: ${topic.data.text}`);
 
-				const topicRow = d3.select("#hover-tooltip .table-main .tooltip-tbody").append("tr");
-				topicRow.append("td").style("text-align", "left")
+				// Add Title
+				const topicRow = d3.select("#hover-tooltip .table-main .tooltip-tbody")
+				topicRow.append("tr")
+					.append("td")
+					.style("text-align", "left")
 					.append("p")
 					.style("font-weight", "bold")
+					.style("font-size", currentTextScale.TooltipBody)
+					.text(d.depth > 2 ? "Title" : "Subtheme");
+				topicRow.append("tr")
+					.append("td")
+					.style("text-align", "left")
+					.append("p")
 					.style("font-size", currentTextScale.TooltipBody)
 					.text(d.data.text);
 				
