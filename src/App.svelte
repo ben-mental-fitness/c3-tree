@@ -12,7 +12,7 @@
     import IntroTour from './components/IntroTour.svelte';
     
     import MinWidthDialog from './components/MinWidthDialog.svelte';
-    import Legend from './components/Legend.svelte';
+    // import Legend from './components/Legend.svelte';
     import DimensionsCalculator from './components/DimensionsCalculator.svelte';
     import CategoryLegend from './components/CategoryLegend.svelte';
 
@@ -277,7 +277,7 @@
 
 	<TabView bind:data bind:rawData bind:showMainVizTrigger {ANIM_DURATION_IN} {ANIM_DURATION_OUT} bind:currentTextScale/>
 
-	<Legend bind:canvasWidth bind:canvasHeight bind:welcomeDialogVisible bind:currentTextScale/>
+	<!-- <Legend bind:canvasWidth bind:canvasHeight bind:welcomeDialogVisible bind:currentTextScale/> -->
 	<Loader bind:visible={loaderVisible}/>
 
 </main>

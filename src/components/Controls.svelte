@@ -5,7 +5,7 @@
 	import Search from './Search.svelte';
 
 	import { setTreeVisibility } from '../helper/setTreeVisibility';
-	import { renderLegend } from "../helper/renderLegend";
+	// import { renderLegend } from "../helper/renderLegend";
 	import { updateTextSize } from "../helper/updateTextSize";
 	import { loadCategoryLabels } from "../helper/calculateCategoryLabels.js";
 
@@ -103,7 +103,7 @@
 		d3.select("#checkbox-legend").on("change", (event) => {
 			checkboxesChecked["checkbox-legend"] = d3.select("#checkbox-legend").property('checked');
 			categoryLegendVisible =  checkboxesChecked["checkbox-legend"];
-			renderLegend(canvasWidth, canvasHeight, currentTextScale, checkboxesChecked["checkbox-legend"], mode);
+			// renderLegend(canvasWidth, canvasHeight, currentTextScale, checkboxesChecked["checkbox-legend"], mode);
 
 			if (mode !== "viz-select-1") return;
 			d3.select("#reduced-category-labels-wrapper").selectAll("*").remove();
@@ -192,7 +192,7 @@
 			d3.selectAll("#curves-wrapper-leaves").attr("opacity", 0.0);
 			rerenderTreeTrigger = false;
 			d3.select("#checkbox-viz-select-connections").property("checked", false);
-			renderLegend(canvasWidth, canvasHeight, currentTextScale, checkboxesChecked["checkbox-legend"], mode);
+			// renderLegend(canvasWidth, canvasHeight, currentTextScale, checkboxesChecked["checkbox-legend"], mode);
 		}
 
 		const vizSelectConnections = () => {
@@ -201,7 +201,7 @@
 			d3.selectAll("#curves-wrapper-leaves").attr("opacity", 1.0);
 			rerenderTreeTrigger = false;
 			d3.select("#checkbox-viz-select-cluster").property("checked", false);
-			renderLegend(canvasWidth, canvasHeight, currentTextScale, checkboxesChecked["checkbox-legend"], mode);
+			// renderLegend(canvasWidth, canvasHeight, currentTextScale, checkboxesChecked["checkbox-legend"], mode);
 		}
 
 		d3.select("#checkbox-viz-select-cluster").on("click", (event) => {
@@ -340,7 +340,7 @@
 			<div style="clear: both;"></div>
 			<!-- svelte-ignore a11y-positive-tabindex -->
 			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-legend" checked tabindex="3">
-			<span style="float:left;display:block">Show legend</span>
+			<span style="float:left;display:block">Toggle legend</span>
 			<div style="clear: both;"></div>
 
 			<span style="float:left;display:block">&nbsp;&nbsp;Text:</span>

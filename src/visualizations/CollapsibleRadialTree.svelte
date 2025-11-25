@@ -8,7 +8,7 @@
 	import { getParentWithDepth } from '../helper/getParentWithDepth';
     import { setTreeVisibility } from '../helper/setTreeVisibility';
     import { radialTreeLineFunction, connectedEdgesLineFunction, separationFunction } from '../helper/d3Functions';
-	import { renderLegend } from "../helper/renderLegend";
+	// import { renderLegend } from "../helper/renderLegend";
 	import { loadCategoryLabels } from "../helper/calculateCategoryLabels.js";
 	
 	// Bound to App.svelte
@@ -394,7 +394,7 @@
 		}
 
 		setMouseEvents();
-		if (mode === "viz-select-0") renderLegend(canvasWidth, canvasHeight, currentTextScale, checkboxesChecked["checkbox-legend"]);
+		// if (mode === "viz-select-0") renderLegend(canvasWidth, canvasHeight, currentTextScale, checkboxesChecked["checkbox-legend"]);
 	};
 
 	const createCollapsableRadialTree = (data, separationFunction, radius) => {
