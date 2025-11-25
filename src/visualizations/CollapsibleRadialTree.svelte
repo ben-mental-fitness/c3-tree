@@ -943,7 +943,6 @@
 				d3.select("#tooltip-main-button-link").selectAll("*").remove();
 				if (d.data.props.publication_link || d.data.props.info_collapsed.Impact) {
 					let buttonLinks = d3.select("#tooltip-main-button-link");
-
 					if(d.data.props.publication_link) {
 						buttonLinks.append("button")
 							.attr("type", "button")
@@ -952,7 +951,7 @@
 							.style("margin", "10px")
 							.style("min-width", "150px")
 							.style("width", "calc(50% - 25px)")
-							.text("Go to publication");
+							.text(["Data","Team"].includes(getParentWithDepth(d, 1).data.text) ? "Go to website" : "Go to publication");
 						d3.select("#hover-tooltip #tooltip-main-button-link").style("display", "block");
 					}
 					if(d.data.props.info_collapsed.Impact) {
