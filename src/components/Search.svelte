@@ -3,7 +3,6 @@
 	import { onMount } from 'svelte';
 
 	const highlightSearchTerm = (searchTerm) => {
-
 		d3.selectAll(".category-labels")
 			.attr("stroke", (d) => {
 				return d.data.text.toLowerCase().includes(searchTerm.toLowerCase()) || d.data.props?.themeDescShort?.toLowerCase().includes(searchTerm.toLowerCase()) ? "#ffee22" : null
@@ -19,8 +18,9 @@
 		d3.selectAll(".node-group text")
 			.attr("stroke", (d) => {
 				return d.data.text.toLowerCase().includes(searchTerm.toLowerCase()) || 
-				(d.data.props?.info_main && (d.data.props?.info_main["Full title"]?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-					d.data.props?.info_main["Summary"]?.toLowerCase().includes(searchTerm.toLowerCase())))
+					(d.data.props?.info_main && (d.data.props?.info_main["Full title"]?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+					d.data.props?.info_main["Summary"]?.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+					d.data.props?.info_main["Abstract"]?.toString().toLowerCase().includes(searchTerm.toLowerCase())))
 				? "#ffee22" : null
 			})
 			.attr("stroke-width", 5);
@@ -32,7 +32,7 @@
 
 			const searchTerm = event.target.value;
 			if(searchTerm.length > 2) {
-				highlightSearchTerm(searchTerm);
+				highlightSearchTerm(searchTerm.toString());
 			/*data.children.forEach((d) => {
 			highlightSearchTerm(d, searchTerm);
 			});*/
