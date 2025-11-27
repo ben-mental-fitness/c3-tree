@@ -38,7 +38,7 @@
 		outerRadius = radius + 90;
 
 		if(width < height) {
-			d3.select("#controls-wrapper").style("left", "150px").style("top", "29px"); // .style("margin-left", "-100px");
+			d3.select("#controls-wrapper").style("left", "10px").style("top", "50px"); // .style("margin-left", "-100px");
 			d3.selectAll(".canvas-wrapper").style("margin-top", `${(height - width) / 2.0}px`)
 			d3.select("#help-button")
 				.style("display", "block")
@@ -52,20 +52,20 @@
 				.style("right", "10px")
 		} else {
 			d3.select("#controls-wrapper")
-				.style("left", width > 1500 ? `${(width - height) * 0.2 + 160}px` : "150px")
-				.style("top", "29px")
+				.style("left", width > 1500 ? `${(width - 1500) * 0.5 + 10}px` : "10px")
+				.style("top", "50px")
 				.style("height", "366px")
 				.style("margin-left", null);
 			d3.select("#help-button")
 				.style("display", "block")
-				.style("right", width > 1500 ? `${(width - height) * 0.2 + 20}px` : "10px") 
+				.style("right", width > 1500 ? `${(width - 1500) * 0.5 + 10}px` : "10px") 
 				.style("top", "20px");
 			d3.select("#back-button")
 				.style("display", "block")
-				.style("left", width > 1500 ? `${(width - height) * 0.2 + 20}px` : "10px") 
+				.style("left", width > 1500 ? `${(width - 1500) * 0.5 + 10}px` : "10px") 
 				.style("top", "45px");
 			d3.select("#category-legend-wrapper")
-				.style("right", width > 1500 ? `${(width - height) * 0.2 + 20}px` : "10px")
+				.style("right", width > 1500 ? `${(width - 1500) * 0.5 + 10}px` : "10px")
 		}
 
 		d3.selectAll(".canvas-wrapper").style("width", `${canvasWidth}px`).style("height", `${canvasHeight}px`)

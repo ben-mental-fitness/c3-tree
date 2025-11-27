@@ -134,11 +134,17 @@ app.post('/fetch_c3tree_data_from_google_sheet', (req, res) => {
           range: 'Team',
         });
 
-        Promise.all([mainDataSheet, metaDataSheet, introDataSheet, teamDataSheet]).then(([
+        const explainerDataSheet = sheets.spreadsheets.values.get({
+          spreadsheetId: sheetsID,
+          range: 'Explainer',
+        });
+
+        Promise.all([mainDataSheet, metaDataSheet, introDataSheet, teamDataSheet, explainerDataSheet]).then(([
             mainDataSheet, 
             metaDataSheet,
             introDataSheet,
-            teamDataSheet
+            teamDataSheet,
+            explainerDataSheet
           ]) => {
           const mainDataRows = mainDataSheet.data.values;
           if (!mainDataRows || mainDataRows.length === 0) {
@@ -153,7 +159,8 @@ app.post('/fetch_c3tree_data_from_google_sheet', (req, res) => {
             mainData: mainDataRows,
             metaData: metaDataSheet.data.values,
             introData: introDataSheet.data.values,
-            teamData: teamDataSheet.data.values // TODO: Remove as unused
+            teamData: teamDataSheet.data.values, // TODO: Remove as unused
+            explainerData: explainerDataSheet.data.values
           })
         }).catch((err) => {
           console.warn(err);

@@ -17,8 +17,8 @@
     export let mode;
     export let root;
 	export let categoryLegendVisible;
-	export let canvasWidth;
-	export let canvasHeight;
+	// export let canvasWidth;
+	// export let canvasHeight;
 	export let currentTextScale;
 	export let categoriesDataConnections;
 	export let radius;
@@ -277,8 +277,9 @@
 
 <div id="controls-wrapper">
 	<center>
-		<p>UK National Core Studies</p>
-		<h1>Covid Research Publications and Datasources</h1> 
+		<p style="text-align:left;">UK National Core Studies</p>
+		<h1 style="text-align:left;">COVID-19 Longitudinal Health and Wellbeing Research and Publications</h1>
+		<p style="text-align:left;">Interactive Visualisation</p>  
 		<!-- svelte-ignore a11y-positive-tabindex -->
 		<input style="float:left;display:block" type="checkbox" id="checkbox-show-controls" tabindex="3">
 		<span style="float:left;display:block">Show Controls</span>

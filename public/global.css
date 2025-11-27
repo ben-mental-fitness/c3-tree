@@ -181,17 +181,3 @@ svg text, svg circle {
 h1 {
   font-size: 117%;
 }
-
-::-webkit-scrollbar {
-    width: 15px;
-}
-::-webkit-scrollbar-button {
-    background: #ccc;
-}
-::-webkit-scrollbar-track-piece {
-    background: #888;
-}
-::-webkit-scrollbar-thumb {
-    background: #eee;
-    border-radius: 5pX;
-}​

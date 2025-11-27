@@ -21,6 +21,7 @@
     import { parseMetaData, parseNCSAndLHWData, parseDefaultData } from './helper/dataPreProcessing';
 	import { updateTextSize } from "./helper/updateTextSize";
 	import { calculateCategoryLabels } from "./helper/calculateCategoryLabels";
+  import intro from 'intro.js';
     
 	// config
 	const TOOLTIP_WIDTH = 800;
@@ -93,6 +94,11 @@
 		"ConnectedNodes": "150%",
 	};
 
+	let explainerData = {
+		"viz-select-0" : {"firstLoad" : false},
+		"viz-select-1" : {"firstLoad" : false},
+	}
+
 	// switch visualizations
 	const showMainViz = () => {
 
@@ -110,7 +116,7 @@
 
 			d3.select("#main-viz-wrapper")
 				.style("display", "block");
-
+			
 			updateLeafTextAppearence();
 
 			setTimeout(() => {
@@ -125,6 +131,19 @@
 					.delay(ANIM_DURATION_IN)
 					.style("display", "none");
 				document.getElementById("back-button").focus();
+				
+				if ((mode === "viz-select-0" || mode === "viz-select-1") && explainerData[mode].firstLoad) {
+					let introPanel = d3.select("#intro-panel-wrapper").style("display", "block");
+					introPanel.select("#intro-panel-header")
+						.text(explainerData[mode].heading);		
+					introPanel.select("#intro-panel-yt-embed")
+						.attr("src", `https://www.youtube-nocookie.com/embed/${explainerData[mode].youtubeId}?origin=https://c3tree.bw1-dev.com`);
+					introPanel.select("#intro-panel-text")
+						.text(explainerData[mode].text);
+					document.getElementById("intro-panel-header").focus();		
+				} else {
+					document.getElementById("back-button").focus();
+				}
 			}, 1000);
 
 		}, ANIM_DURATION_OUT);
@@ -194,11 +213,25 @@
 					categoriesDataConnections = calculateCategoryLabels(dataConnections);
 					dataSimplified = startBuildHierarchy(rawData, presets, visibleTeams, false, 2);
 
+					explainerData = {
+						"viz-select-0" : {
+							"firstLoad" : true,
+							"heading" : response.explainerData[1][1],
+							"youtubeId" : response.explainerData[1][2],
+							"text" : response.explainerData[1][3]
+						},
+						"viz-select-1" : {
+							"firstLoad" : true,
+							"heading" : response.explainerData[2][1],
+							"youtubeId" : response.explainerData[2][2],
+							"text" : response.explainerData[2][3]
+						}
+					}
+
 					introData = response.introData;
 
 					welcomeDialogVisible = true;
 					loaderVisible = false
-
 				} else {
 					console.log("ERROR");
 					console.log(xhr.readyState, xhr.status, xhr.responseText)
@@ -250,6 +283,11 @@
 			})
 			.on("click", (event) => introTourStartTrigger = true);
 
+		d3.select("#intro-panel-wrapper").on("click", () => {
+			d3.select("#intro-panel-wrapper").style("display", "none");
+			explainerData[mode].firstLoad = false;
+		});
+
 		d3.select("#hover-tooltip").style("width", `${TOOLTIP_WIDTH}px`).style("height", "auto")
 
 		fetchGDriveAPIData();
@@ -273,7 +311,7 @@
 		bind:simplifiedMode bind:twist bind:categoriesDataConnections
 		bind:width bind:height bind:canvasWidth bind:canvasHeight bind:radius bind:outerRadius
 		bind:controlsVisible bind:presets bind:checkboxesChecked bind:rerenderTreeTrigger bind:mode bind:categoryLegendVisible 
-		bind:loaderVisible bind:currentTextScale />
+		bind:loaderVisible bind:currentTextScale bind:explainerData />
 
 	<TabView bind:data bind:rawData bind:showMainVizTrigger {ANIM_DURATION_IN} {ANIM_DURATION_OUT} bind:currentTextScale/>
 

@@ -34,6 +34,7 @@
 	// export let rootConnections;
 	export let rootSimplified;
 	export let categoriesDataConnections;
+	export let explainerData;
 
 	// for controls
 	export let controlsVisible;
@@ -395,6 +396,20 @@
 
 		setMouseEvents();
 		// if (mode === "viz-select-0") renderLegend(canvasWidth, canvasHeight, currentTextScale, checkboxesChecked["checkbox-legend"]);
+
+		// Load welcome info dialog
+		if ((mode === "viz-select-0" || mode === "viz-select-1") && explainerData[mode].firstLoad) {
+			let introPanel = d3.select("#intro-panel-wrapper").style("display", "block");
+			introPanel.select("#intro-panel-header")
+				.text(explainerData[mode].heading);		
+			introPanel.select("#intro-panel-yt-embed iframe")
+				.attr("src", `https://www.youtube-nocookie.com/embed/${explainerData[mode].youtubeId}?origin=https://c3tree.bw1-dev.com`);
+			introPanel.select("#intro-panel-text")
+				.text(explainerData[mode].text);
+			document.getElementById("intro-panel-header").focus();		
+		} else {
+			document.getElementById("back-button").focus();
+		}
 	};
 
 	const createCollapsableRadialTree = (data, separationFunction, radius) => {
@@ -1827,8 +1842,7 @@
 
 	<!-- controls -->
 	<Controls bind:visible={controlsVisible} bind:presets bind:checkboxesChecked bind:rerenderTreeTrigger bind:mode bind:root 
-		bind:categoryLegendVisible bind:canvasWidth bind:canvasHeight bind:currentTextScale
-		bind:categoriesDataConnections bind:radius bind:twist/>
+		bind:categoryLegendVisible bind:currentTextScale bind:categoriesDataConnections bind:radius bind:twist/>
 
 	<!-- additional controls -->
 	<div id="back-button" style="display: none;position: absolute;color:#808080;font-size:80%;cursor:pointer;">
@@ -1836,6 +1850,21 @@
 	</div>
 	<div id="help-button" style="display: none;position: absolute;color:#808080;font-size:400%;font-weight: bold;cursor:pointer;">
 		?
+	</div>
+
+	<!-- Intro panel -->
+	<div id="intro-panel-wrapper">
+		<div id="intro-panel">
+			<center>
+				<h1 id="intro-panel-header">Introduction</h1>
+				<div id="intro-panel-yt-embed">
+					<iframe width="440" height="320" frameborder="0" allowfullscreen title="Visualisation explainer video"></iframe>
+				</div>
+				<div id="intro-panel-text" style="text-align: left;">
+					<p>Some explainer text here.</p>
+				</div>
+			</center>
+		</div>
 	</div>
 
 </div>
@@ -1857,5 +1886,55 @@
 		left: 0;
 		top: 0;
 		z-index: -1;
+	}
+
+	::-webkit-scrollbar {
+		width: 15px;
+	}
+	::-webkit-scrollbar-button {
+		background: #ccc;
+	}
+	::-webkit-scrollbar-track-piece {
+		background: #888;
+	}
+	::-webkit-scrollbar-thumb {
+		background: #eee;
+		border-radius: 5pX;
+	}
+
+	#intro-panel-wrapper {
+		display : none;
+		width : 100%;
+		height : 100%;
+		left : 0px;
+		top : 0px;
+		position : absolute;
+		z-index : 101;
+		background-color: #ffffffAA;
+	}
+
+	#intro-panel {
+		position: absolute;
+		left:50%;
+		top:50%;
+		width: 800px;
+		min-height: 300px;
+		margin-left:-400px;
+		margin-top:-200px;
+		padding:20px;
+		opacity: 1.0;
+		background: #ffffff;
+		border: 1px solid #f0f0f0;
+		box-shadow: 3px 3px 7px 1px rgba(0,0,0,0.15);
+		-webkit-box-shadow: 3px 3px 7px 1px rgba(0,0,0,0.15);
+		-moz-box-shadow: 3px 3px 7px 1px rgba(0,0,0,0.15);
+		-webkit-border-radius: 0.2em;
+		border-radius: 0.2em;
+	}
+	
+	#intro-panel-yt-embed {
+		width : 440px;
+		height : 320px;
+		margin : 15px;
 	}
 </style>

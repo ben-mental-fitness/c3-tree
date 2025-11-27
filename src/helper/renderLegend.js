@@ -6,7 +6,7 @@ export const renderLegend = (canvasWidth, canvasHeight, currentTextScale, visibl
     if (!visible || mode == "viz-select-1") return;
 
     const legendWrapper = d3.select("#d3-canvas").append("g")
-        .attr("class", "legend-wrapper")
+        .attr("class", "legend-wrapper");
 
     if(canvasWidth < canvasHeight) {
         const margin = (canvasHeight - canvasWidth) / 2.0;
