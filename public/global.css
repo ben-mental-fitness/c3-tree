@@ -48,7 +48,7 @@ html, body {
   text-transform: lowercase;
   /* font-size: 80%; */
 }
-.tooltip-close-button {
+.tooltip-close-button, #intro-close-button {
   position: absolute;
   right: 10px;
   top: 10px;
@@ -103,6 +103,11 @@ html, body {
 #controls-wrapper {
   position: absolute;
   width: 220px;
+}
+#controls-dropdown-wrapper {
+  width: fit-content;
+  border: 2px solid #e0e0e0;
+  padding: 10px 10px 10px 10px;
 }
 #controls-wrapper span {
   /* font-size: 90%; */

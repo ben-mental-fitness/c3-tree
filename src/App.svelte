@@ -282,11 +282,30 @@
 				}
 			})
 			.on("click", (event) => introTourStartTrigger = true);
-
-		d3.select("#intro-panel-wrapper").on("click", () => {
-			d3.select("#intro-panel-wrapper").style("display", "none");
-			explainerData[mode].firstLoad = false;
-		});
+		
+		// Intro panel mouse events
+		d3.selectAll("#intro-panel-background")
+			.on("click", () => {
+				d3.select("#intro-panel-wrapper").style("display", "none");
+				explainerData[mode].firstLoad = false;
+			})
+			.on("keydown", (event) => {
+				if (event.key === "Enter" || event.key === "Spacebar" || event.key === " ") {
+					d3.select("#intro-panel-wrapper").style("display", "none");
+					explainerData[mode].firstLoad = false;
+				}
+			});
+		d3.selectAll("#intro-close-button")
+			.on("click", () => {
+				d3.select("#intro-panel-wrapper").style("display", "none");
+				explainerData[mode].firstLoad = false;
+			})
+			.on("keydown", (event) => {
+				if (event.key === "Enter" || event.key === "Spacebar" || event.key === " ") {
+					d3.select("#intro-panel-wrapper").style("display", "none");
+					explainerData[mode].firstLoad = false;
+				}
+			});
 
 		d3.select("#hover-tooltip").style("width", `${TOOLTIP_WIDTH}px`).style("height", "auto")
 

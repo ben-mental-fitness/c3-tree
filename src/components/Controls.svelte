@@ -268,23 +268,70 @@
 			rerenderTreeTrigger = true;
 		});
 
-		d3.selectAll("#checkbox-show-controls").on("change", function() {
-			document.getElementById("controls-dropdown").style.display = document.getElementById("controls-dropdown").style.display === "block" ? "none" : "block";
+		// d3.selectAll("#checkbox-show-controls").on("change", function() {
+		// 	document.getElementById("controls-dropdown-wrapper").style.display = document.getElementById("controls-dropdown-wrapper").style.display === "block" ? "none" : "block";
+		// });
+
+		// CONTROLS DROPDOWN TOGGLES
+		const toggleControlsDropdown = (groupSelection, controlsSelection) => {
+			if (groupSelection.style("display") == "none") {
+				groupSelection.style("display", "block");
+				controlsSelection.select(".right").style("display", "none");
+				controlsSelection.select(".down").style("display", "block");
+			} else {
+				groupSelection.style("display", "none");
+				controlsSelection.select(".right").style("display", "block");
+				controlsSelection.select(".down").style("display", "none");
+			}
+
+		} 
+
+		d3.selectAll("#controls-toggle-show-controls").on("click", () => {
+			toggleControlsDropdown(d3.select("#controls-group-all"), d3.select("#controls-toggle-show-controls"));
+		});
+
+		d3.selectAll("#controls-toggle-show-layout").on("click", () => {
+			toggleControlsDropdown(d3.select("#controls-group-layout"), d3.select("#controls-toggle-show-layout"));
+		});
+
+		d3.selectAll("#controls-toggle-show-themes").on("click", () => {
+			toggleControlsDropdown(d3.select("#controls-group-themes"), d3.select("#controls-toggle-show-themes"));
+		});
+
+		d3.selectAll("#controls-toggle-show-labels").on("click", () => {
+			toggleControlsDropdown(d3.select("#controls-group-labels"), d3.select("#controls-toggle-show-labels"));
+		});
+
+		d3.selectAll("#controls-toggle-show-text").on("click", () => {
+			toggleControlsDropdown(d3.select("#controls-group-text"), d3.select("#controls-toggle-show-text"));
 		});
 	});
 
 </script>
 
 <div id="controls-wrapper">
-	<center>
-		<p style="text-align:left;">UK National Core Studies</p>
-		<h1 style="text-align:left;">COVID-19 Longitudinal Health and Wellbeing Research and Publications</h1>
-		<p style="text-align:left;">Interactive Visualisation</p>  
+	<p style="text-align:left;">UK National Core Studies</p>
+	<h1 style="text-align:left;">COVID-19 Longitudinal Health and Wellbeing Research and Publications</h1>
+	<p style="text-align:left;">Interactive Visualisation</p>
+
+	<div id="controls-dropdown-wrapper">
 		<!-- svelte-ignore a11y-positive-tabindex -->
-		<input style="float:left;display:block" type="checkbox" id="checkbox-show-controls" tabindex="3">
-		<span style="float:left;display:block">Show Controls</span>
-		<div style="display:none" id="controls-dropdown">
+
+		<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+		<div id="controls-toggle-show-controls" class="controls-dropdown-selector" tabindex="3">
+			<!-- <input style="float:left;display:block" type="checkbox" id="checkbox-show-controls" tabindex="3"> -->
+			<span style="padding-right:10px">Options</span>
+			<span><i class="arrow right" style="display:block"></i></span>
+			<span><i class="arrow down" style="display:none"></i></span>
+			<div style="clear: both;"></div>
+		</div>
+		
+		<div id="controls-group-all" style="display:none">
+
+			<!-- SEARCH BOX -->
 			<Search/><br/><br/>
+
+			<!-- <HIDDEN> SIMPLE OR DETAILED VIEW -->
 			<!-- svelte-ignore a11y-positive-tabindex -->
 			<input style="float:left;display:none" type="checkbox" id="checkbox-simple-view" tabindex="3">
 			<span style="float:left;display:none">Simple version</span>
@@ -294,33 +341,49 @@
 			<span style="float:left;display:none">Detailed visualisation</span>
 			<!-- <div style="clear: both;"></div> -->
 
-			<!-- <div style="display:{visible ? 'block' : 'none'}">  -->
-			<span style="float:left;display:block">&nbsp;&nbsp;Layout:</span>
-			<div style="clear: both;"></div>
-			<!-- svelte-ignore a11y-positive-tabindex -->
-			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-viz-select-cluster" checked tabindex="3">
-			<span style="float:left;display:block">Cluster by theme</span>
-			<div style="clear: both;"></div>
-			<!-- svelte-ignore a11y-positive-tabindex -->
-			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-viz-select-connections" tabindex="3">
-			<span style="float:left;display:block">Connections</span>
-			<div style="clear: both;"></div>
+			<!-- LAYOUT SELECTOR -->
+			<!-- svelte-ignore a11y-positive-tabindex a11y-no-noninteractive-tabindex -->
+			<div id="controls-toggle-show-layout" class="controls-dropdown-selector" tabindex="3">
+				<span style="padding-right:10px">&nbsp;&nbsp;Layout:</span>
+				<span><i class="arrow right" style="display:block"></i></span>
+				<span><i class="arrow down" style="display:none"></i></span>
+				<div style="clear: both;"></div>
+			</div>
+			<div id="controls-group-layout" style="display:none">
+				<!-- svelte-ignore a11y-positive-tabindex -->
+				<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-viz-select-cluster" checked tabindex="3">
+				<span style="float:left;display:block">Theme Clusters</span>
+				<div style="clear: both;"></div>
+				<!-- svelte-ignore a11y-positive-tabindex -->
+				<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-viz-select-connections" tabindex="3">
+				<span style="float:left;display:block">Connections</span>
+				<div style="clear: both;"></div>
+			</div>
 
-			<span style="float:left;display:block">&nbsp;&nbsp;Show information about:</span>
-			<div style="clear: both;"></div>
-			<!-- svelte-ignore a11y-positive-tabindex -->
-			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-themes-publications" checked tabindex="3">
-			<span style="float:left;display:block">Publications</span>
-			<div style="clear: both;"></div>
-			<!-- svelte-ignore a11y-positive-tabindex -->
-			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-team" tabindex="3">
-			<span style="float:left;display:block">Team</span>
-			<div style="clear: both;"></div>
-			<!-- svelte-ignore a11y-positive-tabindex -->
-			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-data-sources" checked tabindex="3">
-			<span style="float:left;display:block">Data Sources</span>
-			<div style="clear: both;"></div>
+			<!-- THEME SELECTOR -->
+			<!-- svelte-ignore a11y-positive-tabindex a11y-no-noninteractive-tabindex -->
+			<div id="controls-toggle-show-themes" class="controls-dropdown-selector" tabindex="3">
+				<span style="padding-right:10px">&nbsp;&nbsp;Themes:</span>
+				<span><i class="arrow right" style="display:block"></i></span>
+				<span><i class="arrow down" style="display:none"></i></span>
+				<div style="clear: both;"></div>
+			</div>
+			<div id="controls-group-themes" style="display:none">
+				<!-- svelte-ignore a11y-positive-tabindex -->
+				<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-themes-publications" checked tabindex="3">
+				<span style="float:left;display:block">Publications</span>
+				<div style="clear: both;"></div>
+				<!-- svelte-ignore a11y-positive-tabindex -->
+				<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-team" tabindex="3">
+				<span style="float:left;display:block">Team</span>
+				<div style="clear: both;"></div>
+				<!-- svelte-ignore a11y-positive-tabindex -->
+				<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-data-sources" checked tabindex="3">
+				<span style="float:left;display:block">Data Sources</span>
+				<div style="clear: both;"></div>
+			</div>
 
+			<!-- <HIDDEN> CONNECT ALL DATA ON CONNECTED VIEW -->
 			<!-- <span style="float:left;display:block">&nbsp;&nbsp;Connections:</span>
 			<div style="clear: both;"></div> -->
 			<!-- svelte-ignore a11y-positive-tabindex -->
@@ -329,43 +392,59 @@
 			<div style="clear: both;"></div> -->
 			<input style="float:left;display:none;margin-left:20px" type="checkbox" id="checkbox-connect-all">
 			
-			<span style="float:left;display:block">&nbsp;&nbsp;Labels:</span>
+			<!-- LABELS DISPLAY -->
+			<!-- svelte-ignore a11y-positive-tabindex a11y-no-noninteractive-tabindex -->
+			<div id="controls-toggle-show-labels" class="controls-dropdown-selector" tabindex="3">
+				<span style="padding-right:10px">&nbsp;&nbsp;Labels:</span>
+				<span><i class="arrow right" style="display:block"></i></span>
+				<span><i class="arrow down" style="display:none"></i></span>
+				<div style="clear: both;"></div>
+			</div>
+			<div id="controls-group-labels" style="display:none;">
 			<div style="clear: both;"></div>
-			<!-- svelte-ignore a11y-positive-tabindex -->
-			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-leaf-titles" checked tabindex="3">
-			<span style="float:left;display:block">Show leaf titles</span>
-			<div style="clear: both;"></div>
-			<!-- svelte-ignore a11y-positive-tabindex -->
-			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-subtheme-titles" checked tabindex="3">
-			<span style="float:left;display:block">Show subtheme titles</span>
-			<div style="clear: both;"></div>
-			<!-- svelte-ignore a11y-positive-tabindex -->
-			<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-legend" checked tabindex="3">
-			<span style="float:left;display:block">Toggle legend</span>
-			<div style="clear: both;"></div>
+				<!-- svelte-ignore a11y-positive-tabindex -->
+				<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-leaf-titles" checked tabindex="3">
+				<span style="float:left;display:block">Show leaf titles</span>
+				<div style="clear: both;"></div>
+				<!-- svelte-ignore a11y-positive-tabindex -->
+				<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-subtheme-titles" checked tabindex="3">
+				<span style="float:left;display:block">Show subtheme titles</span>
+				<div style="clear: both;"></div>
+				<!-- svelte-ignore a11y-positive-tabindex -->
+				<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-legend" checked tabindex="3">
+				<span style="float:left;display:block">Show legend box</span>
+				<div style="clear: both;"></div>
+			</div>
 
-			<span style="float:left;display:block">&nbsp;&nbsp;Text:</span>
-			<div style="clear: both;"></div>
-			<!-- svelte-ignore a11y-positive-tabindex -->
-			<input style="float:left;display:block;margin-left:20px;margin-top:5px" type="button" id="increase-text-size" tabindex="3">
-			<span style="float:left;display:block;margin-top:5px">Increase text size</span>
-			<div style="clear: both;"></div>
-			<!-- svelte-ignore a11y-positive-tabindex -->
-			<input style="float:left;display:block;margin-left:20px;margin-top:5px" type="button" id="decrease-text-size" tabindex="3">
-			<span style="float:left;display:block;margin-top:5px">Decrease text size</span>
-			<div style="clear: both;"></div>
-			<!-- svelte-ignore a11y-positive-tabindex -->
-			<input style="float:left;display:block;margin-left:20px;margin-top:5px" type="button" id="reset-text-size" tabindex="3">
-			<span style="float:left;display:block;margin-top:5px">Reset text size</span>
-			<div style="clear: both;"></div>
-			<input style="float:left;display:none;margin-left:20px" type="checkbox" id="checkbox-white-backgrounds" checked>
-			<span style="float:left;display:none">Text has white background</span>
-			<div style="clear: both;"></div>
-			<!-- </div> -->
-			
-			<br/><br/><br/>
+			<!-- TEXT SIZING -->
+				<!-- svelte-ignore a11y-positive-tabindex a11y-no-noninteractive-tabindex -->
+			<div id="controls-toggle-show-text" class="controls-dropdown-selector" tabindex="3">
+				<span style="padding-right:10px">&nbsp;&nbsp;Text size:</span>
+				<span><i class="arrow right" style="display:block"></i></span>
+				<span><i class="arrow down" style="display:none"></i></span>
+				<div style="clear: both;"></div>
+			</div>
+			<div id="controls-group-text" style="display:none;">
+				<!-- svelte-ignore a11y-positive-tabindex -->
+				<input style="float:left;display:block;margin-left:20px;margin-top:5px" type="button" id="increase-text-size" tabindex="3">
+				<span style="float:left;display:block;margin-top:5px">Increase text size</span>
+				<div style="clear: both;"></div>
+				<!-- svelte-ignore a11y-positive-tabindex -->
+				<input style="float:left;display:block;margin-left:20px;margin-top:5px" type="button" id="decrease-text-size" tabindex="3">
+				<span style="float:left;display:block;margin-top:5px">Decrease text size</span>
+				<div style="clear: both;"></div>
+				<!-- svelte-ignore a11y-positive-tabindex -->
+				<input style="float:left;display:block;margin-left:20px;margin-top:5px" type="button" id="reset-text-size" tabindex="3">
+				<span style="float:left;display:block;margin-top:5px">Reset text size</span>
+				<div style="clear: both;"></div>
+				<input style="float:left;display:none;margin-left:20px" type="checkbox" id="checkbox-white-backgrounds" checked>
+				<span style="float:left;display:none">Text has white background</span>
+				<div style="clear: both;"></div>
+			</div>
 
-			<div style="display:{visible ? 'block' : 'none'}"> 
+			<!-- <div style="display:{visible ? 'block' : 'none'}">  -->
+			<div style="display:none"> 
+				<br/><br/><br/>
 				<!-- <Search/>
 				<select id="viz-select" style="width:200px">
 					<option value="0">Radial Tree</option>
@@ -403,5 +482,39 @@
 				<div style="clear: both;"></div>
 			</div>
 		</div>
-	</center>
+	</div>
 </div>
+
+<style>
+	.controls-dropdown-selector {
+		cursor: pointer;
+		margin-top: 10px;
+		margin-bottom: 10px;
+	}
+	
+	.controls-dropdown-selector span {
+		margin : 0px !important;
+		float : left !important;
+		vertical-align: middle !important; 
+	}
+
+	.arrow {
+		border: solid black;
+		width: 3px;
+		height: 3px;
+		border-width: 0 3px 3px 0;
+		display: inline-block;
+		padding: 3px;
+	}
+
+	.right {
+		margin-top: 3px;
+		transform: rotate(-45deg);
+		-webkit-transform: rotate(-45deg);
+	}
+
+	.down {
+		transform: rotate(45deg);
+		-webkit-transform: rotate(45deg);
+	}
+</style>

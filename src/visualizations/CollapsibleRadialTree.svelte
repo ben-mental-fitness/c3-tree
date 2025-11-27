@@ -1854,7 +1854,10 @@
 
 	<!-- Intro panel -->
 	<div id="intro-panel-wrapper">
+		<div id="intro-panel-background"></div>
 		<div id="intro-panel">
+			<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+			<div id="intro-close-button" tabindex="0">x</div>
 			<center>
 				<h1 id="intro-panel-header">Introduction</h1>
 				<div id="intro-panel-yt-embed">
@@ -1910,7 +1913,6 @@
 		top : 0px;
 		position : absolute;
 		z-index : 101;
-		background-color: #ffffffAA;
 	}
 
 	#intro-panel {
@@ -1930,6 +1932,15 @@
 		-moz-box-shadow: 3px 3px 7px 1px rgba(0,0,0,0.15);
 		-webkit-border-radius: 0.2em;
 		border-radius: 0.2em;
+	}
+
+	#intro-panel-background {
+		width : 100%;
+		height : 100%;
+		left : 0px;
+		top : 0px;
+		position : absolute;
+		background-color: #ffffffAA;
 	}
 	
 	#intro-panel-yt-embed {
