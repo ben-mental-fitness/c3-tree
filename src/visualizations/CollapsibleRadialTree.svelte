@@ -96,6 +96,7 @@
 		// Update font sizes
 		d3.selectAll("#controls-wrapper span").style("font-size", currentTextScale.Controls);
 		document.getElementById("d3-canvas").style.fontSize = currentTextScale.D3Canvas;
+		document.getElementById("info-button").style.fontSize = currentTextScale.HelpButton;
 		document.getElementById("help-button").style.fontSize = currentTextScale.HelpButton;
 		document.getElementById("back-button").style.fontSize = currentTextScale.BackButton;
 		
@@ -1847,6 +1848,9 @@
 	<!-- additional controls -->
 	<div id="back-button" style="display: none;position: absolute;color:#808080;font-size:80%;cursor:pointer;">
 		&lt; switch to List View
+	</div>
+	<div id="info-button" style="display: none;position: absolute;color:#808080;font-size:400%;font-weight: bold;cursor:pointer;">
+		!
 	</div>
 	<div id="help-button" style="display: none;position: absolute;color:#808080;font-size:400%;font-weight: bold;cursor:pointer;">
 		?

@@ -274,6 +274,34 @@
 				}
 			})
 			.on("click", (event) => {simplifiedMode = true; showTabsView()});
+		d3.select("#info-button")
+			.attr("tabindex", "2")
+			.on("keydown", (event) => {
+				if (event.key === "Enter" || event.key === "Spacebar" || event.key === " ") {
+					if ((mode === "viz-select-0" || mode === "viz-select-1")) {
+						let introPanel = d3.select("#intro-panel-wrapper").style("display", "block");
+						introPanel.select("#intro-panel-header")
+							.text(explainerData[mode].heading);		
+						introPanel.select("#intro-panel-yt-embed iframe")
+							.attr("src", `https://www.youtube-nocookie.com/embed/${explainerData[mode].youtubeId}?origin=https://c3tree.bw1-dev.com`);
+						introPanel.select("#intro-panel-text")
+							.text(explainerData[mode].text);
+						document.getElementById("intro-panel-header").focus();		
+					}
+				}
+			})
+			.on("click", (event) => {
+				if ((mode === "viz-select-0" || mode === "viz-select-1")) {
+					let introPanel = d3.select("#intro-panel-wrapper").style("display", "block");
+					introPanel.select("#intro-panel-header")
+						.text(explainerData[mode].heading);		
+					introPanel.select("#intro-panel-yt-embed iframe")
+						.attr("src", `https://www.youtube-nocookie.com/embed/${explainerData[mode].youtubeId}?origin=https://c3tree.bw1-dev.com`);
+					introPanel.select("#intro-panel-text")
+						.text(explainerData[mode].text);
+					document.getElementById("intro-panel-header").focus();		
+				}
+			});
 		d3.select("#help-button")
 			.attr("tabindex", "2")
 			.on("keydown", (event) => {

@@ -40,6 +40,10 @@
 		if(width < height) {
 			d3.select("#controls-wrapper").style("left", "10px").style("top", "50px"); // .style("margin-left", "-100px");
 			d3.selectAll(".canvas-wrapper").style("margin-top", `${(height - width) / 2.0}px`)
+			d3.select("#info-button")
+				.style("display", "block")
+				.style("right", "60px")
+				.style("top", "20px");
 			d3.select("#help-button")
 				.style("display", "block")
 				.style("right", "10px")
@@ -56,6 +60,10 @@
 				.style("top", "50px")
 				.style("height", "366px")
 				.style("margin-left", null);
+			d3.select("#info-button")
+				.style("display", "block")
+				.style("right", width > 1500 ? `${(width - 1500) * 0.5 + 60}px` : "60px") 
+				.style("top", "20px");
 			d3.select("#help-button")
 				.style("display", "block")
 				.style("right", width > 1500 ? `${(width - 1500) * 0.5 + 10}px` : "10px") 
