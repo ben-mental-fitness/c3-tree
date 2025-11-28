@@ -124,6 +124,9 @@ html, body {
   padding: 5px;
   margin-top: 10px;
 }
+input {
+  font-family: sans-serif;
+}
 
 /* List view */
 #tabs-wrapper .tabs-left .tab p {

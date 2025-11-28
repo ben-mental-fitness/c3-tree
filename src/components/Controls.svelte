@@ -10,7 +10,7 @@
 	import { loadCategoryLabels } from "../helper/calculateCategoryLabels.js";
 
 	// Bound to CollapsibleRadialTree.svelte
-    export let visible;
+    // export let visible;
     export let presets;
     export let checkboxesChecked;
     export let rerenderTreeTrigger;
@@ -306,6 +306,17 @@
 			toggleControlsDropdown(d3.select("#controls-group-text"), d3.select("#controls-toggle-show-text"));
 		});
 	});
+	
+	$: if (mode === "viz-select-0") {
+		d3.select("#control-theme-team").style("display", "none");
+		d3.select("#control-subtheme-titles").style("display", "block");
+		d3.select("#control-subtheme-legend").style("display", "none");
+	}
+	$: if (mode === "viz-select-1") {
+		d3.select("#control-theme-team").style("display", "block");
+		d3.select("#control-subtheme-titles").style("display", "none");
+		d3.select("#control-subtheme-legend").style("display", "block");
+	}
 
 </script>
 
@@ -373,10 +384,12 @@
 				<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-themes-publications" checked tabindex="3">
 				<span style="float:left;display:block">Publications</span>
 				<div style="clear: both;"></div>
-				<!-- svelte-ignore a11y-positive-tabindex -->
-				<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-team" tabindex="3">
-				<span style="float:left;display:block">Team</span>
-				<div style="clear: both;"></div>
+				<div id="control-theme-team">
+					<!-- svelte-ignore a11y-positive-tabindex -->
+					<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-team" tabindex="3">
+					<span style="float:left;display:block">Team</span>
+					<div style="clear: both;"></div>
+				</div>
 				<!-- svelte-ignore a11y-positive-tabindex -->
 				<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-data-sources" checked tabindex="3">
 				<span style="float:left;display:block">Data Sources</span>
@@ -401,19 +414,22 @@
 				<div style="clear: both;"></div>
 			</div>
 			<div id="controls-group-labels" style="display:none;">
-			<div style="clear: both;"></div>
 				<!-- svelte-ignore a11y-positive-tabindex -->
 				<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-leaf-titles" checked tabindex="3">
 				<span style="float:left;display:block">Show leaf titles</span>
 				<div style="clear: both;"></div>
-				<!-- svelte-ignore a11y-positive-tabindex -->
-				<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-subtheme-titles" checked tabindex="3">
-				<span style="float:left;display:block">Show subtheme titles</span>
-				<div style="clear: both;"></div>
-				<!-- svelte-ignore a11y-positive-tabindex -->
-				<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-legend" checked tabindex="3">
-				<span style="float:left;display:block">Show legend box</span>
-				<div style="clear: both;"></div>
+				<div id="control-subtheme-titles">
+					<!-- svelte-ignore a11y-positive-tabindex -->
+					<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-subtheme-titles" checked tabindex="3">
+					<span style="float:left;display:block">Show subtheme titles</span>
+					<div style="clear: both;"></div>
+				</div>
+				<div id="control-subtheme-legend">
+					<!-- svelte-ignore a11y-positive-tabindex -->
+					<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-legend" checked tabindex="3">
+					<span style="float:left;display:block">Show legend box</span>
+					<div style="clear: both;"></div>
+				</div>
 			</div>
 
 			<!-- TEXT SIZING -->
@@ -426,16 +442,16 @@
 			</div>
 			<div id="controls-group-text" style="display:none;">
 				<!-- svelte-ignore a11y-positive-tabindex -->
-				<input style="float:left;display:block;margin-left:20px;margin-top:5px" type="button" id="increase-text-size" tabindex="3">
-				<span style="float:left;display:block;margin-top:5px">Increase text size</span>
+				<input style="float:left;display:block;margin-left:20px;margin-top:5px" type="button" id="increase-text-size" tabindex="3"
+					value="Increase text size">
 				<div style="clear: both;"></div>
 				<!-- svelte-ignore a11y-positive-tabindex -->
-				<input style="float:left;display:block;margin-left:20px;margin-top:5px" type="button" id="decrease-text-size" tabindex="3">
-				<span style="float:left;display:block;margin-top:5px">Decrease text size</span>
+				<input style="float:left;display:block;margin-left:20px;margin-top:5px" type="button" id="decrease-text-size" tabindex="3"
+					value="Decrease text size">
 				<div style="clear: both;"></div>
 				<!-- svelte-ignore a11y-positive-tabindex -->
-				<input style="float:left;display:block;margin-left:20px;margin-top:5px" type="button" id="reset-text-size" tabindex="3">
-				<span style="float:left;display:block;margin-top:5px">Reset text size</span>
+				<input style="float:left;display:block;margin-left:20px;margin-top:5px" type="button" id="reset-text-size" tabindex="3"
+					value="Reset text size">
 				<div style="clear: both;"></div>
 				<input style="float:left;display:none;margin-left:20px" type="checkbox" id="checkbox-white-backgrounds" checked>
 				<span style="float:left;display:none">Text has white background</span>

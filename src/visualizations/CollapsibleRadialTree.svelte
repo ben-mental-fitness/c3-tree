@@ -1842,8 +1842,9 @@
 	</div>
 
 	<!-- controls -->
-	<Controls bind:visible={controlsVisible} bind:presets bind:checkboxesChecked bind:rerenderTreeTrigger bind:mode bind:root 
+	<Controls bind:presets bind:checkboxesChecked bind:rerenderTreeTrigger bind:mode bind:root 
 		bind:categoryLegendVisible bind:currentTextScale bind:categoriesDataConnections bind:radius bind:twist/>
+	<!-- bind:visible={controlsVisible} -->
 
 	<!-- additional controls -->
 	<div id="back-button" style="display: none;position: absolute;color:#808080;font-size:80%;cursor:pointer;">
