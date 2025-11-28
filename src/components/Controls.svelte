@@ -41,7 +41,6 @@
 				} else {
 					root.descendants().forEach((d) => d.data.visible = false);
 					root.descendants().forEach((d) => {
-						console.log(d.data.presets.includes(chosenPreset))
 						if(d.data.presets.includes(chosenPreset) && d.depth > 0) {
 							d.data.visible = d.depth > 0;
 							let parent = d.parent;
@@ -148,8 +147,8 @@
 				"BackButton": "80%",
 				"Controls": "90%",
 				"LegendWrapper": "120%",
-				"CategoryLabels": "20px",
-				"CategoryLegend": "125%",	
+				"CategoryLabels": "18px",
+				"CategoryLegend": "112%",	
 				"NodeText": "100%",
 				"TooltipCloseButton": "138%",		
 				"TooltipTitle": "80%",	
@@ -237,7 +236,7 @@
 			root.descendants().forEach((d) => {
 				if(d.data.text === 'Data')
 					setTreeVisibility(d.data, checkboxesChecked["checkbox-detailed-view-data-sources"]);
-			})
+			});
 			rerenderTreeTrigger = true;
 		})
 

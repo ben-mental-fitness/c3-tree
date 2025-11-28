@@ -18,6 +18,7 @@
 
 	const hideWelcomeDialog = () => {
 		d3.select("#welcome-dialog-logo").remove();
+		d3.select("#welcome-dialog-logo-2").remove();
 		d3.selectAll("#welcome-dialog")
 			.transition("opacity")
 			.duration(ANIM_DURATION_OUT)
@@ -40,7 +41,8 @@
     
 </script>
 
-<img src="/center_logo.png" alt="Logo" id="welcome-dialog-logo" style="position:absolute;left:50px;top:50px;width:200px"/>
+<img src="/center_logo.png" alt="Logo" id="welcome-dialog-logo" style="position:absolute;left:50px;top:50px;height:200px"/>
+<img src="/center_logo_2.png" alt="Logo" id="welcome-dialog-logo-2" style="position:absolute;left:275px;top:50px;height:200px"/>
 
 <div id="welcome-dialog" style="display:none;">
 

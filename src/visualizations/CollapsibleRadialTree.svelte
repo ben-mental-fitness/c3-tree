@@ -58,14 +58,14 @@
 
 	// When mid-level node on Cluster View is clicked update visible teams array & refresh the view 
 	const nodeOnClick = (d) => {
-		console.log(d);
 		if("Members" in d.data.props.info_main) {
-			if(visibleTeams.indexOf(d.data.text) !== -1) {
-				visibleTeams.splice(visibleTeams.indexOf(d.data.text, 1));
-			} else {
-				visibleTeams.push(d.data.text);
-			}
-			rebuildTree();
+			// if(visibleTeams.indexOf(d.data.text) !== -1) {
+			// 	visibleTeams.splice(visibleTeams.indexOf(d.data.text, 1));
+			// } else {
+			// 	visibleTeams.push(d.data.text);
+			// }
+			// rebuildTree();
+			return;
 		} else {
 			setTreeVisibility(d.data, !d.data.visible);
 			rerenderTree();
@@ -236,7 +236,9 @@
 					document.getElementById("canvas-wrapper").append(canvas);
 
 					const dataUrl = canvas.toDataURL('image/png');
+					// @ts-ignore
 					document.getElementById('curves-wrapper-leaves-img').src = dataUrl;
+					// d3.select('#curves-wrapper-leaves-img').attr("src", dataUrl);
 
 					d3.select("#curves-wrapper-leaves").selectAll("*").remove();
 					canvas.remove();
@@ -1758,7 +1760,7 @@
 		}
 	}
 
-	$:if(rerenderTreeTrigger !== null) {
+	$:if(rerenderTreeTrigger !== null && !loaderVisible) {
 		if (mode == "viz-select-0") {
 			rerenderTree(rerenderTreeTrigger);
 			rerenderTreeTrigger = null;
@@ -1859,6 +1861,10 @@
 	<div id="help-button" style="display: none;position: absolute;color:#808080;font-size:400%;font-weight: bold;cursor:pointer;">
 		?
 	</div>
+
+	<!-- LOGOS  -->
+	<img src="/center_logo.png" alt="Logo" id="welcome-dialog-logo" style="position:absolute;right:125px;bottom:100px;height:100px"/>
+	<img src="/center_logo_2.png" alt="Logo" id="welcome-dialog-logo-2" style="position:absolute;right:10px;bottom:100px;height:100px"/>
 
 	<!-- Intro panel -->
 	<div id="intro-panel-wrapper">

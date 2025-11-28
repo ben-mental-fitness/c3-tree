@@ -9,6 +9,7 @@
     import Loader from './components/Loader.svelte';
     import WelcomeDialog from './components/WelcomeDialog.svelte';
     import DraftNotice from './components/DraftNotice.svelte';
+	import Attribution from './components/Attribution.svelte';
     import IntroTour from './components/IntroTour.svelte';
     
     import MinWidthDialog from './components/MinWidthDialog.svelte';
@@ -84,8 +85,8 @@
 		"BackButton": "80%",
 		"Controls": "90%",
 		"LegendWrapper": "120%",
-		"CategoryLabels": "20px",
-		"CategoryLegend": "125%",	
+		"CategoryLabels": "18px",
+		"CategoryLegend": "112%",	
 		"NodeText": "100%",
 		"TooltipCloseButton": "138%",		
 		"TooltipTitle": "80%",	
@@ -260,8 +261,6 @@
 		});
 
 		d3.select("#welcome-dialog .button.button-default").on("click", async (event) => {
-			simplifiedMode = false;
-			rerenderTreeTrigger = false;
 			showMainViz();
 		});		
 
@@ -347,6 +346,7 @@
 <main>
 	
 	<DraftNotice/>
+	<Attribution/>
 	<WelcomeDialog bind:visible={welcomeDialogVisible} {ANIM_DURATION_OUT}/>
 	<IntroTour bind:introTourStartTrigger bind:introData/>
 	<MinWidthDialog bind:checkShowDisplayCompatabilityTrigger/>

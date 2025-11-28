@@ -62,8 +62,8 @@
 		right:10px;
 		top:50%;
 		width: 200px;
-		margin-left:-200px;
-		margin-top:-150px;
+		margin-top:-300px;
+		background: #ffffff;
 		border: 1px solid #f0f0f0;
 		padding:20px;
 		text-align: left;

@@ -22,7 +22,7 @@
 
 		const pageDim = d3.select("body").node().getBoundingClientRect();
 		const marginTop = 30;
-		const marginBottom = 250;
+		const marginBottom = 280;
 		const tabHeight = Math.floor((pageDim.height - marginTop - marginBottom - 2 * data.children.length) / data.children.length);
 		const tabWidth = 250;
 
@@ -475,6 +475,7 @@
 	<Hamburger bind:open={menuOpen} color="white"/>
 	<div class="tab-view-header">
 		<img src="/center_logo.png" alt="Logo"/>
+		<img src="/center_logo_2.png" alt="Logo"/>
 		<span id="tab-view-title">Welcome</span>
 	</div>
 	<div style="clear:both"></div>
@@ -506,7 +507,6 @@
 		z-index: 30;
 		pointer-events: none;
 	}
-
 	#tabs-wrapper {
 		position: absolute;
 		left:0;
