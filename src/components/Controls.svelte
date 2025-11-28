@@ -224,20 +224,12 @@
 			}
 		});
 
-		d3.select('#checkbox-detailed-view-themes-publications').on("click", (event) => {
-			checkboxesChecked["checkbox-detailed-view-themes-publications"] = !checkboxesChecked["checkbox-detailed-view-themes-publications"];
-			root.descendants().forEach((d) => {
-				if(['Mental Health ','Healthcare disruption','Society & Health ','Serology ','Long Covid ','OpenSAFELY','Other ','Treatment '].includes(d.data.text))
-					setTreeVisibility(d.data, checkboxesChecked["checkbox-detailed-view-themes-publications"]);
-			})
-			rerenderTreeTrigger = true;
-		})
 		d3.select('#checkbox-detailed-view-team').on("click", (event) => {
 			checkboxesChecked["checkbox-detailed-view-team"] = !checkboxesChecked["checkbox-detailed-view-team"];
 			root.descendants().forEach((d) => {
 				if(d.data.text === 'Team' || d.data.text === 'Teams')
 					setTreeVisibility(d.data, checkboxesChecked["checkbox-detailed-view-team"]);
-			})
+			});
 			rerenderTreeTrigger = true;
 		})
 		d3.select('#checkbox-detailed-view-data-sources').on("click", (event) => {
@@ -307,15 +299,54 @@
 		});
 	});
 	
+	// Conditional visibility depending on view
 	$: if (mode === "viz-select-0") {
 		d3.select("#control-theme-team").style("display", "none");
 		d3.select("#control-subtheme-titles").style("display", "block");
 		d3.select("#control-subtheme-legend").style("display", "none");
+		d3.select("#control-theme-publications").style("display", "block");
 	}
 	$: if (mode === "viz-select-1") {
 		d3.select("#control-theme-team").style("display", "block");
 		d3.select("#control-subtheme-titles").style("display", "none");
 		d3.select("#control-subtheme-legend").style("display", "block");
+		d3.select("#control-theme-publications").style("display", "none");
+	}
+
+	// DYNAMIC THEMES LIST
+	$:if (root) {
+		d3.select("#control-theme-publications")
+			.selectAll("div")
+			.data(root.descendants().filter((d) => d.depth === 1 && d.data.text !== "Data" && d.data.text !== "Team"))
+			.enter()
+			.append("div")
+			.attr("id", d => `control-group-${d.data.id}`)
+			.each((d) => {
+				d3.select(`#control-group-${d.data.id}`).append("input")
+					.style("float", "left")
+					.style("display", "block")
+					.style("margin-left", "20px")
+					.attr("type", "checkbox")
+					.attr("tabindex", "3")
+					.attr("checked", "true")
+					.attr("id", (d) => `checkbox-${d.data.id}`)
+					.on("change", (event, d) => {
+						// @ts-ignore
+						checkboxesChecked[`checkbox-${d.data.id}`] = document.getElementById(`checkbox-${d.data.id}`).checked;	
+
+						root.descendants().filter((d_) => d.data.id === d_.data.id)
+							.forEach((d_) => {
+								setTreeVisibility(d.data, checkboxesChecked[`checkbox-${d.data.id}`]);
+							});
+						rerenderTreeTrigger = true;
+					});
+				d3.select(`#control-group-${d.data.id}`).append("span")
+					.style("float", "left")
+					.style("display", "block")
+					.html((d) => d.data.text);
+				d3.select(`#control-group-${d.data.id}`).append("div")
+					.style("clear", "both");
+			})
 	}
 
 </script>
@@ -381,9 +412,8 @@
 			</div>
 			<div id="controls-group-themes" style="display:none">
 				<!-- svelte-ignore a11y-positive-tabindex -->
-				<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-themes-publications" checked tabindex="3">
-				<span style="float:left;display:block">Publications</span>
-				<div style="clear: both;"></div>
+				<input style="float:left;display:none;margin-left:20px" type="checkbox" id="checkbox-detailed-view-themes-publications" checked tabindex="3">
+				<div id="control-theme-publications"></div>
 				<div id="control-theme-team">
 					<!-- svelte-ignore a11y-positive-tabindex -->
 					<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-team" tabindex="3">

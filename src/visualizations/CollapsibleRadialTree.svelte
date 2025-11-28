@@ -58,6 +58,7 @@
 
 	// When mid-level node on Cluster View is clicked update visible teams array & refresh the view 
 	const nodeOnClick = (d) => {
+		console.log(d);
 		if("Members" in d.data.props.info_main) {
 			if(visibleTeams.indexOf(d.data.text) !== -1) {
 				visibleTeams.splice(visibleTeams.indexOf(d.data.text, 1));
@@ -350,7 +351,7 @@
 					})
 
 				update.selectAll(".node-text").transition(animation)
-					.attr("opacity", (d) => d.data.depth === 2 && checkboxesChecked["checkbox-leaf-titles"] && simplifiedMode && !d.children ? 1.0 : 0.0)
+					.attr("opacity", (d) => d.data.depth === 2 && checkboxesChecked["checkbox-leaf-titles"] && d.data.visible && simplifiedMode && !d.children ? 1.0 : 0.0)
 
 				update.selectAll(".text-leaf-interact-area")
 					.style("pointer-events", (d) => simplifiedMode ? "all" : "none");
@@ -424,12 +425,14 @@
 
 		// Set data visibility based on checkboxes
 		root.descendants().forEach((d) => {
-			if(['Mental Health ','Healthcare disruption','Society & Health ','Serology ','Long Covid ','OpenSAFELY','Other ','Treatment '].includes(d.data.text))
-				setTreeVisibility(d.data, checkboxesChecked["checkbox-detailed-view-themes-publications"]);
-			if(d.data.text === 'Data')
+			if(d.data.text === 'Data') {
 				setTreeVisibility(d.data, checkboxesChecked["checkbox-detailed-view-data-sources"]);
-			if(d.data.text === 'Team' || d.data.text === 'Teams')
+			} else if(d.data.text === 'Team' || d.data.text === 'Teams') {
 				setTreeVisibility(d.data, checkboxesChecked["checkbox-detailed-view-team"]);
+			} else if(d.data.depth === 1) {
+				if (checkboxesChecked[`checkbox-${d.data.id}`] == null) checkboxesChecked[`checkbox-${d.data.id}`] = true;
+				setTreeVisibility(d.data, checkboxesChecked[`checkbox-${d.data.id}`]);
+			}
 		});
 
 		// Remove highlighted paths if body is clicked
@@ -1842,7 +1845,7 @@
 	</div>
 
 	<!-- controls -->
-	<Controls bind:presets bind:checkboxesChecked bind:rerenderTreeTrigger bind:mode bind:root 
+	<Controls bind:presets bind:checkboxesChecked bind:rerenderTreeTrigger bind:mode bind:root
 		bind:categoryLegendVisible bind:currentTextScale bind:categoriesDataConnections bind:radius bind:twist/>
 	<!-- bind:visible={controlsVisible} -->
 
