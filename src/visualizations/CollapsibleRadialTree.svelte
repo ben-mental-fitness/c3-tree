@@ -56,7 +56,7 @@
 	let visMode2Nodes = undefined; 
 	let persistentSticky = {"persist" : false};
 	let connectedNodeDuplicates = undefined;
-	let lastClickTime = Date.now();
+	let resizingSticky = false;
 
 	// When mid-level node on Cluster View is clicked update visible teams array & refresh the view 
 	const nodeOnClick = (d) => {
@@ -1374,10 +1374,13 @@
 					.style("top", persistentSticky.persist ? persistentSticky.top : `${boundingRect.top}px`)
 					.style("width", persistentSticky.persist ? persistentSticky.width : `${boundingRect.width}px`)
 					.style("height", persistentSticky.persist ? persistentSticky.height : `${boundingRect.height}px`)
+					.style("min-width", "30px")
+					.style("min-height", "30px")
+					.style("overflow-x", "hidden")
 					.style("pointer-events", "all")
 					.style("cursor", "move")
 					.style("resize", "both")
-					.style("z-index", "99")
+					.style("z-index", "101")
 					.attr("tabindex", "0")
 					.on("mousedown", (event) => {
 						event.stopPropagation();
@@ -1388,22 +1391,68 @@
 							parseInt(d3.select("#sticky-tooltip").style("top"))
 						];
 						
-						const boundingRect = d3.select("#sticky-tooltip").node().getBoundingClientRect();
+						let boundingRect = d3.select("#sticky-tooltip").node().getBoundingClientRect();
 						const tooltipWidth = boundingRect.width;
 						const tooltipHeight = boundingRect.height;
+						let resizeDirection = null;
 
 						// Resizing so don't drag
-						if (!(startPointerPos[0] < boundingRect.right - 25
-							&& startPointerPos[0] > boundingRect.left + 25
+						if (!(startPointerPos[0] > boundingRect.left + 25
 							&& startPointerPos[1] > boundingRect.top + 25
 							&& startPointerPos[1] < boundingRect.bottom - 25)) {
-							return;
+							resizingSticky = true;
 						}
 						event.preventDefault();
 
-						// Drag tooltip
+						// Resize or Drag tooltip
 						d3.select("body")
+							.on("mousemove", (event) => {
+								if (resizingSticky) {
+									let stickyT = d3.select("#sticky-tooltip");
+									if (stickyT.style("cursor") === "ew-resize") {
+										if (event.pageX > boundingRect.left) {
+											stickyT.style("width", `${boundingRect.right - event.pageX}px`)
+												.style("left", `${event.pageX}px`);
+										} else {
+											stickyT.style("width", `${boundingRect.width + boundingRect.left - event.pageX}px`)
+												.style("left", `${event.pageX}px`);
+										}
+									} else if (stickyT.style("cursor") === "ns-resize") {
+										if (!resizeDirection) {
+											if (event.pageY < boundingRect.top + (boundingRect.height / 2)) {resizeDirection = "TOP"}
+											else {resizeDirection = "BOTTOM"}
+										}
+
+										if (resizeDirection === "TOP") {
+											if (event.pageY < boundingRect.top) {
+												stickyT.style("height", `${boundingRect.bottom - event.pageY}px`)
+													.style("top", `${event.pageY}px`);
+											} else {
+												stickyT.style("height", `${boundingRect.height + boundingRect.top - event.pageY}px`)
+													.style("top", `${event.pageY}px`);
+											}
+
+										} else if (resizeDirection === "BOTTOM") {
+											stickyT.style("height", `${event.pageY - boundingRect.top}px`)
+										}
+									} else {
+										resizingSticky = false;
+									}
+								} else {
+									let startPointerPos = [event.pageX, event.pageY];						
+									const boundingRect = d3.select("#sticky-tooltip").node().getBoundingClientRect();
+
+									if (!(startPointerPos[0] > boundingRect.left + 25)) {
+										d3.select("#sticky-tooltip").style("cursor", "ew-resize");
+									} else if (!(startPointerPos[1] > boundingRect.top + 25 && startPointerPos[1] < boundingRect.bottom - 25)) {
+										d3.select("#sticky-tooltip").style("cursor", "ns-resize");
+									} else {
+										d3.select("#sticky-tooltip").style("cursor", "move");
+									}	
+								}
+							})
 							.on("mousemove.dragTooltip", (event) => {
+								if(resizingSticky) return;
 								let pointerPos = [event.pageX, event.pageY];
 								let deltaX = pointerPos[0] - startPointerPos[0];
 								let deltaY = pointerPos[1] - startPointerPos[1];
@@ -1428,10 +1477,29 @@
 									// .style("max-height", `${canvasHeight - newY - 10}px`)
 							})
 							.on("mouseup.dragTooltip,mouseleave.dragTooltip", (event) => {
+								if (resizingSticky) return; 
+								boundingRect = d3.select("#sticky-tooltip").node().getBoundingClientRect();
 								d3.select("body")
 									.on("mousemove.dragTooltip", null)
 									.on("mouseup.dragTooltip,mouseleave.dragTooltip", null);
 							});
+					})
+					.on("mouseup", (event) => {
+						resizingSticky = false;
+					})
+					.on("mousemove", (event) => {
+						if (!resizingSticky) {
+							let startPointerPos = [event.pageX, event.pageY];						
+							const boundingRect = d3.select("#sticky-tooltip").node().getBoundingClientRect();
+
+							if (!(startPointerPos[0] > boundingRect.left + 25)) {
+								d3.select("#sticky-tooltip").style("cursor", "ew-resize");
+							} else if (!(startPointerPos[1] > boundingRect.top + 25 && startPointerPos[1] < boundingRect.bottom - 25)) {
+								d3.select("#sticky-tooltip").style("cursor", "ns-resize");
+							} else {
+								d3.select("#sticky-tooltip").style("cursor", "move");
+							}	
+						}
 					})
 					.on("click", (event) => {
 						event.stopPropagation();
