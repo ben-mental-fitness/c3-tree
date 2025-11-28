@@ -47,6 +47,7 @@
 	export let categoryLegendVisible;
 	export let loaderVisible;
 	export let currentTextScale;
+	let onlyOneCategoryVisible = false; 
 	
 	// For interactions
 	let selectedNode = undefined;
@@ -55,6 +56,7 @@
 	let visMode2Nodes = undefined; 
 	let persistentSticky = {"persist" : false};
 	let connectedNodeDuplicates = undefined;
+	let lastClickTime = Date.now();
 
 	// When mid-level node on Cluster View is clicked update visible teams array & refresh the view 
 	const nodeOnClick = (d) => {
@@ -325,7 +327,7 @@
 
 		d3.selectAll("#node-group-wrapper .node-circle")
 			.transition(animation)
-			.attr("opacity", (d) => !simplifiedMode && (d.data.visible || d.parent?.data.visible || d.parent?.data.id === "r") && (!d.children || mode == "viz-select-0") ? 1.0 : 0.0);
+			.attr("opacity", (d) => d && !simplifiedMode && (d.data.visible || d.parent?.data.visible || d.parent?.data.id === "r") && (!d.children || mode == "viz-select-0") ? 1.0 : 0.0);
 			
 		d3.selectAll("#node-group-wrapper .node-interact-area")
 			.style("pointer-events", (d) => /* d.data.visible && */ !simplifiedMode && mode === "viz-select-0" ? "all" : "none")
@@ -822,6 +824,24 @@
 			.on("click", (event, d) => {
 				mouseClickEvent(event, d);
 			})
+			.on("dblclick", (event, d) => {
+				if (d.depth !== 1 || d.data.text === "Data" || d.data.text === "Team") return;
+				if (onlyOneCategoryVisible) {
+					root.descendants().filter((d_) => d_.depth === 1 && d_.data.text !== "Data" && d_.data.text !== "Team" && d_.data.id !== d.data.id)
+						.forEach(d_ => {
+							document.getElementById(`checkbox-${d_.data.id}`).click();
+						});
+					onlyOneCategoryVisible = false;
+				} else {
+					root.descendants().filter((d_) => d_.depth === 1 && d_.data.text !== "Data" && d_.data.text !== "Team" && d_.data.id !== d.data.id)
+						.forEach(d_ => {
+							document.getElementById(`checkbox-${d_.data.id}`).click();
+						});	
+					onlyOneCategoryVisible = true;
+				}
+				if (!d3.select(`#checkbox-${d.data.id}`).attr("checked")) document.getElementById(`checkbox-${d.data.id}`).click();
+				rerenderTreeTrigger = true;
+			})
 			.on("mouseover", (event, d) => {
 				mouseOverEvent(event, d);
 			})
@@ -1196,8 +1216,23 @@
 					.style("white-space", "pre-wrap")
 					.text(topic.data.props.themeDescShort);
 				
-				// Hide other elements on tooltip
-				d3.select("#hover-tooltip #tooltip-main-button-link").style("display", "none");
+				if (mode === "viz-select-0" && d.data.text !== "Data" && d.data.text !== "Teams" && d.data.text !== "Team") {
+					d3.select("#hover-tooltip #tooltip-main-button-link").selectAll("*").remove();
+					d3.select("#hover-tooltip #tooltip-main-button-link")
+						.style("display", "block")
+						.append("button")
+						.attr("type", "button")
+						.attr("class", "button button-simplified button-blossom")
+						.style("pointer-events", "all")
+						.style("margin", "10px")
+						.style("min-width", "150px")
+						.style("width", "calc(50% - 25px)")
+						.text(onlyOneCategoryVisible ? "Reset to show all publications" : `Show only '${d.data.text}' publications in visualisation`);
+				} else {
+					d3.select("#hover-tooltip #tooltip-main-button-link").style("display", "none");
+				}
+
+				// Hide other elements on tooltip;
 				d3.select("#hover-tooltip .tooltip-collapsible-button").style("display", "none");
 				d3.select("#hover-tooltip .tooltip-dropdown-title").text("");
 				d3.select("#hover-tooltip .table-collapsed .tooltip-tbody").style("display", "none").selectAll("*").remove();
@@ -1612,6 +1647,26 @@
 					.on("click", (event_new) => {
 						window.open(d.data.props.info_collapsed.Impact);
 						event.stopPropagation();
+					});
+
+				// Blossom clusters
+				d3.select("#sticky-tooltip #tooltip-main-button-link .button-blossom")
+					.on("click", () => {
+						if (onlyOneCategoryVisible) {
+							root.descendants().filter((d_) => d_.depth === 1 && d_.data.text !== "Data" && d_.data.text !== "Team" && d_.data.id !== d.data.id)
+								.forEach(d_ => {
+									document.getElementById(`checkbox-${d_.data.id}`).click();
+								});
+							onlyOneCategoryVisible = false;
+						} else {
+							root.descendants().filter((d_) => d_.depth === 1 && d_.data.text !== "Data" && d_.data.text !== "Team" && d_.data.id !== d.data.id)
+								.forEach(d_ => {
+									document.getElementById(`checkbox-${d_.data.id}`).click();
+								});	
+							onlyOneCategoryVisible = true;
+						}
+						if (!d3.select(`#checkbox-${d.data.id}`).attr("checked")) document.getElementById(`checkbox-${d.data.id}`).click();
+						rerenderTreeTrigger = true;
 					});
 
 				// Remove highlighted paths
