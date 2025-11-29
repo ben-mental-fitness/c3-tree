@@ -83,6 +83,8 @@
 		"TabsTitle": "120%",
 		"ListContent": "100%",
 		"BackButton": "80%",
+		"HelpButton": "400%",
+		"InfoButton": "300%",
 		"Controls": "90%",
 		"LegendWrapper": "120%",
 		"CategoryLabels": "18px",

@@ -99,9 +99,12 @@
 		// Update font sizes
 		d3.selectAll("#controls-wrapper span").style("font-size", currentTextScale.Controls);
 		document.getElementById("d3-canvas").style.fontSize = currentTextScale.D3Canvas;
-		document.getElementById("info-button").style.fontSize = currentTextScale.HelpButton;
+		document.getElementById("info-button").style.fontSize = currentTextScale.InfoButton;
 		document.getElementById("help-button").style.fontSize = currentTextScale.HelpButton;
 		document.getElementById("back-button").style.fontSize = currentTextScale.BackButton;
+
+		d3.select("#info-button")
+			.style("width", `${document.getElementById("info-button").offsetHeight}px`);
 		
 		// Define visible elements
 		const filteredRoot = root;
@@ -1972,8 +1975,8 @@
 	<div id="back-button" style="display: none;position: absolute;color:#808080;font-size:80%;cursor:pointer;">
 		&lt; switch to List View
 	</div>
-	<div id="info-button" style="display: none;position: absolute;color:#808080;font-size:400%;font-weight: bold;cursor:pointer;">
-		!
+	<div id="info-button" style="display: none;position: absolute;color:#808080;font-size:250%;font-weight: bold;cursor:pointer;">
+		<center>i</center>
 	</div>
 	<div id="help-button" style="display: none;position: absolute;color:#808080;font-size:400%;font-weight: bold;cursor:pointer;">
 		?
@@ -2034,6 +2037,14 @@
 	::-webkit-scrollbar-thumb {
 		background: #eee;
 		border-radius: 5pX;
+	}
+
+	#info-button {
+		box-sizing: border-box;
+		-moz-box-sizing: border-box;
+		-webkit-box-sizing: border-box;
+		border: 6px solid #808080;
+		border-radius: 50%;
 	}
 
 	#intro-panel-wrapper {
