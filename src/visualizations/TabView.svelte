@@ -4,6 +4,7 @@
 	import { Hamburger } from 'svelte-hamburgers';
 	
 	import Menu from '../components/Menu.svelte';
+	import { listSearchForData } from '../helper/listViewSearchTab';
 
 	// Bound to App.svelte variables
 	export let data;
@@ -23,11 +24,11 @@
 		const pageDim = d3.select("body").node().getBoundingClientRect();
 		const marginTop = 30;
 		const marginBottom = 280;
-		const tabHeight = Math.floor((pageDim.height - marginTop - marginBottom - 2 * data.children.length) / data.children.length);
+		const tabHeight = Math.floor((pageDim.height - marginTop - marginBottom - 2 * (data.children.length + 1)) / (data.children.length + 1));
 		const tabWidth = 250;
 
 		const contentWidth = 750;
-		const contentHeight = tabHeight * data.children.length + 2 * data.children.length - 2;
+		const contentHeight = tabHeight * (data.children.length + 1) + 2 * (data.children.length + 1) - 2;
 
 		d3.select("#tabs-wrapper")
 			.style("margin", `${marginTop}px 0 ${marginBottom}px 0`)
@@ -65,7 +66,43 @@
 			.style("margin", "6px")
 			.text((d) => d.text);
 
+		// CREATE SEARCH TAB
+		const tabSearchData = [{
+			"id" : "tabSearch",
+			"color" : "#000000",
+			"text" : "Search"
+		}]
+		d3.select("#tabs-wrapper .tabs-left")
+			.append("div")
+			.data(tabSearchData)
+			.attr("class", "tab")
+			.attr("id", d => `${d.id}-tab`)
+			.style("border-color", "rgb(208, 208, 208) rgb(209, 209, 209) rgb(208, 208, 208) rgb(208, 208, 208)")
+			.style("border-style", "solid")
+			.style("border-width", "1px")
+			.style("height", `${tabHeight}px`)
+			.style("width", `${tabWidth}px`)
+			.style("line-height", `${tabHeight - 14}px`)
+			.style("cursor", "pointer")
+			.attr("tabindex", "0")
+			.on("keydown", (event) => {
+				if (event.key === "Enter" || event.key === "Spacebar" || event.key === " ") {
+					if (activeDropdownElement) activeDropdownElement.click();
+					selectedTab = tabSearchData;
+					showContentOfSelectedTab(true);
+				}
+			});
+
+		const tabSearch = d3.select(`#${tabSearchData[0].id}-tab`);
+		tabSearch.append("p")
+			.attr("class", "title")
+			.style("border", d => `2px solid ${d.color}`)
+			.style("padding", "0 20px")
+			.style("margin", "6px")
+			.text(d => d.text);
+
 		let contents;
+		let contentSearch;
 
 		d3.select('#tabs-wrapper .hamburger').style('display', isMobile ? null : 'none')
 
@@ -81,10 +118,16 @@
 				.join("div")
 				.attr("class", "content")
 				.attr("id", (d) => `${d.id}-content`)
-				.style("display", (d, i) => i > -1 ? "none" : "default")
-				
-		}  else {
+				.style("display", (d, i) => i > -1 ? "none" : "default");
+			
+			contentSearch = d3.select("#tabs-wrapper .mobile-version .content-mobile")
+				.append("div")
+				.data(tabSearchData)
+				.attr("class", "content")
+				.attr("id", d => `${d.id}-content`)
+				.style("display", "default");
 
+		}  else {
 			contents = d3.select("#tabs-wrapper .desktop-version .content-right")
 				.attr("tabindex", "0")
 				.style("float", "left")
@@ -98,8 +141,16 @@
 				.data(data.children)
 				.join("div")
 				.attr("class", "content")
+				.data(data.children)
 				.attr("id", (d) => `${d.id}-content`)
-				.style("display", (d, i) => i > -1 ? "none" : "default")
+				.style("display", (d, i) => i > -1 ? "none" : "default");
+
+			contentSearch = d3.select("#tabs-wrapper .desktop-version .content-right")
+				.append("div")
+				.data(tabSearchData)
+				.attr("class", "content")
+				.attr("id", d => `${d.id}-content`)
+				.style("display", "default");
 		}
 
 		contents.append("p")
@@ -110,12 +161,41 @@
 			.style("font-size", currentTextScale.TabsTitle)
 			.style("color", (d) => d.color)
 			.text((d) => d.text);
+		contentSearch.append("p")
+			.attr("class", "title")
+			.style("padding", "30px")
+			.style("margin", "0")
+			.style("font-weight", "bold")
+			.style("font-size", currentTextScale.TabsTitle)
+			.style("color", d => d.color)
+			.text(d=> d.text);
 
 		contents.append("p")
 			.attr("class", "content-text")
 			.style("padding", "0 30px 20px")
 			.style("white-space", "pre-wrap")
 			.text((d) => d.props.themeDescLong);
+
+		contentSearch.append("p")
+			.attr("class", "content-text")
+			.attr("id", "tab-search-results-title")
+			.style("margin-left", "30px")
+			.style("white-space", "pre-wrap")
+			.text("Enter at least 3 characters to search");
+		contentSearch.append("input")
+			.attr("id", "tab-search-input")
+			.attr("type", "text")
+			.attr("tabindex", "3")
+			.attr("placeholder", "Search text...")
+			.on("keyup", (event) => {
+				listSearchForData(event.target.value, rawData, ANIM_DURATION_IN, ANIM_DURATION_OUT)
+			});
+		contentSearch.append("div")
+			.style("padding", "0 30px 20px")
+			.style("margin", "10px 0")
+			.attr("class", "collapsible-content-wrapper")
+			.attr("id", "tab-search-results")
+			.style("display", "block")
 			
 		contents.append("div")
 			.style("width", "440px")
@@ -314,9 +394,10 @@
 
 		papersListContent.each(function (d) {
 			// TODO - Add links to Data theme studies.
+			// TEMP - HIDE SUMMARY
 			let collapsibleInfo = false;
 			Object.keys(d).filter((key) => key.indexOf("[INFO_MAIN]") !== -1).forEach((key) => {
-				if(d[key] && d[key] !== "") {
+				if(d[key] && d[key] !== "" && key !== "[INFO_MAIN]Summary") {
 					collapsibleInfo = true;
 					d3.select(this).append("p")
 						.style("font-weight", "bold")
@@ -443,6 +524,10 @@
 			selectedTab = d;
 			showContentOfSelectedTab(true);
 		});
+		tabSearch.on("click", (event, d) => {
+			selectedTab = d;
+			showContentOfSelectedTab(true);
+		});
 
 		
 		d3.select(".hamburger").on("click", (event) => {
@@ -454,7 +539,6 @@
 				});
 		})
 		
-
 		showContentOfSelectedTab(false);
 	};
 

@@ -10,6 +10,7 @@ export const updateTextSize = (currentTextScale) => {
     d3.selectAll(".content-text").style("font-size", currentTextScale.ListContent);
     d3.selectAll(".collapsible-content-toggler p").style("font-size", currentTextScale.ListContent);
     d3.selectAll(".papers-list-item p").style("font-size", currentTextScale.ListContent);
+    d3.selectAll("#tab-search-input").style("font-size", currentTextScale.Controls);
 
     // Visualisation view
     d3.selectAll("#back-button").style("font-size", currentTextScale.BackButton);
