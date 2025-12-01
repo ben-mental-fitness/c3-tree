@@ -161,17 +161,19 @@
 
 	const showTabsView = () => {
 
+		const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
 		welcomeDialogVisible = false;
 		checkShowDisplayCompatabilityTrigger = true;
 
 		d3.selectAll("#yt-embed")
 			.style("height", "0px")
 			.filter(d => d.youtubeId !== undefined && d.youtubeId !== "")
-			.style("height", "320px")
+			.style("height", isMobile ? "240px" : "320px")
 			.append("iframe")
 			.attr("src", d => `https://www.youtube-nocookie.com/embed/${d.youtubeId}?origin=https://c3tree.bw1-dev.com`)
-			.attr("width", "440")
-			.attr("height", "320")
+			.attr("width", isMobile ? "330" : "440")
+			.attr("height", isMobile ? "240" : "320")
 			.attr("frameborder", "0")
 			//.attr("allow", "accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture")
 			.attr("allowfullscreen", true);
@@ -352,8 +354,6 @@
 <main>
 
 	<WelcomeDialog bind:visible={welcomeDialogVisible} {ANIM_DURATION_OUT}/>
-	<Attribution/>
-	<DraftNotice/>
 	<IntroTour bind:introTourStartTrigger bind:introData/>
 	<MinWidthDialog bind:checkShowDisplayCompatabilityTrigger/>
 	<DimensionsCalculator bind:width bind:height bind:canvasWidth bind:canvasHeight bind:radius bind:outerRadius bind:twist {BRAIN_SIZE} {BRAIN_ASPECT_RATIO}/>
@@ -367,6 +367,9 @@
 		bind:loaderVisible bind:currentTextScale bind:explainerData />
 
 	<TabView bind:data bind:rawData bind:showMainVizTrigger {ANIM_DURATION_IN} {ANIM_DURATION_OUT} bind:currentTextScale/>
+
+	<Attribution/>
+	<DraftNotice/>
 
 	<!-- <Legend bind:canvasWidth bind:canvasHeight bind:welcomeDialogVisible bind:currentTextScale/> -->
 	<Loader bind:visible={loaderVisible}/>

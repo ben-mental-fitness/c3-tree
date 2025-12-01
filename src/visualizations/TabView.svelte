@@ -23,7 +23,7 @@
 
 		const pageDim = d3.select("body").node().getBoundingClientRect();
 		const marginTop = 30;
-		const marginBottom = 280;
+		const marginBottom = isMobile ? 30 : 280;
 		const tabHeight = Math.floor((pageDim.height - marginTop - marginBottom - 2 * (data.children.length + 1)) / (data.children.length + 1));
 		const tabWidth = 250;
 
@@ -197,9 +197,10 @@
 			.attr("id", "tab-search-results")
 			.style("display", "block")
 			
-		contents.append("div")
-			.style("width", "440px")
-			.style("height", "320px")
+		contents.append("center")
+			.append("div")
+			.style("width", isMobile ? "auto" : "440px")
+			.style("height", isMobile ? "300px" : "320px")
 			.style("margin", "0 auto")
 			.style('display', (d) => d.youtubeId !== undefined ? 'block' : 'none')
 			.attr("id", "yt-embed");
@@ -556,8 +557,8 @@
 <div id="full-page-fade" style="display:none;"></div>
 
 <div id="tabs-wrapper" style="opacity: 0.0;display: none;">
-	<Hamburger bind:open={menuOpen} color="white"/>
 	<div class="tab-view-header">
+		<Hamburger bind:open={menuOpen} color="white"/>
 		<img src="/center_logo.png" alt="Logo"/>
 		<img src="/center_logo_2.png" alt="Logo"/>
 		<span id="tab-view-title">Welcome</span>
@@ -576,7 +577,7 @@
 </div>
 
 <div class="hamburger-wrapper">
-	<Menu bind:open={menuOpen}/>
+	<Menu bind:open={menuOpen} bind:data/>
 </div>
 
 <style>

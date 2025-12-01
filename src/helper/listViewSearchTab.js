@@ -137,7 +137,6 @@ const createCollapsibleDropdown = (searchTerm, rawData, ANIM_DURATION_IN, ANIM_D
         let collapsibleInfo = false;
         Object.keys(d).filter((key) => key.indexOf("[INFO_MAIN]") !== -1).forEach((key) => {
             if(d[key] && d[key] !== "" && key !== "[INFO_MAIN]Summary") {
-                console.log(key);
                 collapsibleInfo = true;
                 d3.select(this).append("p")
                     .style("font-weight", "bold")
@@ -207,7 +206,6 @@ const createCollapsibleDropdown = (searchTerm, rawData, ANIM_DURATION_IN, ANIM_D
 }
 
 const overlayClickEvent = (event) => {
-    console.log(activeDropdownElement);
     if (activeDropdownElement.contains(event.target)) return;
     activeDropdownElement.click();
 };

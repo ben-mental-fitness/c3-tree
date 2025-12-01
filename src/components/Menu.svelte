@@ -4,18 +4,21 @@
 
     // Bound to TabView.svelte
     export let open;
+    export let data;
 </script>
 
 {#if open}
-    <div>
-        {#each ['Mental Health ','Healthcare disruption','Society & Health ','Serology ','Long Covid ','OpenSAFELY','Other ','Treatment ','Teams','Data'] as link, i}
-            <p transition:fly={{ y: -15, delay: 50 * i }} data-link="{link}" class="hamburger-link">
-                {link}
-            </p>
-        {/each}
-    </div>
+    {#key data}
+        <div id="hamburger-link-wrapper">
+            {#each data.children as link, i}
+                <p transition:fly={{ y: -15, delay: 50 * i }} data-link="{link.text}" class="hamburger-link">
+                    {link.text}
+                </p>
+            {/each}
+        </div>
 
-    <hr transition:scale={{ duration: 750, easing: quadOut, opacity: 1 }} />
+        <hr transition:scale={{ duration: 750, easing: quadOut, opacity: 1 }} />
+    {/key}
 {/if}
 
 <style>

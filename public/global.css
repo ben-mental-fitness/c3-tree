@@ -151,12 +151,27 @@ input {
   height: 110px;
   line-height: 110px;
   padding-bottom: 20px;
+  vertical-align: middle;
 }
 #tabs-wrapper .tab-view-header img {
   float: left;
   height: 110px;
   margin-right: 15px;
 }
+
+@media screen and (max-width: 768px) {
+  #tabs-wrapper .tab-view-header {
+    height: 60px;
+    line-height: 60px;
+    padding-bottom: 15px;
+  }
+
+  #tabs-wrapper .tab-view-header img {
+    float: right;
+    height: 50px;
+  }
+}
+
 #tabs-wrapper .tab-view-header span {
   float: left;
   font-weight: bold;
