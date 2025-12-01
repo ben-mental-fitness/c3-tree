@@ -14,7 +14,15 @@
 		font-size: 80%;
 		border: 1px solid #f0f0f0;
 		padding: 10px;
-		text-align: left
-		;z-index: 99;
+		text-align: left;
+		z-index: 99;
+	}
+
+	@media screen and (max-width: 768px) {
+		#draft-notice {
+			position: relative;
+			width: 90%;
+			margin-top: 25px;
+		}
 	}
 </style>

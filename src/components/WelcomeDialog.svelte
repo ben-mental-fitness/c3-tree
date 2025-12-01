@@ -41,8 +41,9 @@
     
 </script>
 
-<img src="/center_logo.png" alt="Logo" id="welcome-dialog-logo" style="position:absolute;left:50px;top:50px;height:200px"/>
-<img src="/center_logo_2.png" alt="Logo" id="welcome-dialog-logo-2" style="position:absolute;left:275px;top:50px;height:200px"/>
+<img src="/center_logo.png" alt="Logo" id="welcome-dialog-logo"/>
+<img src="/center_logo_2.png" alt="Logo" id="welcome-dialog-logo-2"/>
+<div style="clear:both;margin-bottom:25px"></div>
 
 <div id="welcome-dialog" style="display:none;">
 
@@ -81,15 +82,42 @@
 		font-style: italic;
 	}
 
+	#welcome-dialog-logo, #welcome-dialog-logo-2 {
+		position : absolute;
+		top : 50px;
+		height : 200px;
+	}
+
+	#welcome-dialog-logo {
+			left : 50px;
+		}
+		
+	#welcome-dialog-logo-2 {
+		left : 275px;
+	}
+
 	@media screen and (max-width: 768px) {
+
+		#welcome-dialog-logo, #welcome-dialog-logo-2 {
+			position : relative;
+			top: 20px;
+			height: 100px;
+		}
+		#welcome-dialog-logo {
+			left : 20px;
+		}
+		
+		#welcome-dialog-logo-2 {
+			left : 145px;
+		}
+
 	    #welcome-dialog {
-			position: absolute;
-			left:10px;
-			top:50%;
-			width: calc(100% - 60px);
-			margin-left:0;
-			margin-top:-350px;
-			padding:20px;
+			position : relative;
+			left :10px;
+			top : auto;
+			width : 90%;
+			margin : 25px 0px 25px 0px;
+			padding : 10px;
 		}
 		#welcome-dialog .button-row {
 			display: block;

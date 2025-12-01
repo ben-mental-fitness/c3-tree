@@ -8,6 +8,7 @@
 <style>
     #attribution {
         width: calc(100% - 370px);
+        min-width: 200px;
         background: #ffffff;
         display: block;
         position: fixed;
@@ -18,5 +19,14 @@
         padding: 10px;
         text-align: center;
         z-index: 99;
+    }
+
+    @media screen and (max-width: 768px) {
+        #attribution {
+            position: relative;
+			width: 90%;
+            left: 10px;
+            margin-top: 25px;
+		}
     }
 </style>
