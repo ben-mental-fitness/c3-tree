@@ -1997,8 +1997,12 @@
 				<div id="intro-panel-yt-embed">
 					<iframe width="440" height="320" frameborder="0" allowfullscreen title="Visualisation explainer video"></iframe>
 				</div>
-				<div id="intro-panel-text" style="text-align: left;">
+				<div id="intro-panel-text" style="text-align: left;margin-top:25px">
 					<p>Some explainer text here.</p>
+				</div>
+				<div id="info-panel-attribution" style="text-align: left;"> 
+					<h1>About this Work</h1>   
+					<p>This work is independent research jointly funded by the National Institute for Health and Care Research (NIHR) and UK Research and Innovation (UKRI) \[Characterisation, determinants, mechanisms and consequences of the long-term effects of COVID-19: providing the evidence base for health care services, COV-LT-0009\MC_PC20051]. The views expressed in this publication are those of the author(s) and not necessarily those of NIHR, The Department of Health and Social Care or UKRI. More information is available at: <a href="https://www.ucl.ac.uk/covid-19-longitudinal-health-wellbeing/" target="_blank">www.ucl.ac.uk/covid-19-longitudinal-health-wellbeing/</a></p>
 				</div>
 			</center>
 		</div>
@@ -2062,10 +2066,11 @@
 		left:50%;
 		top:50%;
 		width: 800px;
-		min-height: 300px;
+		height: 500px;
 		margin-left:-400px;
-		margin-top:-200px;
+		margin-top:-250px;
 		padding:20px;
+		overflow-y: scroll;
 		opacity: 1.0;
 		background: #ffffff;
 		border: 1px solid #f0f0f0;

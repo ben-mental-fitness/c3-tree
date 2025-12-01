@@ -154,6 +154,9 @@
 		updateTextSize(currentTextScale);
 		simplifiedMode = false;
 		rerenderTreeTrigger = true;
+
+		d3.select("#attribution")
+			.style("display", "none");
 	};
 
 	const showTabsView = () => {
@@ -188,8 +191,9 @@
 		d3.select("#main-viz-wrapper")
 			.transition("display")
 			.delay(ANIM_DURATION_IN)
-			.style("display", "none")
-			
+			.style("display", "none");
+		d3.select("#attribution")
+			.style("display", "block");
 	};
 
 	const fetchGDriveAPIData = () => {
