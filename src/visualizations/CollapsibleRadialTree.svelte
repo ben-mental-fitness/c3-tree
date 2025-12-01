@@ -1983,8 +1983,8 @@
 	</div>
 
 	<!-- LOGOS  -->
-	<img src="/center_logo.png" alt="Logo" id="welcome-dialog-logo" style="position:absolute;right:125px;bottom:100px;height:100px"/>
-	<img src="/center_logo_2.png" alt="Logo" id="welcome-dialog-logo-2" style="position:absolute;right:10px;bottom:100px;height:100px"/>
+	<img src="/center_logo.png" alt="Logo" id="welcome-dialog-logo" style="position:absolute;right:185px;bottom:10px;height:150px"/>
+	<img src="/center_logo_2.png" alt="Logo" id="welcome-dialog-logo-2" style="position:absolute;right:10px;bottom:10px;height:150px"/>
 
 	<!-- Intro panel -->
 	<div id="intro-panel-wrapper">
