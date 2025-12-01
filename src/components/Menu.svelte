@@ -15,6 +15,10 @@
                     {link.text}
                 </p>
             {/each}
+
+            <p  transition:fly={{ y: -15, delay: 50 }} data-link="Search" class="hamburger-link">
+                Search
+            </p>
         </div>
 
         <hr transition:scale={{ duration: 750, easing: quadOut, opacity: 1 }} />

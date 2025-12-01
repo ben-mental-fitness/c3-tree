@@ -534,7 +534,11 @@
 		d3.select(".hamburger").on("click", (event) => {
 			d3.selectAll(".hamburger-link")
 				.on("click", function(event) {
-					selectedTab = data.children.find((d) => d.text === d3.select(this).attr("data-link"));
+					if (d3.select(this).attr("data-link") === "Search") {
+						selectedTab = tabSearchData[0];
+					} else {
+						selectedTab = data.children.find((d) => d.text === d3.select(this).attr("data-link"));
+					}
 					showContentOfSelectedTab(true);
 					menuOpen = false;
 				});
