@@ -52,11 +52,12 @@ export const buildHierarchy = ((parentLevel, data, presetsAvailable, presetsPare
 		Object.keys(d).filter((key) => key.indexOf("[INFO_MAIN]") !== -1).forEach((key) => {
 			level.props.info_main[key.replace("[INFO_MAIN]", "")] = d[key];
 		});
-		if (d.parent === "Data") {
-			let datas = [];
-			data.filter((c) => c.parent === d.text).forEach((c) => datas.push(c["Papers Title"]));
-			level.props.info_main.Summary = datas;
-		};		
+		// TEMP REMOVED DATA
+		// if (d.parent === "Data") {
+		// 	let datas = [];
+		// 	data.filter((c) => c.parent === d.text).forEach((c) => datas.push(c["Papers Title"]));
+		// 	level.props.info_main.Summary = datas;
+		// };		
 
 		if(depth <= maxDepth)
 			parentLevel.children.push(level);
@@ -80,7 +81,9 @@ export const buildHierarchy = ((parentLevel, data, presetsAvailable, presetsPare
 			});
 		}
 
-		let specificMaxDepth = filterSpecifics && (level.text === "Teams" || level.text === "Team" || level.text === "Data") ? 2 : maxDepth;
+		// TEMP REMOVED DATA
+		// let specificMaxDepth = filterSpecifics && (level.text === "Teams" || level.text === "Team" || level.text === "Data") ? 2 : maxDepth;
+		let specificMaxDepth = filterSpecifics && (level.text === "Teams" || level.text === "Team") ? 2 : maxDepth;
 		// let specificMaxDepth = maxDepth;
 
 		buildHierarchy(level, data, presetsAvailable, level.presets, visibleTeams, filterSpecifics, depth + 1, specificMaxDepth, type);

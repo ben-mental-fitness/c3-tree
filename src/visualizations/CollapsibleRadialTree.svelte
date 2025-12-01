@@ -962,14 +962,15 @@
 							}
 						});
 
-					// If Data add list of members
-					} else if (value && Array.isArray(value)) {
-						const mainInfoRow = d3.select("#hover-tooltip .table-main .tooltip-tbody");
-						mainInfoRow.append("tr").append("td")
-							.style("padding-bottom", "2px")
-							.append("p")
-							.style("font-size", currentTextScale.TooltipBody)
-							.html(value.join("<br/>"));	
+					// TEMP REMOVED DATA LISTING SUBTHEMES
+					// If Data add list of each subtheme's items
+					// } else if (value && Array.isArray(value)) {
+					// 	const mainInfoRow = d3.select("#hover-tooltip .table-main .tooltip-tbody");
+					// 	mainInfoRow.append("tr").append("td")
+					// 		.style("padding-bottom", "2px")
+					// 		.append("p")
+					// 		.style("font-size", currentTextScale.TooltipBody)
+					// 		.html(value.join("<br/>"));	
 
 					// If publication add summary and/or abstract
 					} else if(value && value !== "") {					
@@ -1219,7 +1220,21 @@
 					.style("white-space", "pre-wrap")
 					.text(topic.data.props.themeDescShort);
 				
-				if (mode === "viz-select-0" && d.data.text !== "Data" && d.data.text !== "Teams" && d.data.text !== "Team") {
+				if (mode === "viz-select-0" && d.data.text !== "Teams" && d.data.text !== "Team") {
+					const showNotHideCategories = () => {
+						let visibleCategories = 0;
+						root.descendants().filter((d_) => d_.depth === 1 && d_.data.text !== "Data" && d_.data.text !== "Team")
+							.forEach(d_ => {
+								// @ts-ignore
+								visibleCategories += document.getElementById(`checkbox-${d_.data.id}`).checked ? 1 : 0;
+							});
+
+						// @ts-ignore
+						visibleCategories += document.getElementById("checkbox-detailed-view-data-sources").checked ? 1 : 0;
+						onlyOneCategoryVisible = visibleCategories < 2;
+						return onlyOneCategoryVisible;
+					}
+
 					d3.select("#hover-tooltip #tooltip-main-button-link").selectAll("*").remove();
 					d3.select("#hover-tooltip #tooltip-main-button-link")
 						.style("display", "block")
@@ -1230,7 +1245,8 @@
 						.style("margin", "10px")
 						.style("min-width", "150px")
 						.style("width", "calc(50% - 25px)")
-						.text(onlyOneCategoryVisible ? "Reset to show all publications" : `Show only '${d.data.text}' publications in visualisation`);
+						.text(showNotHideCategories() ? "Reset to show all publications" : 
+							d.data.text === "Data" ? "Show only 'data' category in visualisation" : `Show only '${d.data.text}' publications in visualisation`);
 				} else {
 					d3.select("#hover-tooltip #tooltip-main-button-link").style("display", "none");
 				}
@@ -1717,17 +1733,28 @@
 				// Blossom clusters
 				d3.select("#sticky-tooltip #tooltip-main-button-link .button-blossom")
 					.on("click", () => {
+						// Show all categories
 						if (onlyOneCategoryVisible) {
 							root.descendants().filter((d_) => d_.depth === 1 && d_.data.text !== "Data" && d_.data.text !== "Team" && d_.data.id !== d.data.id)
 								.forEach(d_ => {
 									document.getElementById(`checkbox-${d_.data.id}`).click();
 								});
+							document.getElementById("checkbox-detailed-view-data-sources").click();
 							onlyOneCategoryVisible = false;
+
+						// Hide all categories
 						} else {
 							root.descendants().filter((d_) => d_.depth === 1 && d_.data.text !== "Data" && d_.data.text !== "Team" && d_.data.id !== d.data.id)
 								.forEach(d_ => {
-									document.getElementById(`checkbox-${d_.data.id}`).click();
+									// @ts-ignore
+									if (document.getElementById(`checkbox-${d_.data.id}`).checked) {
+										document.getElementById(`checkbox-${d_.data.id}`).click();
+									}
 								});	
+							// @ts-ignore	
+							if (document.getElementById("checkbox-detailed-view-data-sources").checked) {
+								document.getElementById("checkbox-detailed-view-data-sources").click();
+							}
 							onlyOneCategoryVisible = true;
 						}
 						if (!d3.select(`#checkbox-${d.data.id}`).attr("checked")) document.getElementById(`checkbox-${d.data.id}`).click();
