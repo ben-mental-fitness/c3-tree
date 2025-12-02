@@ -41,8 +41,10 @@
     
 </script>
 
-<img src="/center_logo.png" alt="Logo" id="welcome-dialog-logo"/>
-<img src="/center_logo_2.png" alt="Logo" id="welcome-dialog-logo-2"/>
+<div id="welcome-dialog-logos">
+	<img src="/center_logo.png" alt="Logo" id="welcome-dialog-logo"/>
+	<img src="/center_logo_2.png" alt="Logo" id="welcome-dialog-logo-2"/>
+</div>
 <div style="clear:both;margin-bottom:25px"></div>
 
 <div id="welcome-dialog" style="display:none;">
@@ -89,8 +91,8 @@
 	}
 
 	#welcome-dialog-logo {
-			left : 50px;
-		}
+		left : 50px;
+	}
 		
 	#welcome-dialog-logo-2 {
 		left : 275px;
@@ -98,17 +100,17 @@
 
 	@media screen and (max-width: 768px) {
 
+		#welcome-dialog-logos {
+			width: 100%;
+			justify-content: space-around;
+			display: flex;
+		}
+
 		#welcome-dialog-logo, #welcome-dialog-logo-2 {
 			position : relative;
 			top: 20px;
 			height: 100px;
-		}
-		#welcome-dialog-logo {
-			left : 20px;
-		}
-		
-		#welcome-dialog-logo-2 {
-			left : 145px;
+			left: auto;
 		}
 
 	    #welcome-dialog {
