@@ -988,7 +988,10 @@
 								.style("padding-bottom", "5px")
 								.append("p")
 								.style("font-size", currentTextScale.TooltipBody)
-								.text(value);	
+								.html(value
+									.replaceAll(/{b{(?<bold>.*)}}/gm, "<b>$1</b>")
+									.replaceAll(/{s\+{(?<super>.*)}}/gm, "<sup>$1</sup>")
+									.replaceAll(/{s-{(?<sub>.*)}}/gm, "<sub>$1</sub>"));
 						}
 					}
 				});
@@ -1128,7 +1131,10 @@
 							d3.select(this).append("p")
 								.style("padding-bottom", "5px")
 								.style("font-size", currentTextScale.TooltipBody)
-								.text(d.data.props.info_main.Abstract);
+								.html(d.data.props.info_main.Abstract
+									.replaceAll(/{b{(?<bold>.*)}}/gm, "<b>$1</b>")
+									.replaceAll(/{s\+{(?<super>.*)}}/gm, "<sup>$1</sup>")
+									.replaceAll(/{s-{(?<sub>.*)}}/gm, "<sub>$1</sub>"));
 						}
 
 						if(d.data.props.publication_link && d.data.props.publication_link !== "") {

@@ -405,7 +405,10 @@
 						.text(key.replace("[INFO_MAIN]", ""));
 					d3.select(this).append("p")
 						.style("padding-bottom", "5px")
-						.text(d[key]);
+						.html(d[key]
+							.replaceAll(/{b{(?<bold>.*)}}/gm, "<b>$1</b>")
+							.replaceAll(/{s\+{(?<super>.*)}}/gm, "<sup>$1</sup>")
+							.replaceAll(/{s-{(?<sub>.*)}}/gm, "<sub>$1</sub>"));
 				}
 			});
 			Object.keys(d).filter((key) => key.indexOf("[INFO_COLLAPSED]") !== -1).forEach((key) => {
@@ -416,7 +419,10 @@
 						.text(key.replace("[INFO_COLLAPSED]", ""));
 					d3.select(this).append("p")
 						.style("padding-bottom", "5px")
-						.text(d[key]);
+						.html(d[key]
+							.replaceAll(/{b{(?<bold>.*)}}/gm, "<b>$1</b>")
+							.replaceAll(/{s\+{(?<super>.*)}}/gm, "<sup>$1</sup>")
+							.replaceAll(/{s-{(?<sub>.*)}}/gm, "<sub>$1</sub>"));
 				}
 			});
 			if (d["[INFO_COLLAPSED]Impact"] && d["[INFO_COLLAPSED]Impact"] !== "") {
