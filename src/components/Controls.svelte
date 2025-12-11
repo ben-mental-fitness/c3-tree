@@ -420,7 +420,7 @@
 					<div style="clear: both;"></div>
 				</div>
 				<!-- svelte-ignore a11y-positive-tabindex -->
-				<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-data-sources" checked tabindex="3">
+				<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-data-sources" tabindex="3">
 				<span style="float:left;display:block">Data Sources</span>
 				<div style="clear: both;"></div>
 			</div>

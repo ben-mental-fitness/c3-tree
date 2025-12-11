@@ -66,6 +66,7 @@
 	let checkboxesChecked = {};
 
 	let checkShowDisplayCompatabilityTrigger;
+	let calculateDimensions;
 
 	let width  = null;
 	let height = null;
@@ -164,7 +165,6 @@
 		const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
 		welcomeDialogVisible = false;
-		checkShowDisplayCompatabilityTrigger = true;
 
 		d3.selectAll("#yt-embed")
 			.style("height", "0px")
@@ -345,6 +345,17 @@
 		d3.select("#hover-tooltip").style("width", `${TOOLTIP_WIDTH}px`).style("height", "auto")
 
 		fetchGDriveAPIData();
+
+		let resizeTimeout;
+		window.onresize = () => {
+			calculateDimensions();
+
+			clearTimeout(resizeTimeout);
+			resizeTimeout = setTimeout( () => {
+				checkShowDisplayCompatabilityTrigger = true;
+				if (!simplifiedMode && mode === "viz-select-1") rerenderTreeTrigger = true;
+			}, 500);
+		};
 	});
 
 	// skip welcome dialog
@@ -355,8 +366,9 @@
 
 	<WelcomeDialog bind:visible={welcomeDialogVisible} {ANIM_DURATION_OUT}/>
 	<IntroTour bind:introTourStartTrigger bind:introData/>
-	<MinWidthDialog bind:checkShowDisplayCompatabilityTrigger/>
-	<DimensionsCalculator bind:width bind:height bind:canvasWidth bind:canvasHeight bind:radius bind:outerRadius bind:twist {BRAIN_SIZE} {BRAIN_ASPECT_RATIO}/>
+	<MinWidthDialog bind:checkShowDisplayCompatabilityTrigger bind:simplifiedMode/>
+	<DimensionsCalculator bind:width bind:height bind:canvasWidth bind:canvasHeight bind:radius bind:outerRadius 
+		bind:twist {BRAIN_SIZE} {BRAIN_ASPECT_RATIO} bind:calculateDimensions/>
 	<CategoryLegend  bind:visible={categoryLegendVisible} {ANIM_DURATION_OUT} bind:mode bind:simplifiedMode/>
 
 	<CollapsibleRadialTree {BRAIN_SIZE} {BRAIN_ASPECT_RATIO} {TOOLTIP_WIDTH}
@@ -364,7 +376,7 @@
 		bind:simplifiedMode bind:twist bind:categoriesDataConnections
 		bind:width bind:height bind:canvasWidth bind:canvasHeight bind:radius bind:outerRadius
 		bind:controlsVisible bind:presets bind:checkboxesChecked bind:rerenderTreeTrigger bind:mode bind:categoryLegendVisible 
-		bind:loaderVisible bind:currentTextScale bind:explainerData />
+		bind:loaderVisible bind:currentTextScale bind:explainerData bind:checkShowDisplayCompatabilityTrigger />
 
 	<TabView bind:data bind:rawData bind:showMainVizTrigger {ANIM_DURATION_IN} {ANIM_DURATION_OUT} bind:currentTextScale/>
 

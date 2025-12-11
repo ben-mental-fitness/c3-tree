@@ -108,7 +108,7 @@
 		
 		// Define visible elements
 		const filteredRoot = root;
-		simplifiedMode = checkboxesChecked["checkbox-simple-view"];
+		// simplifiedMode = checkboxesChecked["checkbox-simple-view"];
 		controlsVisible = !simplifiedMode;
 
 		// Visualisation rotation
@@ -1950,16 +1950,6 @@
 		createCollapsableRadialTree(data, separationFunction, radius)
 	}
 
-	let resizeTimeout;
-	window.onresize = () => {
-		if (simplifiedMode || mode !== "viz-select-1") return;
-		
-		clearTimeout(resizeTimeout);
-		resizeTimeout = setTimeout( () => {
-			rerenderTreeTrigger = true;
-		}, 500);
-	};
-
 </script>
 
 <div id="main-viz-wrapper" style="opacity: 0.0;display: none;">
@@ -2016,8 +2006,8 @@
 	</div>
 
 	<!-- LOGOS  -->
-	<img src="/center_logo.png" alt="Logo" id="welcome-dialog-logo" style="position:absolute;right:185px;bottom:10px;height:150px"/>
-	<img src="/center_logo_2.png" alt="Logo" id="welcome-dialog-logo-2" style="position:absolute;right:10px;bottom:10px;height:150px"/>
+	<img src="/center_logo.png" alt="Logo" id="welcome-dialog-logo" style="position:absolute;right:145px;bottom:10px;height:110px"/>
+	<img src="/center_logo_2.png" alt="Logo" id="welcome-dialog-logo-2" style="position:absolute;right:10px;bottom:10px;height:110px"/>
 
 	<!-- Intro panel -->
 	<div id="intro-panel-wrapper">
@@ -2040,7 +2030,6 @@
 			</center>
 		</div>
 	</div>
-
 </div>
 
 

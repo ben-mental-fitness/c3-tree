@@ -4,16 +4,18 @@
 	import { onMount } from 'svelte';
 
 	export let checkShowDisplayCompatabilityTrigger = false;
+	export let simplifiedMode;
 
 	const checkShowDisplayCompatability = () => {
 		const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-		const isPortraitView = window.innerWidth < window.innerHeight;
 
-		if(isMobile) {
-			//d3.select("#min-width-dialog .please-desktop").style("display", null);
-			//d3.select("#min-width-dialog .please-maximize").style("display", "none");
-			//d3.select("#min-width-dialog").style("display", "block");
-		} else if(isPortraitView) {
+		if(isMobile && !simplifiedMode) {
+			d3.select("#min-width-dialog").style("opacity", 1.0);
+			d3.select("#min-width-dialog .please-desktop").style("display", null);
+			d3.select("#min-width-dialog .please-maximize").style("display", "none");
+			d3.select("#min-width-dialog").style("display", "block");
+		} else if(window.innerWidth < 1020) {
+			d3.select("#min-width-dialog").style("opacity", 1.0);
 			d3.select("#min-width-dialog .please-maximize").style("display", null);
 			d3.select("#min-width-dialog .please-desktop").style("display", "none");
 			d3.select("#min-width-dialog").style("display", "block");
@@ -39,7 +41,7 @@
 </script>
 
 
-<div id="min-width-dialog" style="display:none;position: absolute;left:50%;top:50%;width: 500px;min-height: 200px;margin-left:-250px;margin-top:-200px;border: 1px solid #f0f0f0;padding:20px;text-align: left;z-index: 99;background:#ffffff">
+<div id="min-width-dialog" style="display:none;position: absolute;left:50%;top:50%;width: 500px;min-height: 200px;margin-left:-250px;margin-top:-200px;border: 1px solid #f0f0f0;padding:20px;text-align: left;z-index: 120;background:#ffffff">
 	<center>
 		<h1 class="please-maximize" style="display:none">Please maximaze your browser window for best experience.</h1><br/>
 		<h1 class="please-desktop" style="display:none">This visualization was optimized for desktop use only.</h1><br/>
