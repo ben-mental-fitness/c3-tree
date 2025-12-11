@@ -415,9 +415,7 @@
 				.attr("src", `https://www.youtube-nocookie.com/embed/${explainerData[mode].youtubeId}?origin=https://c3tree.bw1-dev.com`);
 			introPanel.select("#intro-panel-text")
 				.text(explainerData[mode].text);
-			document.getElementById("intro-panel-header").focus();		
-		} else {
-			document.getElementById("back-button").focus();
+			document.getElementById("intro-panel").focus();	
 		}
 	};
 
@@ -819,6 +817,17 @@
 			.on("keydown", (event, d) => {
 				if (event.key === "Enter" || event.key === "Spacebar" || event.key === " ") {
 					focusElement = event.target;
+					mouseOverEvent(event, d);
+
+					let left = event.target.getBoundingClientRect().x < canvasWidth / 2.0 ? canvasWidth / 2.0 + 10 : 20; 
+					d3.select("#hover-tooltip.tooltip")
+						.style("left", `${left}px`) 
+						.style("top", "100px") 
+						.style('max-height', `${window.innerHeight - 120}px`)
+						.style("width", `${canvasWidth / 2.0 - 30}px`)
+						.style("display", checkboxesChecked["checkbox-second-tooltip"] || d3.select("#sticky-tooltip").empty() ? "block" : "none")
+						.raise();
+						
 					mouseClickEvent(event, d);
 				} else {
 					mouseLeaveEvent(event, d);
@@ -827,34 +836,12 @@
 			.on("click", (event, d) => {
 				mouseClickEvent(event, d);
 			})
-			.on("dblclick", (event, d) => {
-				if (d.depth !== 1 || d.data.text === "Data" || d.data.text === "Team") return;
-				if (onlyOneCategoryVisible) {
-					root.descendants().filter((d_) => d_.depth === 1 && d_.data.text !== "Data" && d_.data.text !== "Team" && d_.data.id !== d.data.id)
-						.forEach(d_ => {
-							document.getElementById(`checkbox-${d_.data.id}`).click();
-						});
-					onlyOneCategoryVisible = false;
-				} else {
-					root.descendants().filter((d_) => d_.depth === 1 && d_.data.text !== "Data" && d_.data.text !== "Team" && d_.data.id !== d.data.id)
-						.forEach(d_ => {
-							document.getElementById(`checkbox-${d_.data.id}`).click();
-						});	
-					onlyOneCategoryVisible = true;
-				}
-				if (!d3.select(`#checkbox-${d.data.id}`).attr("checked")) document.getElementById(`checkbox-${d.data.id}`).click();
-				rerenderTreeTrigger = true;
-			})
 			.on("mouseover", (event, d) => {
 				mouseOverEvent(event, d);
 			})
 			// Fix tooltip to left or right depending on hovered element 
 			.on("mousemove", (event, d) => {
-				const boundingRect = d3.select("#hover-tooltip.tooltip").node().getBoundingClientRect();
-				const pointerPos = [event.pageX, event.pageY];
-
 				let left = event.pageX < canvasWidth / 2.0 ? canvasWidth / 2.0 + 10 : 20; 
-				let top = event.pageY;
 
 				d3.select("#hover-tooltip.tooltip")
 					.style("left", `${left}px`) 

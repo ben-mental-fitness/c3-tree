@@ -134,8 +134,7 @@
 					.transition("display")
 					.delay(ANIM_DURATION_IN)
 					.style("display", "none");
-				document.getElementById("back-button").focus();
-				
+					
 				if ((mode === "viz-select-0" || mode === "viz-select-1") && explainerData[mode].firstLoad) {
 					let introPanel = d3.select("#intro-panel-wrapper").style("display", "block");
 					introPanel.select("#intro-panel-header")
@@ -144,7 +143,7 @@
 						.attr("src", `https://www.youtube-nocookie.com/embed/${explainerData[mode].youtubeId}?origin=https://c3tree.bw1-dev.com`);
 					introPanel.select("#intro-panel-text")
 						.text(explainerData[mode].text);
-					document.getElementById("intro-panel-header").focus();		
+					document.getElementById("intro-panel").focus();		
 				} else {
 					document.getElementById("back-button").focus();
 				}
@@ -293,7 +292,7 @@
 							.attr("src", `https://www.youtube-nocookie.com/embed/${explainerData[mode].youtubeId}?origin=https://c3tree.bw1-dev.com`);
 						introPanel.select("#intro-panel-text")
 							.text(explainerData[mode].text);
-						document.getElementById("intro-panel-header").focus();		
+						document.getElementById("intro-panel").focus();		
 					}
 				}
 			})
@@ -306,7 +305,7 @@
 						.attr("src", `https://www.youtube-nocookie.com/embed/${explainerData[mode].youtubeId}?origin=https://c3tree.bw1-dev.com`);
 					introPanel.select("#intro-panel-text")
 						.text(explainerData[mode].text);
-					document.getElementById("intro-panel-header").focus();		
+					document.getElementById("intro-panel").focus();		
 				}
 			});
 		d3.select("#help-button")
@@ -334,11 +333,13 @@
 			.on("click", () => {
 				d3.select("#intro-panel-wrapper").style("display", "none");
 				explainerData[mode].firstLoad = false;
+				document.getElementById("back-button").focus();	
 			})
 			.on("keydown", (event) => {
 				if (event.key === "Enter" || event.key === "Spacebar" || event.key === " ") {
 					d3.select("#intro-panel-wrapper").style("display", "none");
 					explainerData[mode].firstLoad = false;
+					document.getElementById("back-button").focus();	
 				}
 			});
 

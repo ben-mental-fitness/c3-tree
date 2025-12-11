@@ -14,11 +14,13 @@
 			d3.select("#min-width-dialog .please-desktop").style("display", null);
 			d3.select("#min-width-dialog .please-maximize").style("display", "none");
 			d3.select("#min-width-dialog").style("display", "block");
+			document.getElementById("min-width-dialog").focus();
 		} else if(window.innerWidth < 1020) {
 			d3.select("#min-width-dialog").style("opacity", 1.0);
 			d3.select("#min-width-dialog .please-maximize").style("display", null);
 			d3.select("#min-width-dialog .please-desktop").style("display", "none");
 			d3.select("#min-width-dialog").style("display", "block");
+			document.getElementById("min-width-dialog").focus();
 		}
 	}
 

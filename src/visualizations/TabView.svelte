@@ -85,10 +85,11 @@
 			.style("line-height", `${tabHeight - 14}px`)
 			.style("cursor", "pointer")
 			.attr("tabindex", "0")
-			.on("keydown", (event) => {
+			.on("keydown", (event, d) => {
 				if (event.key === "Enter" || event.key === "Spacebar" || event.key === " ") {
+					console.log("HERE");
 					if (activeDropdownElement) activeDropdownElement.click();
-					selectedTab = tabSearchData;
+					selectedTab = d;
 					showContentOfSelectedTab(true);
 				}
 			});
@@ -185,7 +186,7 @@
 		contentSearch.append("input")
 			.attr("id", "tab-search-input")
 			.attr("type", "text")
-			.attr("tabindex", "3")
+			.attr("tabindex", "0")
 			.attr("placeholder", "Search text...")
 			.on("keyup", (event) => {
 				listSearchForData(event.target.value, rawData, ANIM_DURATION_IN, ANIM_DURATION_OUT)
@@ -523,7 +524,7 @@
 					.duration(animated ? 750 : 0)
 					.style("border-color", (d) => `${d.color} rgb(255, 255, 255) ${d.color} ${d.color}`)
 					.style("background-color", (d) => `${d.color}33`)
-					.style("font-weight", "bold")
+					.style("font-weight", "bold");
 			}
 		}
 

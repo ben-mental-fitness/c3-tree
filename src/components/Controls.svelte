@@ -279,22 +279,47 @@
 
 		d3.selectAll("#controls-toggle-show-controls").on("click", () => {
 			toggleControlsDropdown(d3.select("#controls-group-all"), d3.select("#controls-toggle-show-controls"));
+		})
+		.on("keydown", (event) => {
+			if (event.key === "Enter" || event.key === "Spacebar" || event.key === " ") {
+				toggleControlsDropdown(d3.select("#controls-group-all"), d3.select("#controls-toggle-show-controls"));		
+			}
 		});
 
 		d3.selectAll("#controls-toggle-show-layout").on("click", () => {
 			toggleControlsDropdown(d3.select("#controls-group-layout"), d3.select("#controls-toggle-show-layout"));
+		})
+		.on("keydown", (event) => {
+			if (event.key === "Enter" || event.key === "Spacebar" || event.key === " ") {
+				toggleControlsDropdown(d3.select("#controls-group-layout"), d3.select("#controls-toggle-show-layout"));
+			}
 		});
 
 		d3.selectAll("#controls-toggle-show-themes").on("click", () => {
 			toggleControlsDropdown(d3.select("#controls-group-themes"), d3.select("#controls-toggle-show-themes"));
+		})
+		.on("keydown", (event) => {
+			if (event.key === "Enter" || event.key === "Spacebar" || event.key === " ") {	
+				toggleControlsDropdown(d3.select("#controls-group-themes"), d3.select("#controls-toggle-show-themes"));
+			}
 		});
 
 		d3.selectAll("#controls-toggle-show-labels").on("click", () => {
 			toggleControlsDropdown(d3.select("#controls-group-labels"), d3.select("#controls-toggle-show-labels"));
+		})
+		.on("keydown", (event) => {
+			if (event.key === "Enter" || event.key === "Spacebar" || event.key === " ") {
+				toggleControlsDropdown(d3.select("#controls-group-labels"), d3.select("#controls-toggle-show-labels"));
+			}
 		});
 
 		d3.selectAll("#controls-toggle-show-text").on("click", () => {
 			toggleControlsDropdown(d3.select("#controls-group-text"), d3.select("#controls-toggle-show-text"));
+		})
+		.on("keydown", (event) => {
+			if (event.key === "Enter" || event.key === "Spacebar" || event.key === " ") {
+				toggleControlsDropdown(d3.select("#controls-group-text"), d3.select("#controls-toggle-show-text"));
+			}
 		});
 	});
 	
