@@ -195,6 +195,14 @@
 		}
 
 		const vizSelectConnections = () => {
+			if (!d3.select("#checkbox-detailed-view-data-sources").property("checked")) {
+				d3.select("#checkbox-detailed-view-data-sources").property("checked", true);
+				checkboxesChecked["checkbox-detailed-view-data-sources"] = !checkboxesChecked["checkbox-detailed-view-data-sources"];
+				root.descendants().forEach((d) => {
+					if(d.data.text === 'Data')
+						setTreeVisibility(d.data, checkboxesChecked["checkbox-detailed-view-data-sources"]);
+				});
+			}
 			mode = "viz-select-1";
 			d3.selectAll("#curves-wrapper-center").attr("opacity", 0.0);
 			d3.selectAll("#curves-wrapper-leaves").attr("opacity", 1.0);
