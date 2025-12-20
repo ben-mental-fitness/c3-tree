@@ -13,7 +13,13 @@
 			.transition("opacity")
 			.duration(ANIM_DURATION_OUT)
 			.ease(d3.easeQuadOut)
-			.style("opacity", 1.0);
+			.style("opacity", 1.0)
+			.attr("role", "alert")
+			.attr("aria-live", "assertive")
+			.on("end", () => {
+				document.getElementById("welcome-dialog-title").dispatchEvent(new KeyboardEvent('keydown', {'key': 'Control'}));
+				document.getElementById("welcome-dialog-title").focus();
+			});
 	}
 
 	const hideWelcomeDialog = () => {
@@ -24,7 +30,9 @@
 			.transition("opacity")
 			.duration(ANIM_DURATION_OUT)
 			.ease(d3.easeQuadOut)
-			.style("opacity", 0.0);
+			.style("opacity", 0.0)
+			.attr("role", "")
+			.attr("aria-live", "");
 		d3.selectAll("#welcome-dialog")
 			.transition("display")
 			.delay(ANIM_DURATION_OUT)
@@ -42,24 +50,28 @@
     
 </script>
 
-<div id="welcome-dialog-logos">
+<div id="welcome-dialog-logos" tabindex="-1" aria-hidden="true">
 	<img src="/center_logo.png" alt="Logo" id="welcome-dialog-logo"/>
 	<img src="/center_logo_2.png" alt="Logo" id="welcome-dialog-logo-2"/>
 </div>
 <div id="welcome-dialog-logo-linebreak" style="clear:both;margin-bottom:25px"></div>
 
-<div id="welcome-dialog" style="display:none;">
+<div id="welcome-dialog" role="main" style="display:none">
 
 	<center>
-		<h1>Welcome!</h1><br/>
+		<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+		<h1 id="welcome-dialog-title" tabindex="0">Welcome!</h1><br/>
 	</center>
-	<span></span>
+	<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+	<span tabindex="0"></span>
 	<br/><br/>
+
 	<span id="mobile-availability-note">Note: The main visualisation is currently only available on a desktop PC.</span>
 	<br/>
+
 	<div class="button-row">
-		<button class="button button-simplified" style="margin-right:10px">List View</button>
-		<button class="button button-default">Visualisation</button>
+		<button class="button button-simplified" style="margin-right:10px" aria-label="Go to list view">List View</button>
+		<button class="button button-default" aria-label="Go to main visualisation">Visualisation</button>
 	</div>
 </div>
 

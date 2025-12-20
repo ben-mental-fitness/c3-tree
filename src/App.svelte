@@ -129,11 +129,13 @@
 					.transition("opacity")
 					.duration(ANIM_DURATION_IN)
 					.ease(d3.easeQuadOut)
-					.style("opacity", 1.0);
+					.style("opacity", 1.0)
+					.attr("role", "main");;
 				d3.select("#tabs-wrapper")
 					.transition("display")
 					.delay(ANIM_DURATION_IN)
-					.style("display", "none");
+					.style("display", "none")		
+					.attr("role", "");
 					
 				if ((mode === "viz-select-0" || mode === "viz-select-1") && explainerData[mode].firstLoad) {
 					let introPanel = d3.select("#intro-panel-wrapper").style("display", "block");
@@ -182,13 +184,15 @@
 			.transition("opacity")
 			.duration(ANIM_DURATION_OUT)
 			.ease(d3.easeQuadOut)
-			.style("opacity", 0.0);
+			.style("opacity", 0.0)
+			.attr("role", "");
 		d3.select("#tabs-wrapper")
 			.style("display", "block")
 			.transition("opacity")
 			.duration(ANIM_DURATION_IN)
 			.ease(d3.easeQuadOut)
-			.style("opacity", 1.0);
+			.style("opacity", 1.0)
+			.attr("role", "main");
 		d3.select("#main-viz-wrapper")
 			.transition("display")
 			.delay(ANIM_DURATION_IN)
@@ -381,8 +385,8 @@
 
 	<TabView bind:data bind:rawData bind:showMainVizTrigger {ANIM_DURATION_IN} {ANIM_DURATION_OUT} bind:currentTextScale/>
 
-	<Attribution/>
 	<DraftNotice/>
+	<Attribution/>
 
 	<!-- <Legend bind:canvasWidth bind:canvasHeight bind:welcomeDialogVisible bind:currentTextScale/> -->
 	<Loader bind:visible={loaderVisible}/>

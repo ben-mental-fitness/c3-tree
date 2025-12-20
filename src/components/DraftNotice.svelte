@@ -1,6 +1,10 @@
 
-<div id="draft-notice">
-	<span><b>Draft visualisation</b> - not for publication or sharing. The information in this visualisation draft is being collaboratively developed and a launch is planned for Q4 2025 - Q1 2026. Information included in the visualisation may contain errors.</span>
+<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+<div id="draft-notice" tabindex="0" role="contentinfo"
+	aria-label="Draft visualisation - not for publication or sharing. The information in this visualisation draft is being collaboratively developed and a launch is planned for Q4 2025 - Q1 2026. Information included in the visualisation may contain errors.">
+	<span>
+		<b>Draft visualisation</b> - not for publication or sharing. The information in this visualisation draft is being collaboratively developed and a launch is planned for Q4 2025 - Q1 2026. Information included in the visualisation may contain errors.
+	</span>
 </div>
 
 <style>

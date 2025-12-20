@@ -1,7 +1,9 @@
 
-<div id="attribution">
+<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+<div id="attribution" tabindex="0" role="contentinfo"
+    aria-label="This work is independent research jointly funded by the National Institute for Health and Care Research (NIHR) and UK Research and Innovation (UKRI). The views expressed in this publication are those of the author(s) and not necessarily those of NIHR, The Department of Health and Social Care or UKRI. More information is available on the UCL website.">
     <center>    
-    	<span>This work is independent research jointly funded by the National Institute for Health and Care Research (NIHR) and UK Research and Innovation (UKRI) \[Characterisation, determinants, mechanisms and consequences of the long-term effects of COVID-19: providing the evidence base for health care services, COV-LT-0009\MC_PC20051]. The views expressed in this publication are those of the author(s) and not necessarily those of NIHR, The Department of Health and Social Care or UKRI. More information is available at: <a href="https://www.ucl.ac.uk/covid-19-longitudinal-health-wellbeing/" target="_blank">www.ucl.ac.uk/covid-19-longitudinal-health-wellbeing/</a></span>
+    	<span>This work is independent research jointly funded by the National Institute for Health and Care Research (NIHR) and UK Research and Innovation (UKRI) \[Characterisation, determinants, mechanisms and consequences of the long-term effects of COVID-19: providing the evidence base for health care services, COV-LT-0009\MC_PC20051]. The views expressed in this publication are those of the author(s) and not necessarily those of NIHR, The Department of Health and Social Care or UKRI. More information is available at: <a href="https://www.ucl.ac.uk/covid-19-longitudinal-health-wellbeing/" target="_blank" aria-label="Go to UCL COVID-19 longitudinal health and wellbeing webpage">www.ucl.ac.uk/covid-19-longitudinal-health-wellbeing/</a></span>
     </center>
 </div>
 
