@@ -139,12 +139,18 @@ app.post('/fetch_c3tree_data_from_google_sheet', (req, res) => {
           range: 'Explainer',
         });
 
-        Promise.all([mainDataSheet, metaDataSheet, introDataSheet, teamDataSheet, explainerDataSheet]).then(([
+        const screenReaderDataSheet = sheets.spreadsheets.values.get({
+          spreadsheetId: sheetsID,
+          range: 'Screen Reader Descriptions',
+        });
+
+        Promise.all([mainDataSheet, metaDataSheet, introDataSheet, teamDataSheet, explainerDataSheet, screenReaderDataSheet]).then(([
             mainDataSheet, 
             metaDataSheet,
             introDataSheet,
             teamDataSheet,
-            explainerDataSheet
+            explainerDataSheet,
+            screenReaderDataSheet
           ]) => {
           const mainDataRows = mainDataSheet.data.values;
           if (!mainDataRows || mainDataRows.length === 0) {
@@ -160,7 +166,8 @@ app.post('/fetch_c3tree_data_from_google_sheet', (req, res) => {
             metaData: metaDataSheet.data.values,
             introData: introDataSheet.data.values,
             teamData: teamDataSheet.data.values, // TODO: Remove as unused
-            explainerData: explainerDataSheet.data.values
+            explainerData: explainerDataSheet.data.values,
+            screenReaderData: screenReaderDataSheet.data.values
           })
         }).catch((err) => {
           console.warn(err);

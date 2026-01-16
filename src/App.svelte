@@ -103,6 +103,8 @@
 		"viz-select-1" : {"firstLoad" : false},
 	}
 
+	let screenReaderData = null;
+
 	// switch visualizations
 	const showMainViz = () => {
 
@@ -201,6 +203,45 @@
 			.style("display", "block");
 	};
 
+	const addScreenReaderDescriptions = (screenReaderData) => {
+		screenReaderData.shift();
+		screenReaderData.forEach((elementDescription) => {
+			waitUntilElementIsRendered(elementDescription).then(
+			(resolve) => {
+				console.log(resolve);
+			},
+			(reject) => {
+				console.log(reject);
+			});
+		})
+	}
+
+	const waitUntilElementIsRendered = (elementDescription, timeout = 10000) => {
+		const waitForElement = (resolve, reject) => {
+			const checkElement = () => {
+
+				// Timeout so not endlessly looping
+				setTimeout(() => {
+					reject(`${elementDescription} timed out.`);
+				}, timeout)
+
+				// If the element exists, resolve and stop
+				let el = d3.select(elementDescription[0]);
+				if (!el.empty()) {
+					el.attr("aria-label", elementDescription[1])
+					resolve(`${elementDescription} aria-label added.`);
+				}
+
+				// If the element doesn't exist, keep looping
+				window.requestAnimationFrame(checkElement);
+			};
+
+			window.requestAnimationFrame(checkElement);
+		};
+
+		return new Promise(waitForElement);
+	}
+
 	const fetchGDriveAPIData = () => {
 
 		loaderVisible = true;
@@ -239,6 +280,9 @@
 							"text" : response.explainerData[2][3]
 						}
 					}
+
+					screenReaderData = response.screenReaderData;
+					addScreenReaderDescriptions(screenReaderData);
 
 					introData = response.introData;
 

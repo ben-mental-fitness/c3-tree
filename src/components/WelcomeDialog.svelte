@@ -70,8 +70,8 @@
 	<br/>
 
 	<div class="button-row">
-		<button class="button button-simplified" style="margin-right:10px" aria-label="Go to list view">List View</button>
-		<button class="button button-default" aria-label="Go to main visualisation">Visualisation</button>
+		<button class="button button-simplified" style="margin-right:10px">List View</button>
+		<button class="button button-default">Visualisation</button>
 	</div>
 </div>
 
