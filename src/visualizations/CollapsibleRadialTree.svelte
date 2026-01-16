@@ -415,7 +415,7 @@
 				.attr("src", `https://www.youtube-nocookie.com/embed/${explainerData[mode].youtubeId}?origin=https://c3tree.bw1-dev.com`);
 			introPanel.select("#intro-panel-text")
 				.text(explainerData[mode].text);
-			document.getElementById("intro-panel").focus();	
+			document.getElementById("intro-panel-header").focus();	
 		}
 	};
 
@@ -817,18 +817,21 @@
 			.on("keydown", (event, d) => {
 				if (event.key === "Enter" || event.key === "Spacebar" || event.key === " ") {
 					focusElement = event.target;
-					mouseOverEvent(event, d);
-
-					let left = event.target.getBoundingClientRect().x < canvasWidth / 2.0 ? canvasWidth / 2.0 + 10 : 20; 
-					d3.select("#hover-tooltip.tooltip")
-						.style("left", `${left}px`) 
-						.style("top", "100px") 
-						.style('max-height', `${window.innerHeight - 120}px`)
-						.style("width", `${canvasWidth / 2.0 - 30}px`)
-						.style("display", checkboxesChecked["checkbox-second-tooltip"] || d3.select("#sticky-tooltip").empty() ? "block" : "none")
-						.raise();
-						
-					mouseClickEvent(event, d);
+					mouseOverEvent(event, d)
+						.then(() => {
+							let left = event.target.getBoundingClientRect().x < canvasWidth / 2.0 ? canvasWidth / 2.0 + 10 : 20; 
+							d3.select("#hover-tooltip.tooltip")
+								.style("left", `${left}px`) 
+								.style("top", "100px") 
+								.style('max-height', `${window.innerHeight - 120}px`)
+								.style("width", `${canvasWidth / 2.0 - 30}px`)
+								.style("display", checkboxesChecked["checkbox-second-tooltip"] || d3.select("#sticky-tooltip").empty() ? "block" : "none")
+								.raise();
+						})
+						.then(() => {mouseClickEvent(event, d)});
+					
+					// console.log(d3.select("#hover-tooltip.tooltip"));
+					// mouseClickEvent(event, d);
 				} else {
 					mouseLeaveEvent(event, d);
 				}
@@ -1311,6 +1314,11 @@
 						.attr("font-size", currentTextScale.ConnectedNodes);
 				}
 			}	
+
+			return new Promise((resolve, reject) => {
+				if (d3.select("#hover-tooltip.tooltip")) resolve()
+				else reject();
+			});
 		}
 
 		// Create sticky tooltip
@@ -1940,11 +1948,29 @@
 </script>
 
 <div id="main-viz-wrapper" style="opacity: 0.0;display: none;">
-
-	<!-- Main visualisation -->
-	<div class="canvas-wrapper" id="canvas-wrapper">
-		<svg id="d3-canvas" opacity="0.0" version="1.1" xmlns="http://www.w3.org/2000/svg"/>
-		<img alt="Connections view" style="opacity:0.0" id="curves-wrapper-leaves-img"/>
+	<!-- Intro panel -->
+	<div id="intro-panel-wrapper">
+		<div id="intro-panel-background"></div>
+		<div id="intro-panel">
+			<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+			<div id="intro-close-button" tabindex="0" role="button" aria-label="Close information panel">x</div>
+			<center>
+				<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+				<h1 id="intro-panel-header" tabindex="0">Introduction</h1>
+				<div id="intro-panel-yt-embed">
+					<iframe width="440" height="320" frameborder="0" allowfullscreen title="Visualisation explainer video"></iframe>
+				</div>
+				<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+				<div id="intro-panel-text" tabindex="0" style="text-align: left;margin-top:25px">
+					<p>Some explainer text here.</p>
+				</div>
+				<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+				<div id="info-panel-attribution" tabindex="0" style="text-align: left;"> 
+					<h1>About this Work</h1>   
+					<p>This work is independent research jointly funded by the National Institute for Health and Care Research (NIHR) and UK Research and Innovation (UKRI) \[Characterisation, determinants, mechanisms and consequences of the long-term effects of COVID-19: providing the evidence base for health care services, COV-LT-0009\MC_PC20051]. The views expressed in this publication are those of the author(s) and not necessarily those of NIHR, The Department of Health and Social Care or UKRI. More information is available at: <a href="https://www.ucl.ac.uk/covid-19-longitudinal-health-wellbeing/" target="_blank">www.ucl.ac.uk/covid-19-longitudinal-health-wellbeing/</a></p>
+				</div>
+			</center>
+		</div>
 	</div>
 
 	<!-- tooltip -->
@@ -1976,47 +2002,31 @@
 		</div>
 	</div>
 
+	<!-- additional controls -->
+	<div id="back-button" role="button" style="display: none;position: absolute;color:#808080;font-size:80%;cursor:pointer;">
+		&lt; switch to List View
+	</div>
+	<div id="info-button" role="button" aria-label="Show information panel" style="display: none;position: absolute;color:#808080;font-size:250%;font-weight: bold;cursor:pointer;">
+		<center>i</center>
+	</div>
+	<div id="help-button" role="button" aria-label="Show introduction tour" style="display: none;position: absolute;color:#808080;font-size:400%;font-weight: bold;cursor:pointer;">
+		?
+	</div>
+
 	<!-- controls -->
 	<Controls bind:presets bind:checkboxesChecked bind:rerenderTreeTrigger bind:mode bind:root
 		bind:categoryLegendVisible bind:currentTextScale bind:categoriesDataConnections bind:radius bind:twist/>
 	<!-- bind:visible={controlsVisible} -->
 
-	<!-- additional controls -->
-	<div id="back-button" style="display: none;position: absolute;color:#808080;font-size:80%;cursor:pointer;">
-		&lt; switch to List View
-	</div>
-	<div id="info-button" style="display: none;position: absolute;color:#808080;font-size:250%;font-weight: bold;cursor:pointer;">
-		<center>i</center>
-	</div>
-	<div id="help-button" style="display: none;position: absolute;color:#808080;font-size:400%;font-weight: bold;cursor:pointer;">
-		?
+	<!-- Main visualisation -->
+	<div class="canvas-wrapper" id="canvas-wrapper">
+		<svg id="d3-canvas" opacity="0.0" version="1.1" xmlns="http://www.w3.org/2000/svg"/>
+		<img alt="Connections view" style="opacity:0.0" id="curves-wrapper-leaves-img"/>
 	</div>
 
 	<!-- LOGOS  -->
 	<img src="/center_logo.png" alt="Logo" id="welcome-dialog-logo" style="position:absolute;right:145px;bottom:10px;height:110px"/>
 	<img src="/center_logo_2.png" alt="Logo" id="welcome-dialog-logo-2" style="position:absolute;right:10px;bottom:10px;height:110px"/>
-
-	<!-- Intro panel -->
-	<div id="intro-panel-wrapper">
-		<div id="intro-panel-background"></div>
-		<div id="intro-panel">
-			<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-			<div id="intro-close-button" tabindex="0">x</div>
-			<center>
-				<h1 id="intro-panel-header">Introduction</h1>
-				<div id="intro-panel-yt-embed">
-					<iframe width="440" height="320" frameborder="0" allowfullscreen title="Visualisation explainer video"></iframe>
-				</div>
-				<div id="intro-panel-text" style="text-align: left;margin-top:25px">
-					<p>Some explainer text here.</p>
-				</div>
-				<div id="info-panel-attribution" style="text-align: left;"> 
-					<h1>About this Work</h1>   
-					<p>This work is independent research jointly funded by the National Institute for Health and Care Research (NIHR) and UK Research and Innovation (UKRI) \[Characterisation, determinants, mechanisms and consequences of the long-term effects of COVID-19: providing the evidence base for health care services, COV-LT-0009\MC_PC20051]. The views expressed in this publication are those of the author(s) and not necessarily those of NIHR, The Department of Health and Social Care or UKRI. More information is available at: <a href="https://www.ucl.ac.uk/covid-19-longitudinal-health-wellbeing/" target="_blank">www.ucl.ac.uk/covid-19-longitudinal-health-wellbeing/</a></p>
-				</div>
-			</center>
-		</div>
-	</div>
 </div>
 
 
