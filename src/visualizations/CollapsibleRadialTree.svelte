@@ -124,7 +124,7 @@
 		// Increase visualisation radius when leaf titles are not visible
 		const treeFunction = d3.cluster().size([2 * Math.PI - 0.02, (checkboxesChecked["checkbox-leaf-titles"] ? radius : outerRadius - 25) + ((mode === "viz-select-1" || !checkboxesChecked["checkbox-subtheme-titles"]) && !simplifiedMode ? 80 : 0)]);
 		treeFunction.separation(separationFunction)(filteredRoot);
-		treeFunction.separation(separationFunction)(rootSimplified);
+		// treeFunction.separation(separationFunction)(rootSimplified);
 
 		const animation = d3.transition().duration(animated ? 750 : 0).ease(d3.easeQuadOut);
 
@@ -264,6 +264,8 @@
 		d3.select("#outer-node-group-wrapper")
 			.transition(animation)
 			.attr("opacity",  (!simplifiedMode && checkboxesChecked["checkbox-subtheme-titles"]) ? 1.0 : 0.0)
+			.style("tabindex", (d) => !simplifiedMode && checkboxesChecked["checkbox-subtheme-titles"] ? "0" : "-1")
+			.style("pointer-events", (d) => !simplifiedMode && checkboxesChecked["checkbox-subtheme-titles"] ? "all" : "none")
 		
 		if (!simplifiedMode) { 
 			d3.select("#outer-node-group-wrapper")
@@ -274,6 +276,7 @@
 				.attr("aria-label", (d) => d.data.text)
 				.attr("transform", (d) => `rotate(${d.x * 180 / Math.PI - 90}) translate(${radius + 130},0)`)
 				.attr("opacity", (d) => d.data.visible ? 1 : 0)
+				.style("tabindex", (d) => d.data.visible && !simplifiedMode ? "0" : "-1")
 				.style("pointer-events", (d) => d.data.visible && !simplifiedMode ? "all" : "none")
 		}
 
@@ -328,7 +331,7 @@
 			.attr("font-size", currentTextScale.NodeText)
 
 		update.selectAll(".text-leaf-interact-area")
-			.style("pointer-events", (d) => d.data.visible && !simplifiedMode ? "all" : "none");
+			.attr("pointer-events", (d) => d.data.visible && !simplifiedMode ? "all" : "none");
 
 		d3.selectAll("#node-group-wrapper .node-circle")
 			.transition(animation)
@@ -338,37 +341,41 @@
 			.style("pointer-events", (d) => /* d.data.visible && */ !simplifiedMode && mode === "viz-select-0" ? "all" : "none")
 
 		// Simplified cluster view
-		d3.selectAll("#node-group-simplified-wrapper .node-group-simplified")
-			.data(rootSimplified.descendants())//, (d) => d.data.id)
-			.call((update) => {
-				update.transition(animation)
-					.attr("transform", (d) => `rotate(${d.x * 180 / Math.PI - 90}) 
-					translate(${d.depth === 1 ? 55 : d.y + (d.parent && d.children ? (d.parent.y - d.y) * 0.7 : 0)},0)`)
+		// d3.selectAll("#node-group-simplified-wrapper .node-group-simplified")
+		// 	.data(rootSimplified.descendants())//, (d) => d.data.id)
+		// 	.call((update) => {
+		// 		update.transition(animation)
+		// 			.attr("transform", (d) => `rotate(${d.x * 180 / Math.PI - 90}) 
+		// 			translate(${d.depth === 1 ? 55 : d.y + (d.parent && d.children ? (d.parent.y - d.y) * 0.7 : 0)},0)`)
 
-				update.selectAll(".node-text")
-					.attr("x", (d) => {
-						const angle = (d.x + twist) % (Math.PI * 2.0);
-						return angle < Math.PI ? 12 : -12;
-					})
-					.attr("text-anchor", (d) => {
-						const angle = (d.x + twist) % (Math.PI * 2.0);
-						return angle < Math.PI ? "start" : "end";
-					})
-					.attr("transform", (d) => {
-						const angle = (d.x + twist) % (Math.PI * 2.0);
-						return `rotate(${angle >= Math.PI ? 180 : 0})`;
-					})
+		// 		update.selectAll(".node-text")
+		// 			.attr("x", (d) => {
+		// 				const angle = (d.x + twist) % (Math.PI * 2.0);
+		// 				return angle < Math.PI ? 12 : -12;
+		// 			})
+		// 			.attr("text-anchor", (d) => {
+		// 				const angle = (d.x + twist) % (Math.PI * 2.0);
+		// 				return angle < Math.PI ? "start" : "end";
+		// 			})
+		// 			.attr("transform", (d) => {
+		// 				const angle = (d.x + twist) % (Math.PI * 2.0);
+		// 				return `rotate(${angle >= Math.PI ? 180 : 0})`;
+		// 			})
 
-				update.selectAll(".node-text").transition(animation)
-					.attr("opacity", (d) => d.data.depth === 2 && checkboxesChecked["checkbox-leaf-titles"] && d.data.visible && simplifiedMode && !d.children ? 1.0 : 0.0)
+		// 		update.selectAll(".node-text").transition(animation)
+		// 			.attr("opacity", (d) => d.data.depth === 2 && checkboxesChecked["checkbox-leaf-titles"] && d.data.visible && simplifiedMode && !d.children ? 1.0 : 0.0)
+		// 			.attr("tabindex", (d) => d.data.depth === 2 && checkboxesChecked["checkbox-leaf-titles"] && d.data.visible && simplifiedMode && !d.children ? "0" : "-1")
+		// 			.attr("pointer-events", (d) => d.data.depth === 2 && checkboxesChecked["checkbox-leaf-titles"] && d.data.visible && simplifiedMode && !d.children ? "all" : "none")
 
-				update.selectAll(".text-leaf-interact-area")
-					.style("pointer-events", (d) => simplifiedMode ? "all" : "none");
+		// 		update.selectAll(".text-leaf-interact-area")
+		// 			.attr("opacity", (d) => {if (d.data.id == "r04") {console.log(simplifiedMode)}; return simplifiedMode ? "1" : "0"})
+		// 			.attr("tabindex", (d) => simplifiedMode ? "0" : "-1")
+		// 			.attr("pointer-events", (d) => simplifiedMode ? "all" : "none");
 
-			});
-		d3.selectAll("#node-group-simplified-wrapper .node-circle")
-			.transition(animation)
-			.attr("opacity", (d) => simplifiedMode ? 1.0 : 0.0);
+		// 	});
+		// d3.selectAll("#node-group-simplified-wrapper .node-circle")
+		// 	.transition(animation)
+		// 	.attr("opacity", (d) => simplifiedMode ? 1.0 : 0.0);
 
 
 		// Legend and outer labels - Publication Themes
@@ -379,25 +386,28 @@
 				.attr("transform", (d, i) => `translate(0,${i * 50})`)
 		}
 
-		d3.select("#category-labels-wrapper")
-			.selectAll(".category-labels")
-			.data(simplifiedMode ? rootSimplified.descendants().filter((d) => d.depth === 1) : filteredRoot.descendants().filter((d) => d.depth === 1))//, (d) => d.data.id)
-			.transition(animation)
-			.attr("transform", (d, i) => {
-				const angle = d.x;
-				return `rotate(${angle * 180 / Math.PI - 90}) 
-				translate(${radius + 200},0)
-				rotate(${(-angle - twist) * 180 / Math.PI + 90}) `;
+		if (!simplifiedMode) {
+			d3.select("#category-labels-wrapper")
+				.selectAll(".category-labels")
+				.data(filteredRoot.descendants().filter((d) => d.depth === 1))//, (d) => d.data.id)
+				.transition(animation)
+				.attr("transform", (d, i) => {
+					const angle = d.x;
+					return `rotate(${angle * 180 / Math.PI - 90}) 
+					translate(${radius + 200},0)
+					rotate(${(-angle - twist) * 180 / Math.PI + 90}) `;
 
-			})
-			.attr("text-anchor", (d, i) => {
-				const angle = (d.x + twist) % (Math.PI * 2.0);
-				return angle < Math.PI ? "start" : "end"
-			})
-			.attr("opacity", (d) => d.data.visible && (mode === "viz-select-0" || (mode === "viz-select-1" && !categoryLegendVisible)) ? 1.0 : 0.0)
-			.attr("tabindex", (d) => d.data.visible && (mode === "viz-select-0" || (mode === "viz-select-1" && !categoryLegendVisible)) ? "0" : "-1")
-			.attr("fill", (d) => d.data.color) // mode === "viz-select-1" && d.data.text === 'Vaccination' ? 'rgb(160, 160, 160)' : d.data.color)
-			.text((d) => d.data.text); // mode === "viz-select-1" && d.data.text === 'Vaccination' ? 'Publications' : d.data.text)
+				})
+				.attr("text-anchor", (d, i) => {
+					const angle = (d.x + twist) % (Math.PI * 2.0);
+					return angle < Math.PI ? "start" : "end"
+				})
+				.attr("opacity", (d) => d.data.visible && (mode === "viz-select-0" || (mode === "viz-select-1" && !categoryLegendVisible)) ? 1.0 : 0.0)
+				.attr("tabindex", (d) => d.data.visible && (mode === "viz-select-0" || (mode === "viz-select-1" && !categoryLegendVisible)) ? "0" : "-1")
+				.attr("pointer-events", (d) => d.data.visible && (mode === "viz-select-0" || (mode === "viz-select-1" && !categoryLegendVisible)) ? "all" : "none")
+				.attr("fill", (d) => d.data.color) // mode === "viz-select-1" && d.data.text === 'Vaccination' ? 'rgb(160, 160, 160)' : d.data.color)
+				.text((d) => d.data.text); // mode === "viz-select-1" && d.data.text === 'Vaccination' ? 'Publications' : d.data.text)
+		}
 
 		// Get visible nodes in connected view
 		if (mode === "viz-select-1") {
@@ -428,7 +438,7 @@
 		const treeFunction = d3.cluster().size([2 * Math.PI, radius]);
 		
 		treeFunction.separation(separationFunction)(root);
-		treeFunction.separation(separationFunction)(rootSimplified);
+		// treeFunction.separation(separationFunction)(rootSimplified);
 
 		// Set data visibility based on checkboxes
 		root.descendants().forEach((d) => {
@@ -524,6 +534,8 @@
 			.attr("dominant-baseline", "middle")
 			.attr("font-weight", "bold")
 			.attr("opacity", 1.0)
+			.attr("tabindex", (d) => d.data.visible && (mode === "viz-select-0" || (mode === "viz-select-1" && !categoryLegendVisible)) ? "0" : "-1")
+			.attr("pointer-events", (d) => d.data.visible && (mode === "viz-select-0" || (mode === "viz-select-1" && !categoryLegendVisible)) ? "all" : "none")
 			.attr("fill", (d) => d.data.color)
 			.text((d) => d.data.text) // d.data.text === 'Vaccination' ? 'Publications' : d.data.text)
 			.each(function(d) {
@@ -653,18 +665,18 @@
 			.attr("opacity", (d) => d.source.data.depth > 0 ? 1.0 : 0.0);
 
 		// curves from center to leave (simplified version)
-		svg.append("g")
-			.attr("id", "curves-wrapper-simplified")
-			.attr("fill", "none")
-			.attr("opacity", 0.0)
-			.selectAll(".center-to-leaf-path")
-			.data(rootSimplified.links())//, (d) => d.target.data.id)
-			.join("path")
-			.attr("class", "center-to-leaf-path")
-			.attr("d", radialTreeLineFunction)
-			.attr("stroke", (d) => d.target.data.color)
-			.attr("stroke-width", 1.5)
-			.attr("opacity", (d) => d.source.data.depth > 0 ? 1.0 : 0.0);
+		// svg.append("g")
+		// 	.attr("id", "curves-wrapper-simplified")
+		// 	.attr("fill", "none")
+		// 	.attr("opacity", 0.0)
+		// 	.selectAll(".center-to-leaf-path")
+		// 	.data(rootSimplified.links())//, (d) => d.target.data.id)
+		// 	.join("path")
+		// 	.attr("class", "center-to-leaf-path")
+		// 	.attr("d", radialTreeLineFunction)
+		// 	.attr("stroke", (d) => d.target.data.color)
+		// 	.attr("stroke-width", 1.5)
+		// 	.attr("opacity", (d) => d.source.data.depth > 0 ? 1.0 : 0.0);
 
 		// curves from leaf to leaf (connected edges)
 		const leaves = root.leaves();
@@ -733,31 +745,31 @@
 			.style("cursor", "pointer")
 
 		// texts (leaves etc.)
-		const nodeSimplified = svg.append("g")
-			.attr("id", "node-group-simplified-wrapper")
-			.selectAll(".node-group-simplified")
-			.data(rootSimplified.descendants())//, (d) => d.data.id)
-			.join("g")
-			.attr("class", "node-group-simplified")
-			.attr("transform", (d) => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y + (d.parent && d.children ? (d.parent.y - d.y) * 0.7 : 0)},0)`);
+		// const nodeSimplified = svg.append("g")
+		// 	.attr("id", "node-group-simplified-wrapper")
+		// 	.selectAll(".node-group-simplified")
+		// 	.data(rootSimplified.descendants())//, (d) => d.data.id)
+		// 	.join("g")
+		// 	.attr("class", "node-group-simplified")
+		// 	.attr("transform", (d) => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y + (d.parent && d.children ? (d.parent.y - d.y) * 0.7 : 0)},0)`);
 
-
-		nodeSimplified.append("text")
-			.attr("class", "node-text node-text-1st-line")
-			.attr("id", (d) => `${d.data.id}-text`)
-			.attr("dy", "0em")
-			.attr("opacity", (d) => d.data.depth === 2 ? 1.0 : 0.0)
-			.attr("fill", (d) => d.data.color)
-			.style("pointer-events", "none");
-		nodeSimplified.filter((d) => !d.children).append("rect")
-			.attr("class", "text-leaf-interact-area")
-			.attr("fill", "transparent")
-			.attr("aria-label", (d) => d.data.text)
-			.attr("opacity", 0.5)
-			.attr("y", -10)
-			.attr("width", 150)
-			.attr("height", 30)
-			.style("cursor", "pointer")
+		// nodeSimplified.append("text")
+		// 	.attr("class", "node-text node-text-1st-line")
+		// 	.attr("id", (d) => `${d.data.id}-text`)
+		// 	.attr("dy", "0em")
+		// 	.attr("opacity", (d) => d.data.depth === 2 ? 1.0 : 0.0)
+		// 	.attr("tabindex", "-1")
+		// 	.attr("fill", (d) => d.data.color)
+		// 	.attr("pointer-events", "none");
+		// nodeSimplified.filter((d) => !d.children).append("rect")
+		// 	.attr("class", "text-leaf-interact-area")
+		// 	.attr("fill", "transparent")
+		// 	.attr("aria-label", (d) => d.data.text)
+		// 	.attr("opacity", 0.5)
+		// 	.attr("y", -10)
+		// 	.attr("width", 150)
+		// 	.attr("height", 30)
+		// 	.style("cursor", "pointer")
 
 		// ---- //
 		setMouseEvents();
@@ -816,7 +828,9 @@
 	// Show tooltip on hover & fix on click
 	const setMouseEvents = () => {
 		d3.selectAll(".text-leaf-interact-area,.outer-node-group,.category-labels,.legend-entry")
-			.attr("tabindex", d => d.data.visible ? "0" : "-1")
+			.attr("tabindex", (d) => d.data.visible ? "0" : "-1")
+			.attr("opacity", (d) => d.data.visible ? "1" : "0")
+			.attr("pointer-events", (d) => d.data.visible ? "all" : "none")
 			.on("focus", (event, d) => {
 				mouseOverEvent(event, d);
 			})
@@ -1414,6 +1428,7 @@
 							parseInt(d3.select("#sticky-tooltip").style("top"))
 						];
 						
+						if (!d3.select("#sticky-tooltip").node()) return;
 						let boundingRect = d3.select("#sticky-tooltip").node().getBoundingClientRect();
 						const tooltipWidth = boundingRect.width;
 						const tooltipHeight = boundingRect.height;
@@ -1462,7 +1477,8 @@
 										resizingSticky = false;
 									}
 								} else {
-									let startPointerPos = [event.pageX, event.pageY];						
+									let startPointerPos = [event.pageX, event.pageY];	
+									if (!d3.select("#sticky-tooltip").node()) return;					
 									const boundingRect = d3.select("#sticky-tooltip").node().getBoundingClientRect();
 
 									if (!(startPointerPos[0] > boundingRect.left + 25)) {
@@ -1501,6 +1517,7 @@
 							})
 							.on("mouseup.dragTooltip,mouseleave.dragTooltip", (event) => {
 								if (resizingSticky) return; 
+								if (!d3.select("#sticky-tooltip").node()) return;
 								boundingRect = d3.select("#sticky-tooltip").node().getBoundingClientRect();
 								d3.select("body")
 									.on("mousemove.dragTooltip", null)
@@ -1512,7 +1529,8 @@
 					})
 					.on("mousemove", (event) => {
 						if (!resizingSticky) {
-							let startPointerPos = [event.pageX, event.pageY];						
+							let startPointerPos = [event.pageX, event.pageY];
+							if (!d3.select("#sticky-tooltip").node()) return;
 							const boundingRect = d3.select("#sticky-tooltip").node().getBoundingClientRect();
 
 							if (!(startPointerPos[0] > boundingRect.left + 25)) {

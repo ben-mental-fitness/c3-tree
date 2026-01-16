@@ -63,8 +63,9 @@ export const loadCategoryLabels = (categoriesDataConnections, checkboxesChecked,
             .attr("font-size", currentTextScale.CategoryLabels)
             .attr("dominant-baseline", "middle")
             .attr("font-weight", "bold")
-            .attr("opacity", 1.0)
             .attr("fill", "#000000")
             .attr("opacity", (d) => d.visible ? "1.0" : "0.0")
+            .attr("tabindex", (d) => d.visible ? "0" : "-1")
+            .attr("pointer-events", (d) => d.visible ? "all" : "none")            
             .text((d) => d.text)
 }

@@ -18,7 +18,9 @@
 			.style("opacity", 1.0);
 		d3.select("#category-labels-wrapper")
 			.selectAll(".category-labels")
-			.attr("opacity", "0.0");
+			.attr("opacity", "0.0")
+			.attr("tabindex", "-1")
+			.attr("pointer-events", "none");
 	}
 
 	const hideCategoryLegend = () => {
@@ -33,7 +35,9 @@
 			.style("display", "none");
 		d3.select("#category-labels-wrapper")
 			.selectAll(".category-labels")
-			.attr("opacity", (d) => d.data.visible ? 1.0 : 0.0);
+			.attr("opacity", (d) => d.data.visible ? 1.0 : 0.0)
+			.attr("tabindex", (d) => d.data.visible ? "0" : "-1")
+			.attr("pointer-events", (d) => d.data.visible ? "all" : "none");;
 	};
 
 	// Evaluates if any of these variables changes (only show on connected view)
