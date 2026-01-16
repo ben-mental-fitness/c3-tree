@@ -189,6 +189,7 @@
 			.attr("id", "tab-search-input")
 			.attr("type", "text")
 			.attr("tabindex", "0")
+			.attr("aria-label", "Enter text to search the database")
 			.attr("placeholder", "Search text...")
 			.on("keyup", (event) => {
 				listSearchForData(event.target.value, rawData, ANIM_DURATION_IN, ANIM_DURATION_OUT)

@@ -22,7 +22,7 @@
     import { parseMetaData, parseNCSAndLHWData, parseDefaultData } from './helper/dataPreProcessing';
 	import { updateTextSize } from "./helper/updateTextSize";
 	import { calculateCategoryLabels } from "./helper/calculateCategoryLabels";
-  import intro from 'intro.js';
+ 	import intro from 'intro.js';
     
 	// config
 	const TOOLTIP_WIDTH = 800;
@@ -145,7 +145,7 @@
 						.attr("src", `https://www.youtube-nocookie.com/embed/${explainerData[mode].youtubeId}?origin=https://c3tree.bw1-dev.com`);
 					introPanel.select("#intro-panel-text")
 						.text(explainerData[mode].text);
-					document.getElementById("intro-panel").focus();		
+					document.getElementById("intro-panel-header").focus();		
 				} else {
 					document.getElementById("back-button").focus();
 				}
@@ -296,7 +296,7 @@
 							.attr("src", `https://www.youtube-nocookie.com/embed/${explainerData[mode].youtubeId}?origin=https://c3tree.bw1-dev.com`);
 						introPanel.select("#intro-panel-text")
 							.text(explainerData[mode].text);
-						document.getElementById("intro-panel").focus();		
+						document.getElementById("intro-panel-header").focus();		
 					}
 				}
 			})
@@ -309,7 +309,7 @@
 						.attr("src", `https://www.youtube-nocookie.com/embed/${explainerData[mode].youtubeId}?origin=https://c3tree.bw1-dev.com`);
 					introPanel.select("#intro-panel-text")
 						.text(explainerData[mode].text);
-					document.getElementById("intro-panel").focus();		
+					document.getElementById("intro-panel-header").focus();		
 				}
 			});
 		d3.select("#help-button")

@@ -360,6 +360,7 @@
 					.style("margin-left", "20px")
 					.attr("type", "checkbox")
 					.attr("tabindex", "3")
+					.attr("aria-label", (d) => d.data.text)
 					.attr("checked", "true")
 					.attr("id", (d) => `checkbox-${d.data.id}`)
 					.on("change", (event, d) => {
@@ -383,7 +384,8 @@
 
 </script>
 
-<div id="controls-wrapper">
+<!-- svelte-ignore a11y-positive-tabindex a11y-no-noninteractive-tabindex -->
+<div id="controls-wrapper" tabindex="3" role="complementary" aria-label="UK National Core Studies. COVID-19 Longitudinal Health and Wellbeing Research and Publications. Interactive Visualisation">
 	<p style="text-align:left;">UK National Core Studies</p>
 	<h1 style="text-align:left;">COVID-19 Longitudinal Health and Wellbeing Research and Publications</h1>
 	<p style="text-align:left;">Interactive Visualisation</p>
@@ -392,7 +394,7 @@
 		<!-- svelte-ignore a11y-positive-tabindex -->
 
 		<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-		<div id="controls-toggle-show-controls" class="controls-dropdown-selector" tabindex="3">
+		<div id="controls-toggle-show-controls" class="controls-dropdown-selector" tabindex="3" role="button" aria-label="Options toggle">
 			<!-- <input style="float:left;display:block" type="checkbox" id="checkbox-show-controls" tabindex="3"> -->
 			<span style="padding-right:10px">Options</span>
 			<span><i class="arrow right" style="display:block"></i></span>
@@ -417,7 +419,7 @@
 
 			<!-- LAYOUT SELECTOR -->
 			<!-- svelte-ignore a11y-positive-tabindex a11y-no-noninteractive-tabindex -->
-			<div id="controls-toggle-show-layout" class="controls-dropdown-selector" tabindex="3">
+			<div id="controls-toggle-show-layout" class="controls-dropdown-selector" tabindex="3" role="button" aria-label="Layout options toggle">
 				<span style="padding-right:10px">&nbsp;&nbsp;Layout:</span>
 				<span><i class="arrow right" style="display:block"></i></span>
 				<span><i class="arrow down" style="display:none"></i></span>
@@ -425,18 +427,18 @@
 			</div>
 			<div id="controls-group-layout" style="display:none">
 				<!-- svelte-ignore a11y-positive-tabindex -->
-				<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-viz-select-cluster" checked tabindex="3">
+				<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-viz-select-cluster" checked tabindex="3" aria-label="Theme clusters">
 				<span style="float:left;display:block">Theme Clusters</span>
 				<div style="clear: both;"></div>
 				<!-- svelte-ignore a11y-positive-tabindex -->
-				<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-viz-select-connections" tabindex="3">
+				<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-viz-select-connections" tabindex="3" aria-label="Connections">
 				<span style="float:left;display:block">Connections</span>
 				<div style="clear: both;"></div>
 			</div>
 
 			<!-- THEME SELECTOR -->
 			<!-- svelte-ignore a11y-positive-tabindex a11y-no-noninteractive-tabindex -->
-			<div id="controls-toggle-show-themes" class="controls-dropdown-selector" tabindex="3">
+			<div id="controls-toggle-show-themes" class="controls-dropdown-selector" tabindex="3" role="button" aria-label="Themes options toggle">
 				<span style="padding-right:10px">&nbsp;&nbsp;Themes:</span>
 				<span><i class="arrow right" style="display:block"></i></span>
 				<span><i class="arrow down" style="display:none"></i></span>
@@ -448,12 +450,12 @@
 				<div id="control-theme-publications"></div>
 				<div id="control-theme-team">
 					<!-- svelte-ignore a11y-positive-tabindex -->
-					<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-team" tabindex="3">
+					<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-team" tabindex="3" aria-label="Team">
 					<span style="float:left;display:block">Team</span>
 					<div style="clear: both;"></div>
 				</div>
 				<!-- svelte-ignore a11y-positive-tabindex -->
-				<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-data-sources" tabindex="3">
+				<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-detailed-view-data-sources" tabindex="3" aria-label="Data sources">
 				<span style="float:left;display:block">Data Sources</span>
 				<div style="clear: both;"></div>
 			</div>
@@ -469,7 +471,7 @@
 			
 			<!-- LABELS DISPLAY -->
 			<!-- svelte-ignore a11y-positive-tabindex a11y-no-noninteractive-tabindex -->
-			<div id="controls-toggle-show-labels" class="controls-dropdown-selector" tabindex="3">
+			<div id="controls-toggle-show-labels" class="controls-dropdown-selector" tabindex="3" role="button" aria-label="Labels options toggle">
 				<span style="padding-right:10px">&nbsp;&nbsp;Labels:</span>
 				<span><i class="arrow right" style="display:block"></i></span>
 				<span><i class="arrow down" style="display:none"></i></span>
@@ -477,18 +479,18 @@
 			</div>
 			<div id="controls-group-labels" style="display:none;">
 				<!-- svelte-ignore a11y-positive-tabindex -->
-				<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-leaf-titles" checked tabindex="3">
+				<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-leaf-titles" checked tabindex="3" aria-label="Show leaf titles">
 				<span style="float:left;display:block">Show leaf titles</span>
 				<div style="clear: both;"></div>
 				<div id="control-subtheme-titles">
 					<!-- svelte-ignore a11y-positive-tabindex -->
-					<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-subtheme-titles" checked tabindex="3">
+					<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-subtheme-titles" checked tabindex="3" aria-label="Show subtheme titles">
 					<span style="float:left;display:block">Show subtheme titles</span>
 					<div style="clear: both;"></div>
 				</div>
 				<div id="control-subtheme-legend">
 					<!-- svelte-ignore a11y-positive-tabindex -->
-					<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-legend" checked tabindex="3">
+					<input style="float:left;display:block;margin-left:20px" type="checkbox" id="checkbox-legend" checked tabindex="3" aria-label="Show legend box">
 					<span style="float:left;display:block">Show legend box</span>
 					<div style="clear: both;"></div>
 				</div>
@@ -496,7 +498,7 @@
 
 			<!-- TEXT SIZING -->
 				<!-- svelte-ignore a11y-positive-tabindex a11y-no-noninteractive-tabindex -->
-			<div id="controls-toggle-show-text" class="controls-dropdown-selector" tabindex="3">
+			<div id="controls-toggle-show-text" class="controls-dropdown-selector" tabindex="3" role="button" aria-label="Text size options toggle">
 				<span style="padding-right:10px">&nbsp;&nbsp;Text size:</span>
 				<span><i class="arrow right" style="display:block"></i></span>
 				<span><i class="arrow down" style="display:none"></i></span>

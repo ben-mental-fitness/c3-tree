@@ -271,6 +271,7 @@
 				.data(filteredRoot.descendants().filter((d) => d.children && d3.sum(d.children.map((child) => child.children !== undefined ? 1 : 0)) === 0))//, (d) => d.data.id)
 				.transition(animation)
 				.attr("class", "outer-node-group")
+				.attr("aria-label", (d) => d.data.text)
 				.attr("transform", (d) => `rotate(${d.x * 180 / Math.PI - 90}) translate(${radius + 130},0)`)
 				.attr("opacity", (d) => d.data.visible ? 1 : 0)
 				.style("pointer-events", (d) => d.data.visible && !simplifiedMode ? "all" : "none")
@@ -293,6 +294,7 @@
 		enter.filter((d) => !d.children).append("rect")
 			.attr("class", "text-leaf-interact-area")
 			.attr("fill", "transparent")
+			.attr("aria-label", (d) => d.data.text)
 			.attr("opacity", 0.5)
 			.attr("y", -10)
 			.attr("width", 70)
@@ -692,6 +694,7 @@
 				.data(root.descendants().filter((d) => d.children && d3.sum(d.children.map((child) => child.children !== undefined ? 1 : 0)) === 0))//, (d) => d.data.id)
 				.join("g")
 				.attr("class", "outer-node-group")
+				.attr("aria-label", (d) => d.data.text)
 				.attr("transform", (d) => `rotate(${d.x * 180 / Math.PI - 90}) translate(${radius + 130},0)`)
 
 			outerNodes.append("circle")
@@ -721,6 +724,7 @@
 			// .attr("class", mode === "viz-select-0" ? "node-group mode-zero" : "node-group mode-one")
 			.append("rect")
 			.attr("class", "text-leaf-interact-area")
+			.attr("aria-label", (d) => d.data.text)
 			.attr("fill", "transparent")
 			.attr("opacity", 0.5)
 			.attr("y", -10)
@@ -748,6 +752,7 @@
 		nodeSimplified.filter((d) => !d.children).append("rect")
 			.attr("class", "text-leaf-interact-area")
 			.attr("fill", "transparent")
+			.attr("aria-label", (d) => d.data.text)
 			.attr("opacity", 0.5)
 			.attr("y", -10)
 			.attr("width", 150)
@@ -782,6 +787,7 @@
 			.style("pointer-events", !simplifiedMode && mode === "viz-select-0" ? "all" : "none")
 			.style("cursor", (d) => d.data.visible ? "pointer" : "initial")
 			.attr("transform", "translate(4,0)")
+			.attr("aria-label", (d) => d.data.text)
 			.on("mouseover", function(event, d) {
 				//if(d.data.visible)
 				d3.select(this).attr("stroke-width", "2").attr("stroke", "#d0d0d0");
@@ -829,9 +835,6 @@
 								.raise();
 						})
 						.then(() => {mouseClickEvent(event, d)});
-					
-					// console.log(d3.select("#hover-tooltip.tooltip"));
-					// mouseClickEvent(event, d);
 				} else {
 					mouseLeaveEvent(event, d);
 				}
